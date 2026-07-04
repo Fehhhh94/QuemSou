@@ -2,6 +2,32 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## docs: revisão de arquitetura e decisões de produto (2026-07-04)
+
+Sem mudança de código — apenas documentação (`docs/CLAUDE.md`,
+`docs/GAME_RULES.md`).
+
+- **Arquitetura revisada**: multiplayer deixa de ser "baralho sincronizado por
+  seed em cada aparelho" e passa a ser rede local real via Nearby Connections
+  API (`play-services-nearby`), modelo estrela (anfitrião = fonte única da
+  verdade, distribui cards e sincroniza turno/dica/placar), sem internet
+  (Bluetooth/Wi-Fi direto). Biblioteca só instalada na Fase 4. `SeedDeCodigo` e
+  `EmbaralhadorDeCards` continuam válidos, agora como embaralhamento interno
+  do anfitrião.
+- **Jogadores**: mínimo 2, máximo 4 (1 leitor + 1 a 3 adivinhadores por
+  rodada).
+- **Modo de jogo**: individual ou times, configurável antes da partida (ambos
+  na v1).
+- **Placar**: exibido em todos os aparelhos, sincronizado pelo anfitrião via
+  Nearby.
+- **Card queimado**: decisão fechada — descartado (não volta ao baralho);
+  campo entra em `RegrasPartida` na Fase 2 (não criado agora).
+- **Roadmap atualizado**: Fase 2 = banco de cards + importador Room + campo
+  card queimado + `gradle.properties` (`org.gradle.java.home`) · Fase 3 =
+  telas (1 partida em 1 celular, sem rede) + modelos `Partida`/`Turno`/`Placar`
+  · Fase 4 = multiplayer via Nearby (validação exige 2 aparelhos físicos).
+  Backlog: Gemini para cards por IA · Firebase para salas online à distância.
+
 ## Fase 1 — Domínio puro
 
 - Modelos de domínio em `domain/model` (Kotlin puro, sem Android): `Card` (exige

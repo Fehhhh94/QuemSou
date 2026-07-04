@@ -5,6 +5,9 @@
 - **v1** — esqueleto do documento (Fase 0).
 - **v2** (2026-07-04) — URL do GitHub, Fase 0 registrada como concluída, decisão
   "leitor pontua" resolvida, estado da Fase 1.
+- **v3** (2026-07-04) — revisão de arquitetura: multiplayer via Nearby
+  Connections + decisões de produto fechadas (jogadores 2–4, individual/times,
+  placar em todos, card queimado descartado).
 
 ## Visão geral
 
@@ -21,19 +24,48 @@
 - **Fase 0 — esqueleto** (Gradle, Hilt, navegação, 4 telas placeholder):
   concluída — commit `f544a09`.
 - **Fase 1 — domínio puro** (modelos, seed/embaralhamento determinísticos,
-  pontuação, testes JVM): concluída nesta atualização.
+  pontuação, testes JVM): concluída — commit `5227dd8`.
+- **Fase 2 — planejada**: banco de cards + importador Room, campo de card
+  queimado em `RegrasPartida`, `gradle.properties` (`org.gradle.java.home`).
+- **Fase 3 — planejada**: telas de uma partida em um único celular (sem rede),
+  modelos `Partida`/`Turno`/`Placar`.
+- **Fase 4 — planejada**: multiplayer via Nearby Connections (é quando a
+  biblioteca `play-services-nearby` é instalada); validação exige 2 aparelhos
+  físicos.
+- **Backlog**: geração de cards por IA (Gemini); salas online à distância
+  (Firebase).
+
+## Arquitetura de multiplayer
+
+- **Revisada** (v3): o multiplayer deixa de ser "baralho sincronizado por seed
+  em cada aparelho" e passa a ser rede local real via **Nearby Connections API**
+  (`play-services-nearby`), sem depender de internet (Bluetooth/Wi-Fi direto).
+- **Modelo estrela**: o anfitrião é a fonte única da verdade. Ele anuncia a
+  sala, distribui os cards, e sincroniza turno, dica atual e placar em todos os
+  aparelhos conectados.
+- A biblioteca só é instalada na Fase 4 — nada de rede nas Fases 2 e 3.
+- `SeedDeCodigo` e `EmbaralhadorDeCards` (Fase 1) continuam válidos, mas mudam
+  de papel: viram embaralhamento **interno do anfitrião**, não mais mecanismo
+  de sincronização de baralho entre aparelhos.
 
 ## Decisões de design
 
 - **Leitor pontua** — RESOLVIDA: configurável em `RegrasPartida.leitorPontua`,
   padrão SIM; quando ativo, o leitor ganha os **mesmos** pontos do acertador.
-- **Destino do card queimado** — EM ABERTO: não criar campo em `RegrasPartida`
-  até a decisão ser fechada.
+- **Destino do card queimado** — RESOLVIDA: descartado (não volta ao baralho).
+  Campo entra em `RegrasPartida` na Fase 2 (não criado ainda).
+- **Jogadores por partida** — RESOLVIDA: mínimo 2, máximo 4 (1 leitor + 1 a 3
+  adivinhadores por rodada).
+- **Modo de jogo** — RESOLVIDA: individual ou times, configurável antes da
+  partida; ambos os modos entram na v1.
+- **Placar** — RESOLVIDA: exibido em todos os aparelhos, sincronizado pelo
+  anfitrião via Nearby (ver "Arquitetura de multiplayer" acima).
 - **Determinismo é sagrado**: seed e embaralhamento não podem usar `hashCode()`
   da plataforma, `kotlin.random.Random` nem `java.util.Random`. As
   implementações próprias vivem em `domain/rules/` (hash polinomial +
-  xorshift64). A mesma seed precisa gerar o mesmo baralho em qualquer aparelho,
-  para sempre — é a base do multiplayer offline por código de partida.
+  xorshift64). A mesma seed precisa gerar o mesmo baralho, para sempre — hoje é
+  a base do embaralhamento interno do anfitrião (ver "Arquitetura de
+  multiplayer").
 
 ## Documentação — quem é dono do quê
 

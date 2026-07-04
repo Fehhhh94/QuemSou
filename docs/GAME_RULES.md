@@ -7,6 +7,15 @@ código deve estar registrada aqui.
 
 - Todo card tem uma resposta secreta (pessoa, lugar ou coisa) e **exatamente
   10 dicas**, reveladas uma a uma, da mais difícil para a mais fácil.
+- **Card queimado** (ninguém acertou): é **descartado** — não volta ao
+  baralho. Campo entra em `RegrasPartida` na Fase 2.
+
+## Jogadores
+
+- Mínimo **2**, máximo **4** jogadores por partida: 1 leitor + 1 a 3
+  adivinhadores por rodada.
+- **Modo de jogo**: individual ou em times, configurável antes da partida
+  (os dois modos estão na v1).
 
 ## Pontuação
 
@@ -22,10 +31,10 @@ código deve estar registrada aqui.
 - A partida tem um número configurável de rodadas (`RegrasPartida.numeroDeRodadas`,
   padrão 5).
 - O baralho é embaralhado de forma determinística a partir do código da partida
-  (ex.: "LOBO"): o mesmo código gera a mesma ordem de cards em qualquer
-  aparelho — base do multiplayer offline.
+  (ex.: "LOBO"), como embaralhamento interno do anfitrião (Fase 4 — Nearby
+  Connections); veja `docs/CLAUDE.md` para a arquitetura de multiplayer.
 
-## Decisões em aberto
+## Placar
 
-- Destino do card queimado (volta ao baralho? é descartado?) — sem campo em
-  `RegrasPartida` até a decisão ser fechada.
+- O placar é exibido em **todos os aparelhos** e sincronizado pelo anfitrião
+  via Nearby Connections (multiplayer, Fase 4).
