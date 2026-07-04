@@ -8,6 +8,9 @@
 - **v3** (2026-07-04) — revisão de arquitetura: multiplayer via Nearby
   Connections + decisões de produto fechadas (jogadores 2–4, individual/times,
   placar em todos, card queimado descartado).
+- **v4** (2026-07-04) — Fase 2 (parte técnica) concluída: Room + importador de
+  cards versionado + campo `descartarCardQueimado` + `org.gradle.java.home`.
+  Cards definitivos (trabalho editorial) pendentes; decisão "Livre" em aberto.
 
 ## Visão geral
 
@@ -25,8 +28,12 @@
   concluída — commit `f544a09`.
 - **Fase 1 — domínio puro** (modelos, seed/embaralhamento determinísticos,
   pontuação, testes JVM): concluída — commit `5227dd8`.
-- **Fase 2 — planejada**: banco de cards + importador Room, campo de card
-  queimado em `RegrasPartida`, `gradle.properties` (`org.gradle.java.home`).
+- **Fase 2 — parte técnica concluída** nesta atualização: banco de cards Room
+  (`data/local/`), importador de `assets/cards.json` com versionamento via
+  DataStore (`data/importer/`), campo `RegrasPartida.descartarCardQueimado` e
+  `org.gradle.java.home` no `gradle.properties`. **Pendente**: os cards
+  definitivos são trabalho editorial posterior — `cards.json` contém apenas 4
+  cards DUMMY (`TESTE_01`..`TESTE_04`).
 - **Fase 3 — planejada**: telas de uma partida em um único celular (sem rede),
   modelos `Partida`/`Turno`/`Placar`.
 - **Fase 4 — planejada**: multiplayer via Nearby Connections (é quando a
@@ -53,7 +60,9 @@
 - **Leitor pontua** — RESOLVIDA: configurável em `RegrasPartida.leitorPontua`,
   padrão SIM; quando ativo, o leitor ganha os **mesmos** pontos do acertador.
 - **Destino do card queimado** — RESOLVIDA: descartado (não volta ao baralho).
-  Campo entra em `RegrasPartida` na Fase 2 (não criado ainda).
+  Campo `RegrasPartida.descartarCardQueimado`, padrão SIM (criado na Fase 2).
+- **Categoria "Livre"** — EM ABERTO: o papel e o conteúdo da categoria `LIVRE`
+  ainda não foram definidos.
 - **Jogadores por partida** — RESOLVIDA: mínimo 2, máximo 4 (1 leitor + 1 a 3
   adivinhadores por rodada).
 - **Modo de jogo** — RESOLVIDA: individual ou times, configurável antes da
@@ -78,7 +87,11 @@
 
 - Domínio (`domain/`) é Kotlin puro: sem Android, Room ou Compose — testável na JVM.
 - KDoc e commits em português, formato `tipo: descrição`.
-- Rodar `./gradlew test` antes de commitar. No Windows, o Gradle precisa de
-  JDK 17+ — usar o JBR do Android Studio
-  (`JAVA_HOME = C:\Program Files\Android\Android Studio\jbr`).
+- Rodar `./gradlew test` antes de commitar. O JDK do build (JBR do Android
+  Studio, JVM 21) está fixado em `gradle.properties` via `org.gradle.java.home`
+  — não é preciso configurar `JAVA_HOME`.
+- Cards vivem em `app/src/main/assets/cards.json` (fonte da verdade, com campo
+  `version`); o banco Room é só um espelho recarregado pelo `CardsImporter`
+  quando a versão do asset avança. Para editar cards: alterar o JSON **e
+  incrementar `version`**, senão a mudança não chega ao banco.
 - **Push é sempre manual do Felipe** — nunca fazer `git push`.

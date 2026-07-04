@@ -4,15 +4,17 @@ package com.quemsou.app.domain.model
  * Regras configuráveis de uma partida.
  *
  * Novos campos de regra devem entrar aqui conforme as decisões de design forem
- * fechadas — por exemplo, o destino do card queimado (decisão ainda em aberto,
- * por isso ainda sem campo correspondente).
+ * fechadas.
  *
  * @property leitorPontua se `true` (padrão), o leitor ganha os mesmos pontos que o acertador.
  * @property numeroDeRodadas quantidade de rodadas da partida; deve ser maior que zero.
+ * @property descartarCardQueimado se `true` (padrão), o card que ninguém acertou
+ *   é descartado e não volta ao baralho da partida.
  */
 data class RegrasPartida(
     val leitorPontua: Boolean = true,
     val numeroDeRodadas: Int = 5,
+    val descartarCardQueimado: Boolean = true,
 ) {
     init {
         require(numeroDeRodadas > 0) {

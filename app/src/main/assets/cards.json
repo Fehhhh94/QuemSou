@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "cards": [
+    {
+      "id": "teste-01",
+      "type": "PESSOA",
+      "category": "PERSONAGEM_FILME",
+      "answer": "TESTE_01",
+      "clues": ["dica 1", "dica 2", "dica 3", "dica 4", "dica 5", "dica 6", "dica 7", "dica 8", "dica 9", "dica 10"]
+    },
+    {
+      "id": "teste-02",
+      "type": "LUGAR",
+      "category": "PERSONAGEM_FILME",
+      "answer": "TESTE_02",
+      "clues": ["dica 1", "dica 2", "dica 3", "dica 4", "dica 5", "dica 6", "dica 7", "dica 8", "dica 9", "dica 10"]
+    },
+    {
+      "id": "teste-03",
+      "type": "COISA",
+      "category": "MUNDO_DA_MUSICA",
+      "answer": "TESTE_03",
+      "clues": ["dica 1", "dica 2", "dica 3", "dica 4", "dica 5", "dica 6", "dica 7", "dica 8", "dica 9", "dica 10"]
+    },
+    {
+      "id": "teste-04",
+      "type": "PESSOA",
+      "category": "MUNDO_DA_MUSICA",
+      "answer": "TESTE_04",
+      "clues": ["dica 1", "dica 2", "dica 3", "dica 4", "dica 5", "dica 6", "dica 7", "dica 8", "dica 9", "dica 10"]
+    }
+  ]
+}

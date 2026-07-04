@@ -2,6 +2,37 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fase 2 — Banco de cards (parte técnica) (2026-07-04)
+
+Parte técnica concluída. **Pendente**: cards definitivos (trabalho editorial —
+o `cards.json` atual tem só 4 cards DUMMY) e a decisão sobre a categoria
+"Livre" (em aberto).
+
+- **Ambiente**: `org.gradle.java.home` fixado no `gradle.properties` apontando
+  para o JBR do Android Studio (JVM 21) — o build não depende mais do
+  `JAVA_HOME` da máquina.
+- **Domínio**: novo campo `RegrasPartida.descartarCardQueimado` (padrão `true`),
+  materializando a decisão fechada na revisão v3.
+- **Dependências**: DataStore Preferences 1.1.1 e kotlinx-coroutines-test via
+  version catalog (Room, KSP e kotlinx-serialization já estavam no projeto
+  desde a Fase 0).
+- **Camada data** (`data/local/`): `CardEntity` (tabela `cards`, dicas
+  serializadas como JSON string via `Converters`), `CardDao` (inserirTodos,
+  limparTabela, buscarPorCategoria, buscarTodas, contar), `AppDatabase`
+  (version 1, schema exportado em `app/schemas/`), mapper
+  `CardEntity` ⇄ `Card` e módulo Hilt `DataModule` (banco, DAO, DataStore).
+- **Importador** (`data/importer/`): `assets/cards.json` com `"version": 1` e
+  4 cards DUMMY (`TESTE_01`..`TESTE_04`, 2 PERSONAGEM_FILME + 2
+  MUNDO_DA_MUSICA, types variados); `CardsImporter` compara a versão do asset
+  com a salva no DataStore (chave `cards_db_version`, default 0) e só recarrega
+  a tabela quando o asset é mais novo. Validação ruidosa: card com answer
+  vazio, dicas faltando ou dica vazia lança exceção com o id do card. Disparado
+  no `QuemSouApp` fora da main thread, com log na tag `CardsImporter`.
+- **Testes**: 17 novos (parsing e validação do JSON, mapper ida e volta,
+  conversores, decisão de versionamento com fakes em memória — sem Robolectric,
+  e defaults de `RegrasPartida`) — 37 no total, todos verdes com
+  `./gradlew test`, incluindo os 20 da Fase 1.
+
 ## docs: revisão de arquitetura e decisões de produto (2026-07-04)
 
 Sem mudança de código — apenas documentação (`docs/CLAUDE.md`,

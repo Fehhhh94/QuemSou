@@ -8,7 +8,7 @@ código deve estar registrada aqui.
 - Todo card tem uma resposta secreta (pessoa, lugar ou coisa) e **exatamente
   10 dicas**, reveladas uma a uma, da mais difícil para a mais fácil.
 - **Card queimado** (ninguém acertou): é **descartado** — não volta ao
-  baralho. Campo entra em `RegrasPartida` na Fase 2.
+  baralho (`RegrasPartida.descartarCardQueimado`, padrão **SIM**).
 
 ## Jogadores
 
