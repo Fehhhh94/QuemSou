@@ -1,0 +1,21 @@
+*.iml
+.gradle
+/local.properties
+local.properties
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+
+# Build do módulo app
+app/build/
+app/.cxx/
+
+# Android Studio
+.idea/
+*.hprof
+
+# Keystore (nunca versionar chaves de assinatura)
+*.jks
+*.keystore

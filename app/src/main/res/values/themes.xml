@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tema base da Activity antes do Compose assumir a árvore de UI (evita flash claro na inicialização). -->
+    <style name="Theme.QuemSou" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/quemsou_background</item>
+        <item name="android:statusBarColor" tools:targetApi="21">@color/quemsou_background</item>
+        <item name="android:navigationBarColor" tools:targetApi="21">@color/quemsou_background</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+    </style>
+</resources>

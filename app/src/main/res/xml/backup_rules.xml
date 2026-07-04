@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Regras de backup (Android 11 e anteriores). O app é 100% offline na v1,
+   sem dados sensíveis a excluir por enquanto.
+-->
+<full-backup-content>
+</full-backup-content>

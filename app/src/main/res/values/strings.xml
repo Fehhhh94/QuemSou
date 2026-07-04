@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">QuemSou</string>
+
+    <string name="home_title">QuemSou</string>
+    <string name="home_create_match">Criar partida</string>
+    <string name="home_join_with_code">Entrar com código</string>
+
+    <string name="setup_title">Configuração da partida</string>
+
+    <string name="game_title">Jogo</string>
+
+    <string name="score_title">Placar</string>
+</resources>
