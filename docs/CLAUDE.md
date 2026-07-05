@@ -27,6 +27,12 @@
   seguindo os mockups aprovados (placeholders removidos), componentes
   reutilizáveis em `ui/components`, tema claro/escuro, evento
   `reiniciarPartida`. Validação visual no aparelho ainda pendente (Felipe).
+- **v9** (2026-07-04) — fechamento documental da Fase 3: código completo
+  (3.1, 3.2, 3.3), 93 testes verdes, push feito. Precisões nas decisões (seed
+  do grid = seed da partida × 31 + rodada, rodízio do escolhedor, empate
+  declarado no placar, "Livre" via `buscarTodas()`) e novo item em aberto
+  (nome do app). **Validação de jogo completo no Z Fold físico: PENDENTE** —
+  a Fase 3 só fecha depois dela.
 
 ## Visão geral
 
@@ -51,24 +57,27 @@
   nesta atualização: `cards.json` **version 2** com 60 cards reais
   (30 `PERSONAGEM_FILME` + 30 `MUNDO_DA_MUSICA`), validado pelo
   `BaralhoDeAssetsTest`.
-- **Fase 3 — em andamento**: **3.1 concluída** — modelos e regras da partida
-  no domínio puro (`domain/model` + `CriarPartida` em `domain/usecase`).
-  **3.2 concluída** — navegação tipada (Home, Setup, Partida), `SetupViewModel`
+- **Fase 3 — código completo, fechamento pendente de validação física**:
+  **3.1** (commit `a3d815b`) — modelos e regras da partida no domínio puro
+  (`domain/model` + `CriarPartida` em `domain/usecase`). **3.2**
+  (commit `67f4f56`) — navegação tipada (Home, Setup, Partida), `SetupViewModel`
   (validação viva com `podeComecar` + motivo), `PartidaViewModel` (um por
   partida, `StateFlow<PartidaUiState>`, eventos, SavedStateHandle com
   restauração por seed) e `RepositorioDeCards` (interface no domínio,
-  implementação Room). **3.3 concluída** nesta atualização — telas reais
-  seguindo os mockups aprovados, substituindo os placeholders da 3.2:
-  Home (com diálogo "Como jogar" e badge "Fase 4" no entrar com código),
-  Setup (chips de categoria, segmentado individual/times, jogadores com times,
-  stepper de rodadas, toggle leitor pontua) e a tela única da Partida com
+  implementação Room). **3.3** (commit `2874326`) — telas reais seguindo os
+  mockups aprovados, substituindo os placeholders da 3.2: Home (com diálogo
+  "Como jogar" e badge "Fase 4" no entrar com código), Setup (chips de
+  categoria, segmentado individual/times, jogadores com times, stepper de
+  rodadas, toggle leitor pontua) e a tela única da Partida com
   `AnimatedContent` trocando as fases (grid às cegas com revelação por
   pressionar-e-segurar, `ModalBottomSheet` do QuemAcertou, anúncio, placar
   final). Componentes reutilizáveis em `presentation/ui/components/`
   (`ChipTipoDeCard`, `AvatarInicial`, `ChipDeJogador`, `RodapeDePontos`,
   `ConfirmDialog`). Tema Material 3 agora suporta claro/escuro
-  (`isSystemInDarkTheme()`). **Pendente**: validação visual no aparelho
-  (manual, Felipe).
+  (`isSystemInDarkTheme()`).
+  **93 testes verdes, push feito.** **PENDENTE: validação de jogo completo no
+  Z Fold físico** — não marcar a Fase 3 como encerrada enquanto essa validação
+  não constar como concluída.
 - **Fase 4 — planejada**: multiplayer via Nearby Connections (é quando a
   biblioteca `play-services-nearby` é instalada); validação exige 2 aparelhos
   físicos.
@@ -97,12 +106,23 @@
 - **Destino do card queimado** — RESOLVIDA: descartado (não volta ao baralho).
   Campo `RegrasPartida.descartarCardQueimado`, padrão SIM (criado na Fase 2).
 - **Categoria "Livre"** — RESOLVIDA: é um **filtro** de baralho, a união de
-  todas as categorias — não existem cards exclusivos de `LIVRE`.
+  todas as categorias — não existem cards exclusivos de `LIVRE`. Implementado
+  em `RepositorioDeCardsLocal.buscarPorCategoria`: para `LIVRE` chama
+  `CardDao.buscarTodas()`; para as demais, `buscarPorCategoria(categoria.name)`.
 - **Dicas às cegas** — RESOLVIDA e implementada (3.1): o grid 1–10 é escolha
   às cegas; `Turno.criar` embaralha as posições das dicas com o PRNG por seed
-  da Fase 1 (`EmbaralhadorDeCards`, agora genérico), com seed derivada da
-  partida + rodada. Pontuação inalterada: 11 − quantidade de dicas usadas,
-  nunca o número da posição tocada.
+  da Fase 1 (`EmbaralhadorDeCards`, agora genérico). Seed do grid = **seed da
+  partida × 31 + rodada** (`Partida.seedDasDicas`) — grid diferente a cada
+  turno, sempre reproduzível. Pontuação inalterada: 11 − quantidade de dicas
+  usadas, nunca o número da posição tocada.
+- **Rodízio do escolhedor** — RESOLVIDO e implementado (3.1): quem escolhe a
+  posição no grid gira **a cada dica revelada**, circular entre os
+  adivinhadores (`Turno.indiceDoEscolhedor`, funciona com 1, 2 ou 3); o leitor
+  nunca escolhe.
+- **Fim de turno sempre revela a resposta** — RESOLVIDO e implementado (3.1):
+  tanto `TurnoEncerrado.Acerto` quanto `TurnoEncerrado.Queimado` carregam a
+  resposta do card; a UI (`Anuncio`, 3.3) sempre a exibe, independente do
+  desfecho.
 - **Erros no domínio** — RESOLVIDA: transições e argumentos inválidos lançam
   **exceção** (`IllegalStateException` para estado errado,
   `IllegalArgumentException` para argumento inválido, via `check`/`require`) —
@@ -110,9 +130,12 @@
   Na camada de UI, o `PartidaViewModel` **ignora eventos fora de fase**
   (toques duplicados não derrubam o app); os guards garantem que só chamadas
   válidas cheguem ao domínio, e as exceções ficam como rede de proteção.
-- **Fases do jogo são estados, não rotas** — RESOLVIDA (3.2): o app tem só
-  3 rotas tipadas (Home, Setup, Partida); grid, dica revelada, anúncio e
-  placar final são estados do `StateFlow<PartidaUiState>` da rota Partida.
+- **Fases do jogo são estados, não rotas** — RESOLVIDA e validada (3.2/3.3):
+  o app tem só 3 rotas tipadas (Home, Setup, Partida); VezDeJogar, Grid,
+  DicaRevelada, QuemAcertou, Anuncio e PlacarFinal são estados do
+  `StateFlow<PartidaUiState>` da rota Partida, trocados com `AnimatedContent`.
+  Voltar em qualquer fase (`BackHandler`) abre diálogo de confirmação de
+  abandono (`abandonoSolicitado`/`continuarPartida`); confirmar sai para Home.
 - **Um ViewModel por partida** — RESOLVIDA (3.2): `PartidaViewModel` único,
   escopado à rota Partida, dirige a partida inteira; nunca duplica regra do
   domínio — só traduz `EstadoDoTurno`/`Placar` em `PartidaUiState` e repassa
@@ -125,7 +148,9 @@
 - **Modo de jogo** — RESOLVIDA: individual ou times, configurável antes da
   partida; ambos os modos entram na v1.
 - **Placar** — RESOLVIDA: exibido em todos os aparelhos, sincronizado pelo
-  anfitrião via Nearby (ver "Arquitetura de multiplayer" acima).
+  anfitrião via Nearby (ver "Arquitetura de multiplayer" acima). **Empate
+  final é declarado, sem desempate**: `Placar.vencedores()`/`vencedoresPorTime`
+  retornam todos os empatados na maior pontuação (v1).
 - **Evento `reiniciarPartida`** (3.3) — único evento novo autorizado no
   `PartidaViewModel`: no `PlacarFinal`, gera um código novo (seed nova) para os
   mesmos jogadores/modo/regras/categoria e reembaralha o baralho do zero —
@@ -137,6 +162,9 @@
   vez primeiro) e `Anuncio` (`nomeDoLeitor`, `ultimaRodada`) ganharam campos
   que os mockups aprovados exigem e que não eram deriváveis na UI sem duplicar
   regra do domínio — só a tradução ficou mais completa.
+- **Nome do app** — EM ABERTO: código, pacote (`com.quemsou.app`) e strings
+  usam "QuemSou" provisoriamente; é a única decisão de produto ainda sem
+  fechamento.
 - **Determinismo é sagrado**: seed e embaralhamento não podem usar `hashCode()`
   da plataforma, `kotlin.random.Random` nem `java.util.Random`. As
   implementações próprias vivem em `domain/rules/` (hash polinomial +

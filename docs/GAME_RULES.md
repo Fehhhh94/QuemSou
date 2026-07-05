@@ -45,6 +45,9 @@ código deve estar registrada aqui.
 
 ## Partida
 
+- **Categoria**: filtra o baralho da partida — Personagem de filme, Mundo da
+  música, ou Livre (união de todas as categorias; não há cards exclusivos de
+  Livre).
 - A partida tem um número configurável de rodadas (`RegrasPartida.numeroDeRodadas`,
   padrão 5).
 - O baralho é embaralhado de forma determinística a partir do código da partida

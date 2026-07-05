@@ -2,6 +2,30 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fechamento documental da Fase 3 (2026-07-04)
+
+Sem mudança de código — apenas documentação (`docs/CLAUDE.md`,
+`docs/GAME_RULES.md`).
+
+**Status**: código completo, 93 testes verdes, push feito (commits `a3d815b`,
+`67f4f56`, `2874326` — sub-etapas 3.1, 3.2 e 3.3). **Validação de jogo
+completo no Z Fold físico: PENDENTE — a ser realizada na próxima sessão.** A
+Fase 3 não está marcada como encerrada em `docs/CLAUDE.md` até essa validação
+constar como concluída.
+
+- Precisão da seed do grid de dicas em `docs/CLAUDE.md`: seed da partida × 31
+  + rodada (`Partida.seedDasDicas`).
+- Decisões registradas explicitamente em `docs/CLAUDE.md`: rodízio do
+  escolhedor (gira a cada dica revelada, circular entre adivinhadores); fim de
+  turno sempre revela a resposta (acerto ou queimado); empate final declarado
+  no placar, sem desempate; "Livre" como filtro implementado via
+  `RepositorioDeCardsLocal.buscarPorCategoria`/`CardDao.buscarTodas()`.
+- `docs/GAME_RULES.md`: adicionada a regra de categoria como filtro de
+  baralho (Personagem de filme / Mundo da música / Livre) — estava só em
+  `docs/CARDS_GUIDE.md`, que já estava correto e não precisou de mudança.
+- Novo item em aberto registrado: nome do app ("QuemSou" é provisório) — a
+  única decisão de produto ainda sem fechamento.
+
 ## Fase 3.3 — Telas reais da partida (2026-07-04)
 
 Substitui os placeholders da 3.2 pelas telas Compose reais, seguindo os
