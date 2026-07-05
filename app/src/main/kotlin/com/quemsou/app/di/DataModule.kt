@@ -6,12 +6,14 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
+import com.quemsou.app.data.RepositorioDeCardsLocal
 import com.quemsou.app.data.importer.AssetsFonteDeCardsJson
 import com.quemsou.app.data.importer.CardsVersionStore
 import com.quemsou.app.data.importer.DataStoreCardsVersionStore
 import com.quemsou.app.data.importer.FonteDeCardsJson
 import com.quemsou.app.data.local.AppDatabase
 import com.quemsou.app.data.local.CardDao
+import com.quemsou.app.domain.repository.RepositorioDeCards
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -33,6 +35,9 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindCardsVersionStore(impl: DataStoreCardsVersionStore): CardsVersionStore
+
+    @Binds
+    abstract fun bindRepositorioDeCards(impl: RepositorioDeCardsLocal): RepositorioDeCards
 
     companion object {
 

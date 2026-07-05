@@ -2,6 +2,38 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fase 3.2 — ViewModels e navegação tipada (2026-07-04)
+
+Sem telas reais (ficam para a 3.3) — placeholders mínimos navegáveis por fase.
+
+- **Navegação**: 3 rotas tipadas (`HomeRoute`, `SetupRoute`, `PartidaRoute`);
+  as fases do jogo **não são rotas** — são estados da rota Partida. A rota
+  Partida carrega só a `ConfiguracaoDaPartida` (JSON serializável em um único
+  argumento; nunca objetos de domínio). Rotas antigas Game/Score removidas.
+- **SetupViewModel**: categoria (3 opções), modo individual/times, jogadores
+  2–4 (adicionar/remover com clamp, renomear, atribuir time), rodadas e
+  leitorPontua; validação viva com `podeComecar` + `MotivoDoBloqueio`; ao
+  confirmar, sorteia o código (4 letras) e publica a configuração para a
+  navegação.
+- **PartidaViewModel** (um por partida, escopado à rota): cria a partida via
+  `CriarPartida` + `RepositorioDeCards` (interface no domínio, implementação
+  Room em `data/`), expõe `StateFlow<PartidaUiState>` (Carregando, VezDeJogar,
+  Grid, DicaRevelada, QuemAcertou — pulado com 1 adivinhador —, Anúncio de
+  acerto/queimado com a resposta revelada, PlacarFinal com empate declarado) e
+  os eventos da partida. Nunca duplica regra do domínio. Eventos fora de fase
+  são **ignorados** (guards); exceções do domínio ficam como rede de proteção.
+- **Morte de processo**: SavedStateHandle guarda só o não-derivável (rodada,
+  placar, fase, posições reveladas na ordem, acertador do anúncio); o resto é
+  reconstruído por determinismo — baralho e grid derivam da seed, e reexecutar
+  as revelações salvas devolve o turno ao mesmo estado.
+- **Voltar** na rota Partida: interceptado (`BackHandler`) e exposto como
+  pedido de abandono no ViewModel (UI de confirmação na 3.3).
+- **Testes**: 13 novos com `MainDispatcherRule` (validações do Setup, partida
+  completa por eventos até o placar final, queimado por 10 dicas, pulo do
+  QuemAcertou, leitor sem pontuar, restauração pós-morte de processo, eventos
+  inválidos ignorados, pedido de abandono) — **91 no total, todos verdes**;
+  `assembleDebug` compila.
+
 ## Fase 3.1 — Modelos e regras da partida (2026-07-04)
 
 Domínio puro, sem nenhuma UI (telas ficam para a 3.2).

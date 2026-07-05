@@ -19,6 +19,10 @@
   Jogador/Partida/Turno/Placar, máquina de estados do turno, rodízios de
   leitor e escolhedor, grid de dicas embaralhado por seed, empate declarado.
   Erros do domínio: exceções (decisão documentada).
+- **v7** (2026-07-04) — sub-etapa 3.2 concluída: navegação tipada com 3 rotas,
+  SetupViewModel com validação viva, PartidaViewModel único por partida
+  (fases do jogo = estados, não rotas), restauração pós-morte de processo por
+  determinismo de seed. Telas reais ficam para a 3.3.
 
 ## Visão geral
 
@@ -43,11 +47,14 @@
   nesta atualização: `cards.json` **version 2** com 60 cards reais
   (30 `PERSONAGEM_FILME` + 30 `MUNDO_DA_MUSICA`), validado pelo
   `BaralhoDeAssetsTest`.
-- **Fase 3 — em andamento**: **sub-etapa 3.1 concluída** nesta atualização —
-  modelos e regras da partida no domínio puro (`Jogador`, `ModoDeJogo`,
-  `Partida`, `Turno`, `EstadoDoTurno`, `Placar` em `domain/model`;
-  `CriarPartida` em `domain/usecase`), sem nenhuma UI. **Pendente (3.2)**:
-  telas de uma partida em um único celular (sem rede).
+- **Fase 3 — em andamento**: **3.1 concluída** — modelos e regras da partida
+  no domínio puro (`domain/model` + `CriarPartida` em `domain/usecase`).
+  **3.2 concluída** nesta atualização — navegação tipada (Home, Setup,
+  Partida), `SetupViewModel` (validação viva com `podeComecar` + motivo),
+  `PartidaViewModel` (um por partida, `StateFlow<PartidaUiState>`, eventos,
+  SavedStateHandle com restauração por seed) e `RepositorioDeCards`
+  (interface no domínio, implementação Room). Placeholders navegáveis por
+  fase. **Pendente (3.3)**: telas reais da partida.
 - **Fase 4 — planejada**: multiplayer via Nearby Connections (é quando a
   biblioteca `play-services-nearby` é instalada); validação exige 2 aparelhos
   físicos.
@@ -86,6 +93,19 @@
   **exceção** (`IllegalStateException` para estado errado,
   `IllegalArgumentException` para argumento inválido, via `check`/`require`) —
   abordagem única em todo o domínio; não usamos erro tipado de retorno.
+  Na camada de UI, o `PartidaViewModel` **ignora eventos fora de fase**
+  (toques duplicados não derrubam o app); os guards garantem que só chamadas
+  válidas cheguem ao domínio, e as exceções ficam como rede de proteção.
+- **Fases do jogo são estados, não rotas** — RESOLVIDA (3.2): o app tem só
+  3 rotas tipadas (Home, Setup, Partida); grid, dica revelada, anúncio e
+  placar final são estados do `StateFlow<PartidaUiState>` da rota Partida.
+- **Um ViewModel por partida** — RESOLVIDA (3.2): `PartidaViewModel` único,
+  escopado à rota Partida, dirige a partida inteira; nunca duplica regra do
+  domínio — só traduz `EstadoDoTurno`/`Placar` em `PartidaUiState` e repassa
+  eventos. A rota Partida carrega a `ConfiguracaoDaPartida` em JSON (um único
+  argumento serializável; nunca objetos de domínio), e a restauração
+  pós-morte de processo reexecuta as revelações salvas sobre a partida
+  recriada por seed.
 - **Jogadores por partida** — RESOLVIDA: mínimo 2, máximo 4 (1 leitor + 1 a 3
   adivinhadores por rodada).
 - **Modo de jogo** — RESOLVIDA: individual ou times, configurável antes da

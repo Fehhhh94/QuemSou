@@ -5,14 +5,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.quemsou.app.presentation.ui.game.GameScreen
+import com.quemsou.app.presentation.game.PartidaScreen
+import com.quemsou.app.presentation.setup.SetupScreen
 import com.quemsou.app.presentation.ui.home.HomeScreen
-import com.quemsou.app.presentation.ui.score.ScoreScreen
-import com.quemsou.app.presentation.ui.setup.SetupScreen
 
 /**
- * Grafo de navegação principal do app, com rotas tipadas via [kotlinx.serialization].
- * Nesta fase as telas são apenas placeholders — nenhuma regra de jogo foi implementada.
+ * Grafo de navegação: 3 rotas tipadas (Home, Setup, Partida). As fases do
+ * jogo são estados da rota Partida — o `PartidaViewModel` (escopado à rota)
+ * dirige toda a partida com um único `StateFlow`.
  */
 @Composable
 fun QuemSouNavGraph(navController: NavHostController = rememberNavController()) {
@@ -20,17 +20,19 @@ fun QuemSouNavGraph(navController: NavHostController = rememberNavController()) 
         composable<HomeRoute> {
             HomeScreen(
                 onCreateMatch = { navController.navigate(SetupRoute) },
-                onJoinWithCode = { navController.navigate(GameRoute) },
+                // Entrar com código é multiplayer (Fase 4); por ora leva ao Setup.
+                onJoinWithCode = { navController.navigate(SetupRoute) },
             )
         }
         composable<SetupRoute> {
-            SetupScreen()
+            SetupScreen(
+                onComecarPartida = { configuracao ->
+                    navController.navigate(PartidaRoute(configuracao.paraJson()))
+                },
+            )
         }
-        composable<GameRoute> {
-            GameScreen()
-        }
-        composable<ScoreRoute> {
-            ScoreScreen()
+        composable<PartidaRoute> {
+            PartidaScreen()
         }
     }
 }
