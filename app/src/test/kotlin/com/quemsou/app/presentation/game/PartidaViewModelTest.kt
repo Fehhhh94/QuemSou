@@ -68,14 +68,18 @@ class PartidaViewModelTest {
 
         viewModel.iniciarTurno()
         var grid = viewModel.uiState.value as PartidaUiState.Grid
+        assertEquals(1, grid.rodada)
+        assertEquals("Ana", grid.nomeDoLeitor)
         assertEquals("Bia", grid.nomeDoEscolhedor)
         assertEquals(10, grid.pontosEmJogo)
+        assertEquals(CardType.PESSOA, grid.tipo)
         assertTrue(grid.respostaParaOLeitor.isNotBlank())
 
         viewModel.revelarDica(3)
         var dica = viewModel.uiState.value as PartidaUiState.DicaRevelada
         assertEquals(3, dica.posicao)
         assertEquals(10, dica.valor)
+        assertEquals(CardType.PESSOA, dica.tipo)
 
         // Ninguém arriscou: o escolhedor gira.
         viewModel.outraDica()
@@ -90,7 +94,10 @@ class PartidaViewModelTest {
 
         viewModel.abrirQuemAcertou()
         val quemAcertou = viewModel.uiState.value as PartidaUiState.QuemAcertou
-        assertEquals(listOf("Bia", "Caio"), quemAcertou.adivinhadores.map { it.nome })
+        // Caio é o escolhedor da vez agora, então entra primeiro na lista.
+        assertEquals(listOf("Caio", "Bia"), quemAcertou.adivinhadores.map { it.nome })
+        assertEquals(9, quemAcertou.pontosEmJogo)
+        assertEquals(9, quemAcertou.pontosDoLeitor)
 
         viewModel.registrarAcerto("j2")
         val anuncio = viewModel.uiState.value as PartidaUiState.Anuncio.Acerto
@@ -245,5 +252,41 @@ class PartidaViewModelTest {
 
         viewModel.continuarPartida()
         assertFalse(viewModel.abandonoSolicitado.value)
+    }
+
+    @Test
+    fun `reiniciar partida no placar final volta para a rodada 1 com placar zerado`() {
+        val viewModel = viewModel(configuracao(nomes = listOf("Ana", "Bia"), rodadas = 1))
+        viewModel.iniciarTurno()
+        viewModel.revelarDica(1)
+        viewModel.abrirQuemAcertou() // 1 adivinhador: pula direto para o anúncio
+        val placarFinalAntes = run {
+            viewModel.proximoTurno()
+            viewModel.uiState.value as PartidaUiState.PlacarFinal
+        }
+        assertEquals(10, placarFinalAntes.ranking.first { it.nome == "Bia" }.pontos)
+
+        viewModel.reiniciarPartida()
+
+        val vez = viewModel.uiState.value as PartidaUiState.VezDeJogar
+        assertEquals(1, vez.rodada)
+        assertEquals("Ana", vez.nomeDoLeitor)
+
+        viewModel.iniciarTurno()
+        viewModel.revelarDica(1)
+        viewModel.abrirQuemAcertou()
+        viewModel.proximoTurno()
+        val placarFinalDepois = viewModel.uiState.value as PartidaUiState.PlacarFinal
+        assertEquals(10, placarFinalDepois.ranking.first { it.nome == "Bia" }.pontos)
+    }
+
+    @Test
+    fun `reiniciar partida fora do placar final e ignorado`() {
+        val viewModel = viewModel()
+        val vez = viewModel.uiState.value
+
+        viewModel.reiniciarPartida()
+
+        assertEquals(vez, viewModel.uiState.value)
     }
 }

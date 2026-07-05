@@ -1,13 +1,94 @@
 <resources>
     <string name="app_name">QuemSou</string>
 
+    <!-- Home -->
     <string name="home_title">QuemSou</string>
-    <string name="home_create_match">Criar partida</string>
-    <string name="home_join_with_code">Entrar com código</string>
+    <string name="home_subtitle">O jogo de adivinhação por dicas</string>
+    <string name="home_create_match">Nova partida</string>
+    <string name="home_join_with_code">Entrar em partida</string>
+    <string name="home_join_badge">Fase 4</string>
+    <string name="home_how_to_play">Como jogar</string>
+    <string name="home_how_to_play_dialog_title">Como jogar</string>
+    <string name="home_how_to_play_dialog_body">Um jogador é o leitor da rodada e lê as dicas do card para os demais, os adivinhadores. Cada card tem 10 dicas, mas o grid de 1 a 10 é escolhido às cegas — a posição não indica se a dica é fácil ou difícil.\n\nA cada dica revelada, quem escolhe a próxima posição gira entre os adivinhadores. Quem acertar com N dicas usadas ganha 11 − N pontos: acertar logo na 1ª dica vale 10 pontos, na 10ª vale só 1. Se ninguém acertar até a 10ª dica, ou os jogadores desistirem, o card é queimado e ninguém pontua.\n\nO leitor pode ganhar os mesmos pontos do acertador, se essa regra estiver ligada na configuração. A partida pode ser individual ou em times, e o placar de time soma os pontos de cada jogador do time. No fim das rodadas, quem tiver mais pontos vence — empate é declarado, sem desempate.</string>
+    <string name="home_how_to_play_dialog_close">Entendi</string>
 
+    <!-- Setup -->
     <string name="setup_title">Configuração da partida</string>
+    <string name="setup_categoria_titulo">Categoria</string>
+    <string name="setup_categoria_personagem_filme">Personagem de filme</string>
+    <string name="setup_categoria_mundo_musica">Mundo da música</string>
+    <string name="setup_categoria_livre">Livre</string>
+    <string name="setup_modo_titulo">Modo de jogo</string>
+    <string name="setup_modo_individual">Individual</string>
+    <string name="setup_modo_times">Times</string>
+    <string name="setup_jogadores_titulo">Jogadores</string>
+    <string name="setup_jogador_nome_placeholder">Nome do jogador %1$d</string>
+    <string name="setup_jogador_remover_cd">Remover jogador</string>
+    <string name="setup_adicionar_jogador">Adicionar jogador</string>
+    <string name="setup_time_a">Time A</string>
+    <string name="setup_time_b">Time B</string>
+    <string name="setup_rodadas_titulo">Rodadas</string>
+    <string name="setup_rodadas_diminuir_cd">Diminuir rodadas</string>
+    <string name="setup_rodadas_aumentar_cd">Aumentar rodadas</string>
+    <string name="setup_leitor_pontua_titulo">Leitor também pontua</string>
+    <string name="setup_comecar_partida">Começar partida</string>
+    <string name="setup_bloqueio_poucos_jogadores">É preciso pelo menos 2 jogadores</string>
+    <string name="setup_bloqueio_nomes_vazios">Dê um nome a todos os jogadores</string>
+    <string name="setup_bloqueio_times_incompletos">Escolha um time para todos os jogadores</string>
+    <string name="setup_bloqueio_times_insuficientes">É preciso pelo menos 2 times</string>
 
-    <string name="game_title">Jogo</string>
+    <!-- Partida — comum -->
+    <string name="partida_carregando">Carregando…</string>
+    <string name="partida_abandonar_titulo">Abandonar partida?</string>
+    <string name="partida_abandonar_corpo">Você vai perder todo o progresso desta partida.</string>
+    <string name="partida_abandonar_confirmar">Abandonar</string>
+    <string name="partida_abandonar_cancelar">Continuar jogando</string>
+    <string name="partida_queimar_titulo">Queimar este card?</string>
+    <string name="partida_queimar_corpo">Ninguém pontua e o card sai do baralho.</string>
+    <string name="partida_queimar_confirmar">Queimar card</string>
+    <string name="partida_queimar_cancelar">Cancelar</string>
+    <string name="partida_tipo_pessoa">Sou uma PESSOA</string>
+    <string name="partida_tipo_lugar">Sou um LUGAR</string>
+    <string name="partida_tipo_coisa">Sou uma COISA</string>
 
-    <string name="score_title">Placar</string>
+    <!-- Partida — VezDeJogar -->
+    <string name="partida_vez_rodada">Rodada %1$d de %2$d</string>
+    <string name="partida_vez_leitor_le">%1$s lê as dicas</string>
+    <string name="partida_vez_passe_o_celular">Passe o celular para %1$s</string>
+    <string name="partida_vez_estou_com_celular">Estou com o celular</string>
+
+    <!-- Partida — Grid -->
+    <string name="partida_grid_rodada_leitor">Rodada %1$d · %2$s lê</string>
+    <string name="partida_grid_segure_para_ver">Segure para ver a resposta</string>
+    <string name="partida_grid_vez_de_escolher">Vez de %1$s escolher a dica</string>
+    <string name="partida_grid_rodape">%1$d dicas usadas · vale %2$d pts</string>
+
+    <!-- Partida — DicaRevelada -->
+    <string name="partida_dica_titulo">Dica %1$d · vale %2$d pts</string>
+    <string name="partida_dica_alguem_acertou">Alguém acertou</string>
+    <string name="partida_dica_outra_dica">Outra dica</string>
+    <string name="partida_dica_queimar_link">Ninguém vai acertar · queimar card</string>
+
+    <!-- Partida — QuemAcertou -->
+    <string name="partida_quem_acertou_titulo">Quem acertou?</string>
+    <string name="partida_quem_acertou_leitor_nota">%1$s (leitor) também ganha %2$d pts</string>
+    <string name="partida_quem_acertou_voltar">Voltar</string>
+
+    <!-- Partida — Anúncio -->
+    <string name="partida_anuncio_acerto_titulo">%1$s acertou!</string>
+    <string name="partida_anuncio_acerto_subtitulo">na dica %1$d</string>
+    <string name="partida_anuncio_queimado_titulo">Ninguém acertou</string>
+    <string name="partida_anuncio_queimado_subtitulo">card queimado · 0 pts</string>
+    <string name="partida_anuncio_resposta_era">A resposta era:</string>
+    <string name="partida_anuncio_pontos_acertador">+%1$d pts</string>
+    <string name="partida_anuncio_pontos_leitor">%1$s (leitor): +%2$d pts</string>
+    <string name="partida_anuncio_proximo_turno">Próximo turno</string>
+    <string name="partida_anuncio_ver_placar">Ver placar</string>
+
+    <!-- Partida — PlacarFinal -->
+    <string name="placar_titulo">Fim de partida</string>
+    <string name="placar_vencedor">%1$s venceu!</string>
+    <string name="placar_empate">Empate: %1$s</string>
+    <string name="placar_jogar_de_novo">Jogar de novo</string>
+    <string name="placar_voltar_ao_inicio">Voltar ao início</string>
 </resources>

@@ -2,6 +2,51 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fase 3.3 — Telas reais da partida (2026-07-04)
+
+Substitui os placeholders da 3.2 pelas telas Compose reais, seguindo os
+mockups aprovados. Validação visual no aparelho ainda é manual (Felipe).
+
+- **Home**: título/subtítulo, botão primário "Nova partida", "Entrar em
+  partida" visível porém desabilitado com selo "Fase 4", botão texto
+  "Como jogar" com diálogo resumindo `docs/GAME_RULES.md`.
+- **Setup**: chips de categoria, segmentado Individual/Times, lista de
+  jogadores (2–4) com nome/remover/adicionar, seletor de time por jogador
+  (Time A/Time B) no modo Times, stepper de rodadas (mínimo 1), toggle
+  "Leitor também pontua", botão "Começar partida" com o motivo do bloqueio
+  como texto de apoio. Botão de teste da 3.2 removido.
+- **Partida**: uma tela só, fases trocadas com `AnimatedContent` sobre o
+  `PartidaUiState` — Carregando, VezDeJogar (avatar do leitor, chips dos
+  adivinhadores), Grid (resposta visível só enquanto pressionada — nunca fixa
+  —, banner do escolhedor da vez, grade 2×5 com posições reveladas em check,
+  rodapé fixo de pontos), DicaRevelada (dica em destaque, ≥ 22sp, "queimar
+  card" com confirmação), QuemAcertou (`ModalBottomSheet`, escolhedor primeiro
+  na lista, nota de pontos do leitor), Anúncio (acerto ou queimado, resposta
+  sempre revelada, botão "Próximo turno"/"Ver placar" na última rodada) e
+  PlacarFinal (vencedor ou empate declarado, ranking com o(s) 1º(s) lugar(es)
+  destacado(s), "Jogar de novo"/"Voltar ao início"). Voltar (em qualquer fase)
+  abre diálogo de abandono ligado a `abandonoSolicitado`/`continuarPartida`.
+- **Evento novo no `PartidaViewModel`**: `reiniciarPartida()` — mesma
+  configuração, código novo sorteado (nova seed), baralho reembaralhado do
+  zero; só age na fase `PlacarFinal`.
+- **Campos aditivos em `PartidaUiState`** (sem mudar nenhum evento/assinatura):
+  `Grid` ganhou `rodada`/`nomeDoLeitor`/`tipo`; `DicaRevelada` ganhou `tipo`;
+  `QuemAcertou` ganhou `nomeDoLeitor`/`pontosEmJogo`/`pontosDoLeitor` e agora
+  ordena o escolhedor da vez primeiro; `Anuncio` ganhou `nomeDoLeitor`/
+  `ultimaRodada`. Necessários para os mockups e não deriváveis na UI sem
+  duplicar regra do domínio — só a tradução ficou mais completa.
+- **Componentes reutilizáveis** em `presentation/ui/components/`:
+  `ChipTipoDeCard`, `AvatarInicial`, `ChipDeJogador`, `RodapeDePontos`,
+  `ConfirmDialog` (toda ação destrutiva — queimar card, abandonar partida —
+  passa por ele).
+- **Tema**: Material 3 agora segue o tema claro/escuro do aparelho
+  (`isSystemInDarkTheme()`), com paleta clara provisória equivalente à escura
+  da Fase 0.
+- **Testes**: 2 novos (`reiniciarPartida` reseta para a rodada 1 com placar
+  zerado; ignorado fora do `PlacarFinal`), mais os testes existentes
+  atualizados para os campos aditivos e a nova ordem do `QuemAcertou` —
+  **93 no total, todos verdes**; `assembleDebug` compila.
+
 ## Fase 3.2 — ViewModels e navegação tipada (2026-07-04)
 
 Sem telas reais (ficam para a 3.3) — placeholders mínimos navegáveis por fase.

@@ -1,7 +1,9 @@
 package com.quemsou.app.presentation.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val QuemSouDarkColorScheme = darkColorScheme(
@@ -14,14 +16,24 @@ private val QuemSouDarkColorScheme = darkColorScheme(
     onSurface = QuemSouOnSurface,
 )
 
+private val QuemSouLightColorScheme = lightColorScheme(
+    primary = QuemSouPrimaryLight,
+    onPrimary = QuemSouOnPrimaryLight,
+    secondary = QuemSouSecondary,
+    background = QuemSouBackgroundLight,
+    surface = QuemSouSurfaceLight,
+    onBackground = QuemSouOnBackgroundLight,
+    onSurface = QuemSouOnSurfaceLight,
+)
+
 /**
- * Tema Material 3 do QuemSou. Na v1 o app é sempre escuro;
- * cores definitivas e suporte a tema claro virão em uma fase futura.
+ * Tema Material 3 do QuemSou. Segue o tema claro/escuro do aparelho — cores
+ * definitivas da identidade visual virão em uma fase futura.
  */
 @Composable
 fun QuemSouTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = QuemSouDarkColorScheme,
+        colorScheme = if (isSystemInDarkTheme()) QuemSouDarkColorScheme else QuemSouLightColorScheme,
         typography = QuemSouTypography,
         content = content,
     )

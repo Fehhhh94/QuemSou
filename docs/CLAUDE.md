@@ -23,6 +23,10 @@
   SetupViewModel com validação viva, PartidaViewModel único por partida
   (fases do jogo = estados, não rotas), restauração pós-morte de processo por
   determinismo de seed. Telas reais ficam para a 3.3.
+- **v8** (2026-07-04) — sub-etapa 3.3 concluída: telas reais da partida
+  seguindo os mockups aprovados (placeholders removidos), componentes
+  reutilizáveis em `ui/components`, tema claro/escuro, evento
+  `reiniciarPartida`. Validação visual no aparelho ainda pendente (Felipe).
 
 ## Visão geral
 
@@ -49,12 +53,22 @@
   `BaralhoDeAssetsTest`.
 - **Fase 3 — em andamento**: **3.1 concluída** — modelos e regras da partida
   no domínio puro (`domain/model` + `CriarPartida` em `domain/usecase`).
-  **3.2 concluída** nesta atualização — navegação tipada (Home, Setup,
-  Partida), `SetupViewModel` (validação viva com `podeComecar` + motivo),
-  `PartidaViewModel` (um por partida, `StateFlow<PartidaUiState>`, eventos,
-  SavedStateHandle com restauração por seed) e `RepositorioDeCards`
-  (interface no domínio, implementação Room). Placeholders navegáveis por
-  fase. **Pendente (3.3)**: telas reais da partida.
+  **3.2 concluída** — navegação tipada (Home, Setup, Partida), `SetupViewModel`
+  (validação viva com `podeComecar` + motivo), `PartidaViewModel` (um por
+  partida, `StateFlow<PartidaUiState>`, eventos, SavedStateHandle com
+  restauração por seed) e `RepositorioDeCards` (interface no domínio,
+  implementação Room). **3.3 concluída** nesta atualização — telas reais
+  seguindo os mockups aprovados, substituindo os placeholders da 3.2:
+  Home (com diálogo "Como jogar" e badge "Fase 4" no entrar com código),
+  Setup (chips de categoria, segmentado individual/times, jogadores com times,
+  stepper de rodadas, toggle leitor pontua) e a tela única da Partida com
+  `AnimatedContent` trocando as fases (grid às cegas com revelação por
+  pressionar-e-segurar, `ModalBottomSheet` do QuemAcertou, anúncio, placar
+  final). Componentes reutilizáveis em `presentation/ui/components/`
+  (`ChipTipoDeCard`, `AvatarInicial`, `ChipDeJogador`, `RodapeDePontos`,
+  `ConfirmDialog`). Tema Material 3 agora suporta claro/escuro
+  (`isSystemInDarkTheme()`). **Pendente**: validação visual no aparelho
+  (manual, Felipe).
 - **Fase 4 — planejada**: multiplayer via Nearby Connections (é quando a
   biblioteca `play-services-nearby` é instalada); validação exige 2 aparelhos
   físicos.
@@ -112,6 +126,17 @@
   partida; ambos os modos entram na v1.
 - **Placar** — RESOLVIDA: exibido em todos os aparelhos, sincronizado pelo
   anfitrião via Nearby (ver "Arquitetura de multiplayer" acima).
+- **Evento `reiniciarPartida`** (3.3) — único evento novo autorizado no
+  `PartidaViewModel`: no `PlacarFinal`, gera um código novo (seed nova) para os
+  mesmos jogadores/modo/regras/categoria e reembaralha o baralho do zero —
+  botão "Jogar de novo".
+- **Campos aditivos em `PartidaUiState`** (3.3) — nenhum evento ou assinatura
+  do `PartidaViewModel` mudou; `Grid` (`rodada`, `nomeDoLeitor`, `tipo`),
+  `DicaRevelada` (`tipo`), `QuemAcertou` (`nomeDoLeitor`, `pontosEmJogo`,
+  `pontosDoLeitor`, e a lista de adivinhadores agora vem com o escolhedor da
+  vez primeiro) e `Anuncio` (`nomeDoLeitor`, `ultimaRodada`) ganharam campos
+  que os mockups aprovados exigem e que não eram deriváveis na UI sem duplicar
+  regra do domínio — só a tradução ficou mais completa.
 - **Determinismo é sagrado**: seed e embaralhamento não podem usar `hashCode()`
   da plataforma, `kotlin.random.Random` nem `java.util.Random`. As
   implementações próprias vivem em `domain/rules/` (hash polinomial +

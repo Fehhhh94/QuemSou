@@ -12,6 +12,7 @@ import com.quemsou.app.domain.model.Placar
 import com.quemsou.app.domain.model.RegrasPartida
 import com.quemsou.app.domain.model.Turno
 import com.quemsou.app.domain.repository.RepositorioDeCards
+import com.quemsou.app.domain.rules.CalculadoraDePontos
 import com.quemsou.app.domain.usecase.CriarPartida
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.navigation.PartidaRoute
@@ -63,6 +64,9 @@ class PartidaViewModel @Inject constructor(
     val abandonoSolicitado: StateFlow<Boolean> = _abandonoSolicitado.asStateFlow()
 
     private lateinit var partida: Partida
+    private lateinit var configuracao: ConfiguracaoDaPartida
+    private lateinit var jogadoresBase: List<Jogador>
+    private lateinit var cardsDisponiveis: List<Card>
     private var turno: Turno? = null
 
     init {
@@ -175,31 +179,57 @@ class PartidaViewModel @Inject constructor(
         _abandonoSolicitado.value = false
     }
 
+    /**
+     * Botão "Jogar de novo" do placar final: reinicia com a **mesma
+     * configuração** (jogadores, modo, regras, categoria) mas um **código
+     * novo sorteado** — logo, uma seed nova e um baralho reembaralhado do
+     * zero. Só age na fase [PartidaUiState.PlacarFinal].
+     */
+    fun reiniciarPartida() {
+        if (_uiState.value !is PartidaUiState.PlacarFinal) return
+        partida = CriarPartida.executar(
+            codigo = gerarCodigo(),
+            jogadores = jogadoresBase,
+            modoDeJogo = configuracao.modoDeJogo,
+            regras = RegrasPartida(
+                leitorPontua = configuracao.leitorPontua,
+                numeroDeRodadas = configuracao.numeroDeRodadas,
+            ),
+            cardsDisponiveis = cardsDisponiveis,
+        )
+        turno = null
+        savedStateHandle[CHAVE_RODADA] = 1
+        savedStateHandle[CHAVE_PLACAR] = null
+        savedStateHandle[CHAVE_POSICOES] = intArrayOf()
+        savedStateHandle[CHAVE_ACERTADOR] = null
+        mudarFase(FASE_VEZ_DE_JOGAR, estadoVezDeJogar())
+    }
+
     // endregion
 
     // region Montagem e restauração
 
     private suspend fun inicializar() {
-        val configuracao = ConfiguracaoDaPartida.deJson(
+        configuracao = ConfiguracaoDaPartida.deJson(
             requireNotNull(savedStateHandle.get<String>(ARGUMENTO_CONFIGURACAO)) {
                 "Rota Partida sem o argumento de configuração."
             },
         )
         // Ids determinísticos por índice: a restauração pós-morte de processo
         // reconstrói os mesmos ids a partir da mesma configuração.
-        val jogadores = configuracao.jogadores.mapIndexed { indice, jogador ->
+        jogadoresBase = configuracao.jogadores.mapIndexed { indice, jogador ->
             Jogador(id = "j${indice + 1}", nome = jogador.nome, timeId = jogador.timeId)
         }
-        val cards = repositorioDeCards.buscarPorCategoria(configuracao.categoria)
+        cardsDisponiveis = repositorioDeCards.buscarPorCategoria(configuracao.categoria)
         val base = CriarPartida.executar(
             codigo = configuracao.codigo,
-            jogadores = jogadores,
+            jogadores = jogadoresBase,
             modoDeJogo = configuracao.modoDeJogo,
             regras = RegrasPartida(
                 leitorPontua = configuracao.leitorPontua,
                 numeroDeRodadas = configuracao.numeroDeRodadas,
             ),
-            cardsDisponiveis = cards,
+            cardsDisponiveis = cardsDisponiveis,
         )
         restaurar(base)
     }
@@ -283,10 +313,13 @@ class PartidaViewModel @Inject constructor(
     private fun estadoGrid(): PartidaUiState.Grid {
         val turnoAtual = checkNotNull(turno)
         return PartidaUiState.Grid(
+            rodada = partida.rodadaAtual,
+            nomeDoLeitor = turnoAtual.leitor.nome,
             posicoesReveladas = turnoAtual.posicoesReveladas,
             nomeDoEscolhedor = turnoAtual.escolhedorDaVez.nome,
             respostaParaOLeitor = turnoAtual.card.answer,
             pontosEmJogo = Card.QUANTIDADE_DE_DICAS - turnoAtual.dicasUsadas,
+            tipo = turnoAtual.card.type,
         )
     }
 
@@ -297,19 +330,37 @@ class PartidaViewModel @Inject constructor(
             posicao = dicaAtual.posicao,
             texto = turnoAtual.dicaNaPosicao(dicaAtual.posicao),
             valor = Card.QUANTIDADE_DE_DICAS + 1 - turnoAtual.dicasUsadas,
+            tipo = turnoAtual.card.type,
         )
     }
 
-    private fun estadoQuemAcertou() = PartidaUiState.QuemAcertou(
-        adivinhadores = checkNotNull(turno).adivinhadores.map { AdivinhadorUi(it.id, it.nome) },
-    )
+    /**
+     * O escolhedor da vez entra primeiro na lista (é ele quem mais
+     * provavelmente vai arriscar primeiro na folha de respostas da UI).
+     * Pontos calculados por [CalculadoraDePontos] — nunca duplicados aqui.
+     */
+    private fun estadoQuemAcertou(): PartidaUiState.QuemAcertou {
+        val turnoAtual = checkNotNull(turno)
+        val escolhedor = turnoAtual.escolhedorDaVez
+        val ordenados = listOf(escolhedor) + turnoAtual.adivinhadores.filterNot { it.id == escolhedor.id }
+        val resultado = CalculadoraDePontos.calcular(turnoAtual.dicasUsadas, partida.regras)
+        return PartidaUiState.QuemAcertou(
+            adivinhadores = ordenados.map { AdivinhadorUi(it.id, it.nome) },
+            nomeDoLeitor = turnoAtual.leitor.nome,
+            pontosEmJogo = resultado.pontosAcertador,
+            pontosDoLeitor = resultado.pontosLeitor,
+        )
+    }
 
-    private fun estadoAnuncio(): PartidaUiState.Anuncio =
-        when (val fim = checkNotNull(turno).estado) {
+    private fun estadoAnuncio(): PartidaUiState.Anuncio {
+        val ultimaRodada = partida.rodadaAtual == partida.totalDeRodadas
+        return when (val fim = checkNotNull(turno).estado) {
             is EstadoDoTurno.TurnoEncerrado.Acerto -> PartidaUiState.Anuncio.Acerto(
                 resposta = fim.resposta,
                 dicasUsadas = fim.dicasUsadas,
+                ultimaRodada = ultimaRodada,
                 nomeDoAcertador = nomeDe(fim.acertadorId),
+                nomeDoLeitor = checkNotNull(turno).leitor.nome,
                 pontosDoAcertador = fim.pontosAcertador,
                 pontosDoLeitor = fim.pontosLeitor,
             )
@@ -317,10 +368,12 @@ class PartidaViewModel @Inject constructor(
             is EstadoDoTurno.TurnoEncerrado.Queimado -> PartidaUiState.Anuncio.Queimado(
                 resposta = fim.resposta,
                 dicasUsadas = fim.dicasUsadas,
+                ultimaRodada = ultimaRodada,
             )
 
             else -> error("Anúncio sem turno encerrado (estado: $fim).")
         }
+    }
 
     private fun estadoPlacarFinal(): PartidaUiState.PlacarFinal {
         val vencedores = partida.vencedores()
@@ -357,5 +410,11 @@ class PartidaViewModel @Inject constructor(
         const val FASE_QUEM_ACERTOU = "QUEM_ACERTOU"
         const val FASE_ANUNCIO = "ANUNCIO"
         const val FASE_PLACAR_FINAL = "PLACAR_FINAL"
+
+        const val TAMANHO_DO_CODIGO = 4
+    }
+
+    private fun gerarCodigo(): String = buildString {
+        repeat(TAMANHO_DO_CODIGO) { append(('A'..'Z').random()) }
     }
 }

@@ -10,3 +10,11 @@ val QuemSouBackground = Color(0xFF121212)
 val QuemSouSurface = Color(0xFF1E1E1E)
 val QuemSouOnBackground = Color(0xFFE1E1E1)
 val QuemSouOnSurface = Color(0xFFE1E1E1)
+
+// Contrapartida clara da mesma paleta provisória (3.3 — suporte a tema claro).
+val QuemSouPrimaryLight = Color(0xFF6650A4)
+val QuemSouOnPrimaryLight = Color(0xFFFFFFFF)
+val QuemSouBackgroundLight = Color(0xFFFFFBFE)
+val QuemSouSurfaceLight = Color(0xFFF3EDF7)
+val QuemSouOnBackgroundLight = Color(0xFF1C1B1F)
+val QuemSouOnSurfaceLight = Color(0xFF1C1B1F)

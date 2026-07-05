@@ -32,7 +32,10 @@ fun QuemSouNavGraph(navController: NavHostController = rememberNavController()) 
             )
         }
         composable<PartidaRoute> {
-            PartidaScreen()
+            PartidaScreen(
+                onAbandonarPartida = { navController.popBackStack(HomeRoute, inclusive = false) },
+                onVoltarAoInicio = { navController.popBackStack(HomeRoute, inclusive = false) },
+            )
         }
     }
 }
