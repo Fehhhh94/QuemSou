@@ -2,6 +2,26 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Baralho v2 — 60 cards editoriais (2026-07-04)
+
+- `assets/cards.json` atualizado para `"version": 2` com o baralho editorial
+  definitivo: **60 cards** (30 `PERSONAGEM_FILME` + 30 `MUNDO_DA_MUSICA`),
+  substituindo os 4 dummies da Fase 2.
+- Novo `BaralhoDeAssetsTest`: valida o baralho real com as regras do
+  importador (10 dicas, answer não vazio), confere ids únicos e que nenhuma
+  dica contém a resposta — suíte com 41 testes, todos verdes.
+- **Regras revisadas** (`docs/GAME_RULES.md`): as dicas não têm mais curva de
+  dificuldade; o grid 1–10 é escolha às cegas — o app embaralha a posição das
+  dicas a cada partida (implementação na Fase 3, no domínio, com
+  `clues.shuffled(random)`). Pontuação inalterada: 11 − dicas usadas.
+- **Régua editorial** registrada em `docs/CARDS_GUIDE.md`: 10 dicas com mix de
+  dificuldades, todas autossuficientes, nenhuma nomeia a resposta (a mais
+  forte aponta, não entrega), sem trechos de letras de música.
+- **Decisões**: categoria "Livre" resolvida como filtro (união de todas as
+  categorias, sem cards exclusivos); nova **Fase 5** no plano — fábrica de
+  cards com Gemini (gera → valida → tela de revisão → Room; a partida segue
+  offline).
+
 ## Fase 2 — Banco de cards (parte técnica) (2026-07-04)
 
 Parte técnica concluída. **Pendente**: cards definitivos (trabalho editorial —

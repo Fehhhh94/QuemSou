@@ -6,7 +6,12 @@ código deve estar registrada aqui.
 ## O card
 
 - Todo card tem uma resposta secreta (pessoa, lugar ou coisa) e **exatamente
-  10 dicas**, reveladas uma a uma, da mais difícil para a mais fácil.
+  10 dicas** autossuficientes. As dicas **não têm curva de dificuldade** —
+  cada card mistura dicas fáceis e difíceis.
+- **Grid 1–10 às cegas**: as dicas são apresentadas num grid de 1 a 10 e a
+  escolha do número é às cegas — o app **embaralha a posição** das dicas a
+  cada partida (implementação na Fase 3, no domínio, com
+  `clues.shuffled(random)`).
 - **Card queimado** (ninguém acertou): é **descartado** — não volta ao
   baralho (`RegrasPartida.descartarCardQueimado`, padrão **SIM**).
 
@@ -19,8 +24,8 @@ código deve estar registrada aqui.
 
 ## Pontuação
 
-- Quem acerta com **N** dicas reveladas (N de 1 a 10) ganha **11 − N** pontos:
-  acertou na dica 1 → 10 pontos; na dica 5 → 6 pontos; na dica 10 → 1 ponto.
+- Quem acerta tendo usado **N** dicas (N de 1 a 10) ganha **11 − N** pontos:
+  acertou com 1 dica usada → 10 pontos; com 5 → 6 pontos; com 10 → 1 ponto.
 - **Leitor**: configurável por partida (`RegrasPartida.leitorPontua`, padrão
   **SIM**). Quando ativo, o leitor ganha os **mesmos pontos** do acertador;
   quando desativado, o leitor ganha 0.

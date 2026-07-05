@@ -11,6 +11,10 @@
 - **v4** (2026-07-04) — Fase 2 (parte técnica) concluída: Room + importador de
   cards versionado + campo `descartarCardQueimado` + `org.gradle.java.home`.
   Cards definitivos (trabalho editorial) pendentes; decisão "Livre" em aberto.
+- **v5** (2026-07-04) — baralho editorial v2 (60 cards, 30+30); dicas sem
+  curva de dificuldade (grid 1–10 às cegas, posições embaralhadas por
+  partida); "Livre" resolvida como filtro; Fase 5 (fábrica de cards com
+  Gemini) entra no plano.
 
 ## Visão geral
 
@@ -31,16 +35,19 @@
 - **Fase 2 — parte técnica concluída** nesta atualização: banco de cards Room
   (`data/local/`), importador de `assets/cards.json` com versionamento via
   DataStore (`data/importer/`), campo `RegrasPartida.descartarCardQueimado` e
-  `org.gradle.java.home` no `gradle.properties`. **Pendente**: os cards
-  definitivos são trabalho editorial posterior — `cards.json` contém apenas 4
-  cards DUMMY (`TESTE_01`..`TESTE_04`).
+  `org.gradle.java.home` no `gradle.properties`. Baralho editorial entregue
+  nesta atualização: `cards.json` **version 2** com 60 cards reais
+  (30 `PERSONAGEM_FILME` + 30 `MUNDO_DA_MUSICA`), validado pelo
+  `BaralhoDeAssetsTest`.
 - **Fase 3 — planejada**: telas de uma partida em um único celular (sem rede),
   modelos `Partida`/`Turno`/`Placar`.
 - **Fase 4 — planejada**: multiplayer via Nearby Connections (é quando a
   biblioteca `play-services-nearby` é instalada); validação exige 2 aparelhos
   físicos.
-- **Backlog**: geração de cards por IA (Gemini); salas online à distância
-  (Firebase).
+- **Fase 5 — planejada**: fábrica de cards com Gemini — gera → valida (mesma
+  régua do importador) → tela de revisão → Room. A partida em si segue 100%
+  offline; só a geração de cards usa rede.
+- **Backlog**: salas online à distância (Firebase).
 
 ## Arquitetura de multiplayer
 
@@ -61,8 +68,12 @@
   padrão SIM; quando ativo, o leitor ganha os **mesmos** pontos do acertador.
 - **Destino do card queimado** — RESOLVIDA: descartado (não volta ao baralho).
   Campo `RegrasPartida.descartarCardQueimado`, padrão SIM (criado na Fase 2).
-- **Categoria "Livre"** — EM ABERTO: o papel e o conteúdo da categoria `LIVRE`
-  ainda não foram definidos.
+- **Categoria "Livre"** — RESOLVIDA: é um **filtro** de baralho, a união de
+  todas as categorias — não existem cards exclusivos de `LIVRE`.
+- **Dicas às cegas** — RESOLVIDA: as dicas não têm curva de dificuldade; o
+  grid 1–10 é escolha às cegas e o app embaralha a posição das dicas a cada
+  partida (implementação na Fase 3, no domínio, com `clues.shuffled(random)`).
+  Pontuação inalterada: 11 − quantidade de dicas usadas.
 - **Jogadores por partida** — RESOLVIDA: mínimo 2, máximo 4 (1 leitor + 1 a 3
   adivinhadores por rodada).
 - **Modo de jogo** — RESOLVIDA: individual ou times, configurável antes da
