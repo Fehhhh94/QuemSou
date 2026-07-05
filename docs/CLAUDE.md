@@ -15,6 +15,10 @@
   curva de dificuldade (grid 1–10 às cegas, posições embaralhadas por
   partida); "Livre" resolvida como filtro; Fase 5 (fábrica de cards com
   Gemini) entra no plano.
+- **v6** (2026-07-04) — sub-etapa 3.1 concluída: modelos
+  Jogador/Partida/Turno/Placar, máquina de estados do turno, rodízios de
+  leitor e escolhedor, grid de dicas embaralhado por seed, empate declarado.
+  Erros do domínio: exceções (decisão documentada).
 
 ## Visão geral
 
@@ -39,8 +43,11 @@
   nesta atualização: `cards.json` **version 2** com 60 cards reais
   (30 `PERSONAGEM_FILME` + 30 `MUNDO_DA_MUSICA`), validado pelo
   `BaralhoDeAssetsTest`.
-- **Fase 3 — planejada**: telas de uma partida em um único celular (sem rede),
-  modelos `Partida`/`Turno`/`Placar`.
+- **Fase 3 — em andamento**: **sub-etapa 3.1 concluída** nesta atualização —
+  modelos e regras da partida no domínio puro (`Jogador`, `ModoDeJogo`,
+  `Partida`, `Turno`, `EstadoDoTurno`, `Placar` em `domain/model`;
+  `CriarPartida` em `domain/usecase`), sem nenhuma UI. **Pendente (3.2)**:
+  telas de uma partida em um único celular (sem rede).
 - **Fase 4 — planejada**: multiplayer via Nearby Connections (é quando a
   biblioteca `play-services-nearby` é instalada); validação exige 2 aparelhos
   físicos.
@@ -70,10 +77,15 @@
   Campo `RegrasPartida.descartarCardQueimado`, padrão SIM (criado na Fase 2).
 - **Categoria "Livre"** — RESOLVIDA: é um **filtro** de baralho, a união de
   todas as categorias — não existem cards exclusivos de `LIVRE`.
-- **Dicas às cegas** — RESOLVIDA: as dicas não têm curva de dificuldade; o
-  grid 1–10 é escolha às cegas e o app embaralha a posição das dicas a cada
-  partida (implementação na Fase 3, no domínio, com `clues.shuffled(random)`).
-  Pontuação inalterada: 11 − quantidade de dicas usadas.
+- **Dicas às cegas** — RESOLVIDA e implementada (3.1): o grid 1–10 é escolha
+  às cegas; `Turno.criar` embaralha as posições das dicas com o PRNG por seed
+  da Fase 1 (`EmbaralhadorDeCards`, agora genérico), com seed derivada da
+  partida + rodada. Pontuação inalterada: 11 − quantidade de dicas usadas,
+  nunca o número da posição tocada.
+- **Erros no domínio** — RESOLVIDA: transições e argumentos inválidos lançam
+  **exceção** (`IllegalStateException` para estado errado,
+  `IllegalArgumentException` para argumento inválido, via `check`/`require`) —
+  abordagem única em todo o domínio; não usamos erro tipado de retorno.
 - **Jogadores por partida** — RESOLVIDA: mínimo 2, máximo 4 (1 leitor + 1 a 3
   adivinhadores por rodada).
 - **Modo de jogo** — RESOLVIDA: individual ou times, configurável antes da

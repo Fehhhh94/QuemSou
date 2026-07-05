@@ -2,6 +2,39 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fase 3.1 — Modelos e regras da partida (2026-07-04)
+
+Domínio puro, sem nenhuma UI (telas ficam para a 3.2).
+
+- **Modelos** em `domain/model` (imutáveis; transições retornam cópias):
+  `Jogador` (id, nome, timeId opcional), `ModoDeJogo` (INDIVIDUAL/TIMES),
+  `Partida` (2–4 jogadores validados, baralho embaralhado, rodada atual,
+  rodízio circular de leitor), `Turno` (card da vez, leitor, 1–3
+  adivinhadores, escolhedor da vez, posições reveladas) e `Placar` (pontos por
+  jogadorId, ranking, vencedores com empate declarado, soma por time).
+- **Máquina de estados do turno** (`EstadoDoTurno`): EscolhendoDica →
+  `revelarDica(posicao)` → DicaRevelada → `outraDica()` (avança o escolhedor;
+  posição repetida rejeitada) | `registrarAcerto(id)` → TurnoEncerrado.Acerto |
+  `queimarCard()` ou 10ª dica sem acerto → TurnoEncerrado.Queimado. O fim de
+  turno carrega resposta revelada, dicas usadas e pontos (acertador + leitor
+  conforme `leitorPontua`; queimado = 0). Transições inválidas lançam
+  **exceção** (abordagem única do domínio, documentada).
+- **Grid de dicas às cegas implementado**: `Turno.criar` embaralha as 10 dicas
+  nas posições 1–10 com o PRNG xorshift64 da Fase 1 — `EmbaralhadorDeCards`
+  generalizado para `<T>` (mesmo algoritmo; nome mantido por histórico) — com
+  seed derivada de `seed da partida × 31 + rodada`. Pontuação segue 11 − dicas
+  usadas, nunca o número da posição.
+- **Avanço da partida**: `encerrarTurno` soma o placar, gira o leitor e avança
+  a rodada; após `totalDeRodadas` a partida encerra com placar final;
+  `vencedores()` respeita o modo (jogadores ou times) com empate declarado.
+- **Use case** `CriarPartida` em `domain/usecase`: código → seed
+  (`SeedDeCodigo`) → baralho embaralhado → `Partida` validada.
+- **Testes**: 37 novos (rodízios com 1/2/3 adivinhadores, embaralhamento
+  determinístico e permutação exata do grid, pontuação nos extremos, máquina
+  de estados completa incluindo transições inválidas, giro de leitor,
+  encerramento, empate, validações 2–4 e de times) — **78 no total, todos
+  verdes** com `./gradlew test`.
+
 ## Baralho v2 — 60 cards editoriais (2026-07-04)
 
 - `assets/cards.json` atualizado para `"version": 2` com o baralho editorial

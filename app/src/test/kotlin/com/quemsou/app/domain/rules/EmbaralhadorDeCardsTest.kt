@@ -56,7 +56,7 @@ class EmbaralhadorDeCardsTest {
 
     @Test
     fun `lista vazia nao quebra`() {
-        assertEquals(emptyList<Card>(), EmbaralhadorDeCards.embaralhar(emptyList(), seed = 42L))
+        assertEquals(emptyList<Card>(), EmbaralhadorDeCards.embaralhar(emptyList<Card>(), seed = 42L))
     }
 
     @Test

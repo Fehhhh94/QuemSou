@@ -1,11 +1,12 @@
 package com.quemsou.app.domain.rules
 
-import com.quemsou.app.domain.model.Card
-
 /**
- * Embaralhamento determinístico de cards: a mesma seed produz sempre a mesma
- * ordem, em qualquer aparelho e em qualquer versão de Kotlin/JVM — é a base do
- * multiplayer offline por código de partida.
+ * Embaralhamento determinístico: a mesma seed produz sempre a mesma ordem, em
+ * qualquer aparelho e em qualquer versão de Kotlin/JVM.
+ *
+ * Nasceu na Fase 1 para o baralho de cards (daí o nome); desde a Fase 3 a
+ * função é genérica e também embaralha as posições das dicas no grid 1–10 de
+ * cada turno.
  *
  * Usa Fisher–Yates com um PRNG xorshift64 implementado neste arquivo.
  * Não usa `kotlin.random.Random` nem `java.util.Random`: o algoritmo deles não
@@ -18,11 +19,11 @@ object EmbaralhadorDeCards {
     private const val ESTADO_PARA_SEED_ZERO = -0x61C8864680B583EBL
 
     /**
-     * Retorna uma nova lista com os mesmos [cards] em ordem embaralhada
+     * Retorna uma nova lista com os mesmos [itens] em ordem embaralhada
      * de forma determinística pela [seed].
      */
-    fun embaralhar(cards: List<Card>, seed: Long): List<Card> {
-        val resultado = cards.toMutableList()
+    fun <T> embaralhar(itens: List<T>, seed: Long): List<T> {
+        val resultado = itens.toMutableList()
         var estado = if (seed == 0L) ESTADO_PARA_SEED_ZERO else seed
         for (i in resultado.lastIndex downTo 1) {
             estado = proximo(estado)

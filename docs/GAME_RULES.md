@@ -10,8 +10,8 @@ código deve estar registrada aqui.
   cada card mistura dicas fáceis e difíceis.
 - **Grid 1–10 às cegas**: as dicas são apresentadas num grid de 1 a 10 e a
   escolha do número é às cegas — o app **embaralha a posição** das dicas a
-  cada partida (implementação na Fase 3, no domínio, com
-  `clues.shuffled(random)`).
+  cada turno (embaralhamento determinístico por seed em `Turno.criar`, no
+  domínio; a posição não indica dificuldade).
 - **Card queimado** (ninguém acertou): é **descartado** — não volta ao
   baralho (`RegrasPartida.descartarCardQueimado`, padrão **SIM**).
 
@@ -21,6 +21,18 @@ código deve estar registrada aqui.
   adivinhadores por rodada.
 - **Modo de jogo**: individual ou em times, configurável antes da partida
   (os dois modos estão na v1).
+
+## O turno
+
+- O leitor da rodada lê as dicas; os demais jogadores são os adivinhadores
+  (1 a 3). O leitor **gira a cada rodada**, em rodízio circular.
+- **Rodízio do escolhedor**: quem escolhe a posição no grid gira **a cada dica
+  revelada**, circular entre os adivinhadores (funciona com 1, 2 ou 3);
+  o leitor nunca escolhe.
+- Posição já revelada não pode ser escolhida de novo.
+- O turno termina com **acerto**, **desistência** (card queimado) ou após a
+  **10ª dica sem acerto** (queima automaticamente). O fim de turno é anunciado
+  com a **resposta revelada**, as dicas usadas e os pontos de cada um.
 
 ## Pontuação
 
@@ -43,3 +55,7 @@ código deve estar registrada aqui.
 
 - O placar é exibido em **todos os aparelhos** e sincronizado pelo anfitrião
   via Nearby Connections (multiplayer, Fase 4).
+- No modo **TIMES**, o placar do time é a **soma** dos pontos dos jogadores
+  do time.
+- **Empate**: declarado — todos os empatados na maior pontuação são
+  vencedores; **não há critério de desempate na v1**.
