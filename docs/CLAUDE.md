@@ -40,9 +40,9 @@
   `BaralhoDeAssetsTest`. **130 testes verdes.**
 - **Modo Shot entregue** (2026-07-09); validação física no Z Fold pendente
   — incluir na próxima sessão de jogo.
-- **Fase 5 — EM ANDAMENTO** (Fábrica de Cards com Gemini): sub-fase 5.1
-  concluída (commit `775d866`). **Próximo passo: sub-fase 5.2** (camada
-  Gemini; decisões fechadas em `docs/IMPROVEMENTS.md`).
+- **Fase 5 — EM ANDAMENTO** (Catálogo de Baralhos): sub-fase 5.1 concluída
+  (commit `775d866` — `ValidadorEditorial`, hoje a régua da fábrica
+  interna). **Próximo passo: sub-fase 5A** (catálogo estático de baralhos).
 - **Fase 4 (Nearby Connections): no backlog**, sem previsão — ver "Backlog".
 - Única decisão de produto em aberto: **nome definitivo do app** ("QuemSou"
   é provisório em código, pacote e strings).
@@ -122,26 +122,49 @@
 
 ## Fase 5 — arquitetura
 
-- **Gemini via REST direto** (`generativelanguage.googleapis.com`), cliente
-  HTTP leve; **chave do próprio usuário** no header `x-goog-api-key`, vinda
-  do DataStore. Sem Firebase (App Check obrigatório e chave atrelada ao
-  desenvolvedor o descartaram). A partida segue 100% offline — só a geração
-  de cards usa rede.
+- **Catálogo estático de baralhos**: o app consome baralhos curados de um
+  catálogo hospedado estaticamente (ex.: GitHub raw/releases) — um arquivo
+  índice JSON + um JSON por baralho. Sem servidor, sem Firebase, sem chave
+  de API no app. A tela de catálogo lista, baixa e atualiza baralhos; o
+  import usa o mecanismo de versionamento do `CardsImporter`. A partida
+  segue 100% offline — rede só na tela de catálogo.
+- **Baralho** (modelo de conteúdo): pertence a uma categoria existente e
+  agrupa cards tematicamente (ex.: `PERSONAGEM_FILME` → "Harry Potter").
+  Máximo de **100 cards por baralho**; crescimento além disso vira baralho
+  novo ("Harry Potter 2"), preferindo subtítulos temáticos quando fizer
+  sentido.
+- **Ciclo de vida do baralho**: `EM_DESENVOLVIMENTO` (versões novas podem
+  adicionar, remover ou melhorar cards; o app atualiza por versionamento) →
+  `FINALIZADO` (imutável para sempre; evolução só via novo baralho ou
+  extensão). O catálogo e a UI sinalizam o estado (selo "em evolução" vs
+  "edição final").
+- **Seleção múltipla no Setup**: a partida pode usar a união dos cards de
+  1+ baralhos — mesma filosofia da categoria LIVRE (filtro-união
+  determinístico, sem entidade "baralho mesclado" persistida).
+- **Fábrica interna (ferramenta do desenvolvedor, fora do app)**: pipeline
+  Gemini gera → `ValidadorEditorial` valida → revisão humana → publicação no
+  catálogo. As decisões da camada Gemini (modelo nunca hardcoded, saída
+  estruturada, thinking × `maxOutputTokens`, mapa de erros, timeout 60 s,
+  sanitização, sem fallback) estão em `docs/IMPROVEMENTS.md` e valem para a
+  ferramenta interna.
 - **`ValidadorEditorial`** (`domain/validacao`, feito na 5.1): regras por
   card (resposta não vazia, dica não vazia, dica não contém a resposta
   ignoreCase), retorno `Aprovado` | `Reprovado` com violações acumuladas
   (regra + índice base 0 + mensagem em português numerada 1–10). Regra
   estrutural (10 dicas) fica no construtor de `Card`; regras por baralho no
   `BaralhoDeAssetsTest`; regras de julgamento (autossuficiência, força da
-  dica) ficam com o humano na tela de revisão.
-- **Lacuna registrada para a 5.2**: o JSON cru do Gemini precisa de validação
-  estrutural ANTES de construir `Card` (8 dicas deve virar violação legível
-  na tela de revisão, não exceção do construtor).
-- **Sub-fases**: 5.2 camada Gemini (interface `GeradorDeCards` no domínio +
-  implementação REST na data + tela de configuração da chave; decisões
-  fechadas em `docs/IMPROVEMENTS.md`) · 5.3 tela de revisão (gerados →
-  validados → fila de pendentes → aprovar/rejeitar → aprovados entram no
-  Room por categoria) · 5.4 validação ponta a ponta no Z Fold.
+  dica) ficam com o humano na revisão da fábrica interna.
+- **Validação estrutural pré-`Card`**: o JSON cru do Gemini precisa de
+  validação estrutural ANTES de construir `Card` (8 dicas deve virar
+  violação legível na revisão, não exceção do construtor).
+- **Sub-fases**: **5A — Catálogo** (entidade Baralho no domínio + Room com
+  migração, índice e formato JSON do baralho, tela de catálogo com
+  listar/baixar/atualizar e selos de estado, seleção múltipla de baralhos no
+  Setup, união determinística na partida; validação no Z Fold) ·
+  **5B — Fábrica interna** (pipeline Gemini → validação → revisão como
+  ferramenta do desenvolvedor; o formato — script/CLI ou app-side oculto —
+  é **decisão em aberto**, a fechar no início da 5B) · **5C — visão
+  comercial** (backlog — ver "Backlog").
 
 ## Backlog
 
@@ -152,6 +175,13 @@
   `EmbaralhadorDeCards` viram embaralhamento interno do anfitrião. Retomada
   começa pelo **desenho da arquitetura da camada Nearby** antes de qualquer
   código; validação exige **2+ aparelhos físicos** (emulador não testa Nearby).
+- **Visão comercial de baralhos (5C)**: baralhos customizados pagos sob
+  demanda. Restrição registrada: conteúdo com marca registrada (Harry
+  Potter etc.) **não pode ser vendido** — customizado pago só para temas
+  próprios do cliente. MVP pode ser artesanal (pedido → fábrica interna →
+  baralho no catálogo), sem Play Billing. **Alerta de trademark**: também os
+  baralhos gratuitos com nome de marca são risco a avaliar antes do
+  lançamento na Play Store.
 - Salas online à distância (Firebase).
 
 ## Documentação — quem é dono do quê

@@ -22,11 +22,56 @@
 - Quem bebe: **sempre quem escolheu o número**, sem exceções.
 - **Nota**: referência a álcool afeta a classificação etária na Play Store.
 
-## 🟣 Fase 5.2 — Decisões da camada Gemini (registradas em 2026-07-09)
+## 🟣 Fase 5 reestruturada — Catálogo de Baralhos (2026-07-09)
+
+- **Status**: decisão de produto fechada em 2026-07-09 — a geração de cards
+  por IA sai do app e vira ferramenta interna; o app consome um catálogo
+  estático de baralhos curados. Arquitetura vigente em `docs/CLAUDE.md`
+  ("Fase 5 — arquitetura"); antes/depois no `docs/CHANGELOG.md`. Próximo
+  passo: sub-fase 5A.
+- **Baralho**: nova entidade; pertence a uma categoria existente e agrupa
+  cards tematicamente (ex.: `PERSONAGEM_FILME` → baralho "Harry Potter").
+- **Teto de 100 cards por baralho**: crescimento além disso = novo baralho
+  ("Harry Potter 2"), preferindo subtítulos temáticos quando fizer sentido.
+- **Ciclo de vida**: `EM_DESENVOLVIMENTO` (versões novas podem adicionar,
+  remover ou melhorar cards; o app atualiza por versionamento) →
+  `FINALIZADO` (imutável para sempre; evolução só via novo
+  baralho/extensão). O catálogo e a UI sinalizam o estado (selo "em
+  evolução" vs "edição final").
+- **Seleção múltipla no Setup**: a partida pode usar a união dos cards de
+  1+ baralhos — mesma filosofia da categoria LIVRE (filtro-união, sem
+  entidade "baralho mesclado" persistida).
+- **Distribuição**: índice JSON estático + um JSON por baralho, hospedados
+  estaticamente (ex.: GitHub raw/releases); sem servidor, sem Firebase, sem
+  chave de API no app. Tela de catálogo lista, baixa e atualiza; import via
+  o versionamento do `CardsImporter`. A partida segue 100% offline — rede
+  só na tela de catálogo.
+- **Sub-fases**: 5A — Catálogo (domínio + Room com migração, JSONs, tela de
+  catálogo com selos de estado, seleção múltipla no Setup, união
+  determinística na partida; validação no Z Fold) · 5B — Fábrica interna
+  (pipeline Gemini → validação → revisão; o formato — script/CLI ou
+  app-side oculto — é **decisão em aberto**, a fechar no início da 5B) ·
+  5C — visão comercial (backlog, abaixo).
+
+### 🟣 Visão 5C — baralhos customizados pagos (backlog)
+
+- Baralhos customizados pagos sob demanda. **Restrição registrada**:
+  conteúdo com marca registrada (Harry Potter etc.) **não pode ser
+  vendido** — customizado pago só para temas próprios do cliente.
+- MVP pode ser artesanal (pedido → fábrica interna → baralho no catálogo),
+  sem Play Billing.
+- **⚠️ Alerta de trademark**: também os baralhos **gratuitos** com nome de
+  marca são risco a avaliar antes do lançamento na Play Store.
+
+## 🟣 Fábrica interna — Decisões da camada Gemini (registradas em 2026-07-09)
 
 Decisões fechadas a partir das lições de uma integração Gemini já validada em
-produção (app WakeSong). Implementar na 5.2; nenhuma delas altera as decisões
-já vigentes (REST direto, chave do usuário no DataStore, sem Firebase).
+produção (app WakeSong). Registradas originalmente para a antiga sub-fase 5.2
+(geração dentro do app); com a reestruturação da Fase 5 (2026-07-09),
+**continuam valendo integralmente, agora aplicadas à fábrica interna (5B)**.
+Onde os itens abaixo citarem "tela de configuração"/DataStore do app,
+leia-se a configuração equivalente da ferramenta interna — e a chave da API
+passa a ser a do desenvolvedor, nunca do usuário final.
 
 1. **Nome do modelo nunca hardcoded.** Vira campo editável na tela de
    configuração da 5.2, ao lado da chave da API, persistido no DataStore, com

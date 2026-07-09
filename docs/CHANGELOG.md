@@ -2,6 +2,38 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Reestruturação da Fase 5 — fábrica no app → Catálogo de Baralhos (2026-07-09)
+
+Decisão de produto, sem mudança de código — apenas documentação
+(`docs/CLAUDE.md`, `docs/IMPROVEMENTS.md`).
+
+- **Antes** (sub-fases 5.2–5.4 antigas): geração de cards por IA dentro do
+  app, com a chave Gemini do próprio usuário (REST direto, chave no
+  DataStore), tela de revisão no app (gerados → validados → fila →
+  aprovar/rejeitar → Room) e validação ponta a ponta no Z Fold.
+- **Depois** (sub-fases 5A–5C): o app consome um **catálogo estático de
+  baralhos curados** — índice JSON + um JSON por baralho, hospedagem
+  estática (ex.: GitHub raw/releases), sem servidor, sem Firebase, sem chave
+  de API no app; tela de catálogo lista/baixa/atualiza via o versionamento
+  do `CardsImporter`. A geração por IA vira **fábrica interna do
+  desenvolvedor** (Gemini → `ValidadorEditorial` → revisão humana →
+  publicação no catálogo). 5C é a visão comercial em backlog (baralhos
+  customizados pagos, com restrição de trademark).
+- **Porquê**: exigir chave de API do usuário final é fricção demais para um
+  party game; billing na chave do usuário é custo/risco (cota pré-paga do
+  Google AI Studio, diagnóstico nas mãos do usuário); e o catálogo estático
+  mantém a partida 100% offline — rede só na tela de catálogo.
+- Novo modelo de conteúdo: entidade **Baralho** por categoria, teto de
+  **100 cards por baralho**, ciclo de vida `EM_DESENVOLVIMENTO` →
+  `FINALIZADO` (imutável; selos "em evolução"/"edição final" na UI) e
+  **seleção múltipla de baralhos no Setup** (união dos cards, filosofia da
+  categoria LIVRE).
+- As **7 decisões da camada Gemini** (2026-07-09) continuam valendo,
+  aplicadas à fábrica interna — seção renomeada no `docs/IMPROVEMENTS.md`
+  ("Fábrica interna — Decisões da camada Gemini").
+- A sub-fase **5.1 permanece válida e entregue**: o `ValidadorEditorial` é a
+  régua editorial da fábrica interna.
+
 ## Modo Shot — shot como pedágio no grid (2026-07-09)
 
 Melhoria pré-5.2, implementada a partir da spec registrada em
