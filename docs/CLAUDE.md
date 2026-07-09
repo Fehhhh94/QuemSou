@@ -37,10 +37,12 @@
 - **Fases 0–3 concluídas** e validadas em jogo completo no Z Fold físico
   (Android 16). Baralho editorial: `cards.json` version 2, 60 cards
   (30 `PERSONAGEM_FILME` + 30 `MUNDO_DA_MUSICA`), validado pelo
-  `BaralhoDeAssetsTest`. **115 testes verdes.**
+  `BaralhoDeAssetsTest`. **130 testes verdes.**
+- **Modo Shot entregue** (2026-07-09); validação física no Z Fold pendente
+  — incluir na próxima sessão de jogo.
 - **Fase 5 — EM ANDAMENTO** (Fábrica de Cards com Gemini): sub-fase 5.1
-  concluída (commit `775d866`). **Próximo passo: Modo Shot** (spec em
-  `docs/IMPROVEMENTS.md`), depois a 5.2.
+  concluída (commit `775d866`). **Próximo passo: sub-fase 5.2** (camada
+  Gemini; decisões fechadas em `docs/IMPROVEMENTS.md`).
 - **Fase 4 (Nearby Connections): no backlog**, sem previsão — ver "Backlog".
 - Única decisão de produto em aberto: **nome definitivo do app** ("QuemSou"
   é provisório em código, pacote e strings).
@@ -74,6 +76,16 @@
 - **Placar agregado por grupo** (`Partida.ranking()`, pontos em
   `Grupo.pontos`). **Empate final é declarado, sem desempate**
   (`Partida.vencedores()` retorna todos os empatados na maior pontuação).
+- **Modo Shot** (`RegrasPartida.modoShot`, padrão NÃO; `quantidadeDeShots`
+  1–3, padrão 2): shot é pedágio, não armadilha — quem escolheu o número
+  bebe, toca "Bebi!" e a dica é revelada normalmente; **pontuação intocada**.
+  Posições sorteadas por turno, sem repetição, com seed derivada da seed das
+  dicas com fator próprio (`Partida.seedDosShots` = seed das dicas × 31 + 7).
+  O grid nunca marca a posição antes do toque; o overlay não é dispensável
+  por toque no scrim — só o "Bebi!" avança. A posição pendente sobrevive à
+  morte de processo (`SavedStateHandle`). Paleta âmbar/dourada é EXCLUSIVA
+  do modo (overlay e card do Setup — nada de âmbar no grid). Nota: álcool
+  afeta a classificação etária na Play Store.
 - **Categoria "Livre"** é um filtro: união de todas as categorias, sem cards
   exclusivos. `RepositorioDeCardsLocal.buscarPorCategoria` chama
   `CardDao.buscarTodas()` para `LIVRE`.
@@ -126,18 +138,10 @@
   estrutural ANTES de construir `Card` (8 dicas deve virar violação legível
   na tela de revisão, não exceção do construtor).
 - **Sub-fases**: 5.2 camada Gemini (interface `GeradorDeCards` no domínio +
-  implementação REST na data + tela de configuração da chave) · 5.3 tela de
-  revisão (gerados → validados → fila de pendentes → aprovar/rejeitar →
-  aprovados entram no Room por categoria) · 5.4 validação ponta a ponta no
-  Z Fold.
-- **Modo Shot (implementar antes da 5.2; spec em `docs/IMPROVEMENTS.md`)**:
-  shot é pedágio, não armadilha — quem escolheu o número bebe, toca "Bebi!"
-  e a dica aparece; pontuação intocada. `modoShot: Boolean = false` +
-  `quantidadeDeShots: Int = 2` (1–3) em `RegrasPartida`; posições sorteadas
-  por seed derivada da fórmula existente com fator próprio; grid não marca a
-  posição antes do toque; overlay "🥃 UM SHOT!" com nome de quem bebe, insets
-  via `BarraDeAcaoInferior`. Nota: álcool afeta a classificação etária na
-  Play Store.
+  implementação REST na data + tela de configuração da chave; decisões
+  fechadas em `docs/IMPROVEMENTS.md`) · 5.3 tela de revisão (gerados →
+  validados → fila de pendentes → aprovar/rejeitar → aprovados entram no
+  Room por categoria) · 5.4 validação ponta a ponta no Z Fold.
 
 ## Backlog
 

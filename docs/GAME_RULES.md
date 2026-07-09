@@ -45,6 +45,25 @@ código deve estar registrada aqui.
   **10ª dica sem acerto** (queima automaticamente). O fim de turno é anunciado
   com a **resposta revelada**, as dicas usadas e os pontos de cada um.
 
+## Modo Shot (regra opcional)
+
+- Configurável por partida: `RegrasPartida.modoShot`, padrão **NÃO**;
+  quantidade em `RegrasPartida.quantidadeDeShots` (**1 a 3**, padrão **2**).
+- Com o modo ligado, cada turno tem `quantidadeDeShots` posições do grid com
+  shot, sorteadas **sem repetição** e de forma determinística: a seed dos
+  shots deriva da seed das dicas com um **fator próprio**
+  (`Partida.seedDosShots` = seed das dicas × 31 + 7) — mesma partida, mesmas
+  posições, independentes do embaralhamento das dicas do mesmo turno.
+- O shot é **pedágio, não armadilha**: quem escolheu a posição bebe, toca
+  "Bebi!" e a dica é revelada **normalmente**. A **pontuação não muda em
+  nada** — 11 − N, os pontos do leitor e a invariante dos 10 pontos por turno
+  seguem exatamente iguais.
+- O grid **nunca marca** a posição com shot antes do toque — surpresa,
+  coerente com o grid às cegas.
+- Quem bebe: **sempre quem escolheu o número**, sem exceções.
+- 🔞 Modo para maiores de idade. Beba com responsabilidade — vale combinar
+  shot sem álcool.
+
 ## Pontuação (especificação v3 — "cabo de guerra")
 
 - Quem acerta tendo usado **N** dicas (N de 1 a 10) ganha **11 − N** pontos:

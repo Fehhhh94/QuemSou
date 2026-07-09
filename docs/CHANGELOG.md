@@ -2,6 +2,39 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Modo Shot — shot como pedágio no grid (2026-07-09)
+
+Melhoria pré-5.2, implementada a partir da spec registrada em
+`docs/IMPROVEMENTS.md` (agora marcada como entregue). Antes: nenhuma regra de
+bebida no jogo. Depois: modo opcional em que algumas posições do grid pedem um
+shot antes de revelar a dica — pedágio, não armadilha.
+
+- **Domínio**: `RegrasPartida.modoShot` (padrão NÃO) +
+  `quantidadeDeShots` (1–3, padrão 2, validado no `init`). `Turno.criar`
+  sorteia as posições com shot (sem repetição, vazio com o modo desligado)
+  com o `EmbaralhadorDeCards` e expõe `temShot(posicao)`; a seed dos shots
+  continua o polinômio existente com fator próprio (`Partida.seedDosShots` =
+  seed das dicas × 31 + 7) — determinística, independente do grid de dicas e
+  diferente a cada rodada. A máquina de estados do turno e a pontuação não
+  mudaram em nada (invariante dos 10 pontos coberta por teste com o modo
+  ligado).
+- **UI**: nova fase `SHOT` como estado do `PartidaUiState` (nunca rota) —
+  overlay "🥃 UM SHOT!" com o nome de quem bebe (sempre o escolhedor da vez)
+  sobre scrim escuro que não dispensa por toque; só o "Bebi!" revela a dica,
+  normalmente. Voltar segue a confirmação de abandono da partida. Setup
+  ganhou o card do Modo Shot com borda âmbar sutil (única regra 18+):
+  toggle, stepper 1–3 e nota de responsabilidade. Paleta âmbar/dourada
+  exclusiva do modo; insets via `BarraDeAcaoInferior`.
+- **Morte de processo**: a posição pendente do shot é salva no
+  `SavedStateHandle` (`estado_shot_pendente`) e a restauração reabre o
+  overlay exatamente onde estava (coberto por teste de ViewModel).
+- **Navegação**: `ConfiguracaoDaPartida` leva `modoShot`/`quantidadeDeShots`
+  com defaults — JSONs antigos seguem decodificáveis.
+- `docs/GAME_RULES.md` ganhou a seção "Modo Shot (regra opcional)".
+- **130 testes verdes** (eram 115; +9 de domínio e +6 de ViewModel).
+- **Validação física no Z Fold: PENDENTE** — incluir na próxima sessão de
+  jogo (caso crítico: dobrar/desdobrar com o overlay do shot aberto).
+
 ### 2026-07-09 — CLAUDE.md v16
 - Guia refatorado: passa a conter apenas o estado atual, em voz imperativa.
 - Histórico de versões (v1–v15) e decisões substituídas movidos para a seção

@@ -1,9 +1,12 @@
 # Improvements
 
-## 🟣 Modo Shot (implementar após a 5.1)
+## ✅ Modo Shot (entregue)
 
-- **Status**: backlog — especificação registrada em 2026-07-09, **não
-  implementar agora**.
+- **Status**: **entregue em 2026-07-09** — regra vigente registrada em
+  `docs/GAME_RULES.md` ("Modo Shot (regra opcional)") e no guia
+  `docs/CLAUDE.md`; detalhes da entrega no `docs/CHANGELOG.md`. Validação
+  física no Z Fold pendente. A especificação original fica abaixo como
+  registro.
 - `RegrasPartida`: `modoShot: Boolean = false` + `quantidadeDeShots: Int = 2`
   (1–3, visível na Configuração só com o toggle ligado).
 - Posições-shot sorteadas por rodada com seed derivada da fórmula existente
