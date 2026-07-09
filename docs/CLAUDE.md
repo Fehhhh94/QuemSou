@@ -75,6 +75,13 @@
   retomada por agora; **Fase 5 (Fábrica de Cards com Gemini) passa a ser o
   próximo passo**, sem depender da Fase 4. Numeração original das fases
   mantida (sem renumeração). Nenhuma mudança de código.
+- **v15** (2026-07-09) — sub-fase 5.1 concluída: régua editorial mecânica
+  extraída do `BaralhoDeAssetsTest` para o domínio puro
+  (`domain/validacao/`: `ValidadorEditorial`, `ResultadoValidacao`,
+  `ViolacaoEditorial`/`RegraEditorial`), refatoração sem mudança de
+  comportamento — o teste do baralho real delega ao validador e os 60 cards
+  continuam passando. Especificação do **Modo Shot** registrada em
+  `docs/IMPROVEMENTS.md` como backlog (após a 5.1). 115 testes verdes.
 
 ## Visão geral
 
@@ -130,10 +137,14 @@
   **desenho da arquitetura da camada Nearby** (anúncio de sala, descoberta,
   sincronização de estado) antes de qualquer prompt de código; validação
   exige 2+ aparelhos físicos — o emulador não serve para testar Nearby.
-- **Fase 5 — próxima a ser trabalhada**: fábrica de cards com Gemini — gera →
-  valida (mesma régua do importador) → tela de revisão → Room. Não depende
-  da Fase 4. A partida em si segue 100% offline; só a geração de cards usa
-  rede.
+- **Fase 5 — em andamento**: fábrica de cards com Gemini — gera → valida
+  (mesma régua do importador) → tela de revisão → Room. Não depende da
+  Fase 4. A partida em si segue 100% offline; só a geração de cards usa
+  rede. **Sub-fase 5.1 concluída** (2026-07-09): régua editorial mecânica no
+  domínio puro (`domain/validacao/ValidadorEditorial` + `ResultadoValidacao`
+  + `ViolacaoEditorial`), a mesma para o teste do baralho real e para a
+  futura validação de cards gerados por IA; violações acumuladas com
+  mensagem em português para a tela de revisão.
 - **Backlog**: Fase 4 — multiplayer local via Nearby Connections (adiada em
   2026-07-09) · salas online à distância (Firebase).
 

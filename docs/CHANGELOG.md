@@ -2,6 +2,33 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Sub-fase 5.1 — régua editorial extraída para o domínio (2026-07-09)
+
+Refatoração sem mudança de comportamento, preparando a Fase 5: as regras
+mecânicas que viviam só dentro do `BaralhoDeAssetsTest` agora são código de
+produção no domínio puro, prontas para validar cards gerados por IA antes da
+revisão humana.
+
+- Novo pacote `domain/validacao/`: `ValidadorEditorial` (classe pura,
+  `validar(card): ResultadoValidacao`), `ResultadoValidacao` (sealed:
+  `Aprovado` | `Reprovado(violacoes)`) e `ViolacaoEditorial` (regra violada
+  — enum `RegraEditorial` —, índice da dica quando aplicável e mensagem em
+  português para a futura tela de revisão). Todas as violações são
+  acumuladas, não só a primeira.
+- Regras por card extraídas do teste, sem inventar nem remover nenhuma:
+  resposta não vazia, nenhuma dica vazia, nenhuma dica contém a resposta
+  (sem diferenciar maiúsculas). A regra estrutural de exatamente 10 dicas
+  continua no construtor de `Card`/`paraDominio()` (um `Card` construído não
+  consegue violá-la); as regras de baralho inteiro (ids únicos, não vazio)
+  continuam como testes do `BaralhoDeAssetsTest`.
+- `BaralhoDeAssetsTest` refatorado para delegar ao `ValidadorEditorial`,
+  falhando com id do card + violações; os 60 cards reais continuam passando.
+- Novo `ValidadorEditorialTest`: card válido aprovado, um caso sintético por
+  regra (conferindo regra + índice da dica) e acúmulo de múltiplas violações.
+- Especificação do **Modo Shot** registrada em `docs/IMPROVEMENTS.md` como
+  backlog (implementar após a 5.1; não implementado).
+- **115 testes verdes** (eram 110; +5 do `ValidadorEditorialTest`).
+
 ## Reprioritização do roadmap — Fase 4 adiada, Fase 5 é o próximo passo (2026-07-09)
 
 Sem mudança de código — apenas documentação (`docs/CLAUDE.md` v14).
