@@ -35,14 +35,19 @@
 ## Estado atual
 
 - **Fases 0–3 concluídas** e validadas em jogo completo no Z Fold físico
-  (Android 16). Baralho editorial: `cards.json` version 2, 60 cards
-  (30 `PERSONAGEM_FILME` + 30 `MUNDO_DA_MUSICA`), validado pelo
-  `BaralhoDeAssetsTest`. **130 testes verdes.**
+  (Android 16). Conteúdo editorial: `cards.json` version 3 com **dois
+  baralhos embarcados FINALIZADOS** — "Cinema Clássico — Edição 1" (30
+  `PERSONAGEM_FILME`) e "Mundo da Música — Edição 1" (30 `MUNDO_DA_MUSICA`)
+  —, validados pelo `BaralhoDeAssetsTest`. **156 testes verdes.**
 - **Modo Shot entregue** (2026-07-09); validação física no Z Fold pendente
   — incluir na próxima sessão de jogo.
-- **Fase 5 — EM ANDAMENTO** (Catálogo de Baralhos): sub-fase 5.1 concluída
-  (commit `775d866` — `ValidadorEditorial`, hoje a régua da fábrica
-  interna). **Próximo passo: sub-fase 5A** (catálogo estático de baralhos).
+- **Fase 5 — EM ANDAMENTO** (Catálogo de Baralhos): 5.1 concluída
+  (`ValidadorEditorial`, régua da fábrica interna); **5A parte 1 concluída**
+  (2026-07-09: entidade Baralho + Room v2 + formato do catálogo + seleção
+  por baralhos, com o Setup traduzindo os chips de categoria nos baralhos
+  embarcados — ponte transitória `BaralhosEmbarcados`). **Próximo passo:
+  5A parte 2 (UI do catálogo)** — tela de listar/baixar/atualizar com selos
+  de estado e seleção múltipla real no Setup.
 - **Fase 4 (Nearby Connections): no backlog**, sem previsão — ver "Backlog".
 - Única decisão de produto em aberto: **nome definitivo do app** ("QuemSou"
   é provisório em código, pacote e strings).
@@ -86,9 +91,17 @@
   morte de processo (`SavedStateHandle`). Paleta âmbar/dourada é EXCLUSIVA
   do modo (overlay e card do Setup — nada de âmbar no grid). Nota: álcool
   afeta a classificação etária na Play Store.
-- **Categoria "Livre"** é um filtro: união de todas as categorias, sem cards
-  exclusivos. `RepositorioDeCardsLocal.buscarPorCategoria` chama
-  `CardDao.buscarTodas()` para `LIVRE`.
+- **Seleção por baralhos**: a partida usa 1+ baralhos
+  (`ConfiguracaoDaPartida.baralhos`, lista de ids); o monte é a união dos
+  cards deles. Categoria é **metadado do baralho** (etiqueta/filtro visual),
+  herdada pelos cards; o espírito da "Livre" sobrevive como "selecionar
+  todos os baralhos" (`CardCategory.LIVRE` segue no enum só para a UI
+  transitória do Setup — nenhum baralho a usa).
+- **União determinística** (`Baralho.uniaoDeterministica`): os cards dos
+  baralhos selecionados são ordenados por chave estável — id do baralho, id
+  do card — ANTES do `EmbaralhadorDeCards`. Mesma seleção + mesma seed →
+  mesmo monte, independente da ordem de download/inserção no Room. Ids de
+  baralho e de card são imutáveis para sempre (são a chave).
 - **`reiniciarPartida`** (no `PlacarFinal`): gera seed nova para os mesmos
   jogadores/regras/categoria e reembaralha do zero — botão "Jogar de novo".
 
@@ -124,10 +137,12 @@
 
 - **Catálogo estático de baralhos**: o app consome baralhos curados de um
   catálogo hospedado estaticamente (ex.: GitHub raw/releases) — um arquivo
-  índice JSON + um JSON por baralho. Sem servidor, sem Firebase, sem chave
-  de API no app. A tela de catálogo lista, baixa e atualiza baralhos; o
-  import usa o mecanismo de versionamento do `CardsImporter`. A partida
-  segue 100% offline — rede só na tela de catálogo.
+  índice JSON + um JSON por baralho, formato em `docs/CATALOG_FORMAT.md`,
+  parse e validação estrutural com violações legíveis no `ParserDoCatalogo`
+  (`data/catalogo/`). Sem servidor, sem Firebase, sem chave de API no app.
+  A tela de catálogo lista, baixa e atualiza baralhos; o import usa o
+  mecanismo de versionamento do `CardsImporter`. A partida segue 100%
+  offline — rede só na tela de catálogo.
 - **Baralho** (modelo de conteúdo): pertence a uma categoria existente e
   agrupa cards tematicamente (ex.: `PERSONAGEM_FILME` → "Harry Potter").
   Máximo de **100 cards por baralho**; crescimento além disso vira baralho
@@ -191,6 +206,8 @@
   e versões deste guia.
 - `docs/BUGS.md` / `docs/IMPROVEMENTS.md` — bugs conhecidos e melhorias.
 - `docs/CARDS_GUIDE.md` — guia de criação de cards.
+- `docs/CATALOG_FORMAT.md` — formato dos JSONs do catálogo de baralhos
+  (índice, baralho e envelope de `assets/cards.json`).
 - **Regra de manutenção deste arquivo**: só estado atual, em voz imperativa.
   Ao substituir uma decisão, a antiga é **apagada daqui** e o "antes/depois"
   vai para o `CHANGELOG.md`. Nada de "RESOLVIDA (substitui X)" — a regra

@@ -92,12 +92,18 @@ código deve estar registrada aqui.
 
 ## Partida
 
-- **Categoria**: filtra o baralho da partida — Personagem de filme, Mundo da
-  música, ou Livre (união de todas as categorias; não há cards exclusivos de
-  Livre).
+- **Baralhos**: a partida usa **1 ou mais baralhos** do catálogo, escolhidos
+  na configuração; o monte da partida é a **união dos cards** dos baralhos
+  selecionados. A categoria (Personagem de filme, Mundo da música) é
+  **metadado do baralho** — etiqueta/filtro visual, herdada pelos cards. O
+  espírito da antiga "Livre" sobrevive como "selecionar todos os baralhos".
+- **União determinística**: os cards da união são ordenados por chave
+  estável — id do baralho, depois id do card — **antes** do embaralhamento
+  por seed. Mesma seleção + mesmo código → mesmo monte, em qualquer aparelho
+  e em qualquer ordem de download/instalação dos baralhos.
 - A partida tem um número configurável de rodadas (`RegrasPartida.numeroDeRodadas`,
   padrão 5).
-- O baralho é embaralhado de forma determinística a partir do código da partida
+- O monte é embaralhado de forma determinística a partir do código da partida
   (ex.: "LOBO"), como embaralhamento interno do anfitrião (Fase 4 — Nearby
   Connections); veja `docs/CLAUDE.md` para a arquitetura de multiplayer.
 

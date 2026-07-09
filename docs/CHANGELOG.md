@@ -2,6 +2,54 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fase 5A parte 1 — entidade Baralho e seleção por baralhos (2026-07-09)
+
+Primeira metade da 5A: domínio, Room e formato do catálogo. Sem UI nova —
+comportamento visível idêntico ao anterior; a tela de catálogo e a seleção
+múltipla real ficam para a parte 2.
+
+- **Antes**: a partida era montada por **categoria**
+  (`ConfiguracaoDaPartida.categoria`; LIVRE = todas via
+  `CardDao.buscarTodas()`), com os cards numa lista plana de
+  `assets/cards.json` version 2.
+- **Depois**: a partida é montada por **baralhos** (1+):
+  `ConfiguracaoDaPartida.baralhos` (lista de ids),
+  `RepositorioDeCards.buscarPorIds` e monte =
+  `Baralho.uniaoDeterministica` — a união dos cards ordenada por chave
+  estável (id do baralho, id do card) ANTES do embaralhamento por seed, com
+  teste explícito de que ordens de inserção diferentes geram o mesmo monte.
+  Categoria virou **metadado do baralho** (herdada pelos cards); o espírito
+  da "Livre" sobrevive como "selecionar todos os baralhos".
+- **Domínio**: novo `Baralho` (id estável, nome, categoria, versão, estado
+  `EM_DESENVOLVIMENTO`/`FINALIZADO`, cards; contagem derivada) e
+  `ValidadorDeBaralho` (violação legível acumulada, filosofia do
+  `ValidadorEditorial`): não vazio, **teto de 100 cards**, ids únicos,
+  categoria real (nunca LIVRE), card com a categoria do baralho.
+  `Partida.baralho` renomeada para `Partida.monte` (colisão com a entidade).
+- **Formato do catálogo** (`docs/CATALOG_FORMAT.md`): índice JSON (id, nome,
+  categoria, versão, estado, contagem, url, descrição) + JSON por baralho
+  (metadados + cards **sem** `category` — herdada). `ParserDoCatalogo` com
+  validação estrutural ANTES de construir domínio (8 dicas → violação
+  legível com caminho, não exceção) — resolve a lacuna registrada para o
+  JSON do Gemini.
+- **Room v2**: tabela `baralhos` + `baralhoId` (FK com cascade, índice) em
+  `cards`; migração 1→2 recria `cards` preservando os 60 cards da v1
+  atribuídos aos dois baralhos pela categoria; SQL conferido contra o schema
+  exportado `2.json`.
+- **Assets**: `cards.json` version 3 — os 60 cards viram dois baralhos
+  embarcados **FINALIZADOS**: "Cinema Clássico — Edição 1"
+  (`cinema-classico-1`, 30 `PERSONAGEM_FILME`) e "Mundo da Música —
+  Edição 1" (`mundo-da-musica-1`, 30 `MUNDO_DA_MUSICA`). `CardsImporter`
+  valida cada baralho pelo parser (falha ruidosa com violações legíveis) e
+  recarrega as duas tabelas; `BaralhoDeAssetsTest` valida por baralho,
+  incluindo o teto de 100.
+- **Ponte transitória**: o Setup mantém os chips de categoria e os traduz
+  nos ids embarcados (`BaralhosEmbarcados`; LIVRE = os dois) — some na
+  parte 2, quando entra a seleção múltipla real.
+- **156 testes verdes** (eram 130) — novos de domínio (Baralho e união),
+  validador, parser e importador; os antigos adaptados ao modelo de
+  baralhos (o determinismo por seed e todas as regras de jogo intactos).
+
 ## Reestruturação da Fase 5 — fábrica no app → Catálogo de Baralhos (2026-07-09)
 
 Decisão de produto, sem mudança de código — apenas documentação
