@@ -3,6 +3,7 @@ package com.quemsou.app.presentation.game
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.EstadoDoTurno
 import com.quemsou.app.domain.model.Grupo
@@ -38,8 +39,9 @@ import kotlinx.coroutines.launch
  * por grupo, fase da UI, posições reveladas na ordem, o acertador do anúncio e
  * a posição de shot pendente (Modo Shot — a posição tocada ainda não foi
  * revelada, então não é derivável das revelações salvas). Todo o
- * resto é reconstruído por determinismo: o baralho, o grid e as posições com
- * shot de cada turno derivam da seed do código ([ConfiguracaoDaPartida], que
+ * resto é reconstruído por determinismo: o monte (união determinística dos
+ * baralhos selecionados), o grid e as posições com shot de cada turno derivam
+ * da seed do código ([ConfiguracaoDaPartida], que
  * chega pelo argumento da rota e já sobrevive no `SavedStateHandle`), e o
  * rodízio de leitor e de escolhedor deriva da rodada e das posições reveladas
  * — reexecutar as revelações na ordem salva devolve o turno exatamente ao
@@ -69,7 +71,7 @@ class PartidaViewModel @Inject constructor(
     private lateinit var configuracao: ConfiguracaoDaPartida
     private lateinit var jogadoresBase: List<Jogador>
     private lateinit var gruposBase: List<Grupo>
-    private lateinit var cardsDisponiveis: List<Card>
+    private lateinit var baralhosSelecionados: List<Baralho>
     private var turno: Turno? = null
 
     init {
@@ -217,7 +219,7 @@ class PartidaViewModel @Inject constructor(
                 modoShot = configuracao.modoShot,
                 quantidadeDeShots = configuracao.quantidadeDeShots,
             ),
-            cardsDisponiveis = cardsDisponiveis,
+            baralhosSelecionados = baralhosSelecionados,
             grupos = gruposBase,
         )
         turno = null
@@ -244,7 +246,7 @@ class PartidaViewModel @Inject constructor(
             Jogador(id = "j${indice + 1}", nome = jogador.nome)
         }
         gruposBase = montarGrupos()
-        cardsDisponiveis = repositorioDeCards.buscarPorCategoria(configuracao.categoria)
+        baralhosSelecionados = repositorioDeCards.buscarPorIds(configuracao.baralhos)
         val base = CriarPartida.executar(
             codigo = configuracao.codigo,
             jogadores = jogadoresBase,
@@ -254,7 +256,7 @@ class PartidaViewModel @Inject constructor(
                 modoShot = configuracao.modoShot,
                 quantidadeDeShots = configuracao.quantidadeDeShots,
             ),
-            cardsDisponiveis = cardsDisponiveis,
+            baralhosSelecionados = baralhosSelecionados,
             grupos = gruposBase,
         )
         restaurar(base)

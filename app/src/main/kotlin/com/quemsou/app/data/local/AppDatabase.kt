@@ -7,13 +7,17 @@ import androidx.room.TypeConverters
 /**
  * Banco de dados Room do QuemSou.
  *
- * O conteúdo da tabela `cards` é um espelho de `assets/cards.json`, recarregado
- * pelo `CardsImporter` quando a versão do asset avança — por isso o schema pode
- * evoluir com migrações simples ou destrutivas sem perda de dados do jogador.
+ * O conteúdo das tabelas `baralhos` e `cards` é um espelho dos baralhos
+ * embarcados em `assets/cards.json` (e, na 5A parte 2, dos baixados do
+ * catálogo), recarregado pelo `CardsImporter` quando a versão do asset avança
+ * — por isso o schema pode evoluir com migrações simples sem perda de dados
+ * do jogador.
  */
-@Database(entities = [CardEntity::class], version = 1, exportSchema = true)
+@Database(entities = [BaralhoEntity::class, CardEntity::class], version = 2, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun baralhoDao(): BaralhoDao
 
     abstract fun cardDao(): CardDao
 }

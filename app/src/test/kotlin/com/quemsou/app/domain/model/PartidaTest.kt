@@ -13,7 +13,7 @@ class PartidaTest {
         Jogador(id = "j${indice + 1}", nome = "Jogador ${indice + 1}")
     }
 
-    private fun baralho(tamanho: Int) = List(tamanho) { indice ->
+    private fun cards(quantidade: Int) = List(quantidade) { indice ->
         Card(
             id = "card-${indice + 1}",
             type = CardType.COISA,
@@ -33,7 +33,7 @@ class PartidaTest {
         return Partida(
             jogadores = jogadores,
             regras = regras,
-            baralho = baralho(rodadas),
+            monte = cards(rodadas),
             seed = 42L,
             grupos = grupos ?: Grupo.individuais(jogadores),
         )
@@ -45,7 +45,7 @@ class PartidaTest {
         return Partida(
             jogadores = jogadores,
             regras = RegrasPartida(numeroDeRodadas = rodadas),
-            baralho = baralho(rodadas),
+            monte = cards(rodadas),
             seed = 42L,
             grupos = listOf(
                 Grupo.criar(id = "g1", membros = listOf(jogadores[0], jogadores[1])),
@@ -298,12 +298,12 @@ class PartidaTest {
     }
 
     @Test
-    fun `baralho menor que o total de rodadas e rejeitado`() {
+    fun `monte menor que o total de rodadas e rejeitado`() {
         assertThrows(IllegalArgumentException::class.java) {
             Partida(
                 jogadores = jogadores(2),
                 regras = RegrasPartida(numeroDeRodadas = 5),
-                baralho = baralho(4),
+                monte = cards(4),
                 seed = 42L,
             )
         }

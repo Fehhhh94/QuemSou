@@ -1,26 +1,44 @@
 package com.quemsou.app.data.local
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * Linha da tabela `cards` — representação persistida de um card.
+ * Linha da tabela `cards` — representação persistida de um card. Todo card
+ * pertence a exatamente um baralho ([baralhoId], FK para [BaralhoEntity]).
  *
  * [type] e [category] guardam o `name` dos enums de domínio; [clues] é
  * serializada como JSON string via [Converters]. A conversão de/para o modelo
- * de domínio vive em `CardEntityMapper`.
+ * de domínio vive em `CardEntityMapper`. [category] é denormalizada da
+ * categoria do baralho (herdada) para o mapeamento não exigir join.
  *
  * @property id identificador único do card (chave primária).
  * @property type nome do [com.quemsou.app.domain.model.CardType].
  * @property category nome da [com.quemsou.app.domain.model.CardCategory].
  * @property answer resposta secreta do card.
  * @property clues dicas na ordem de revelação.
+ * @property baralhoId id do baralho dono do card; apagar o baralho apaga os
+ *   cards em cascata.
  */
-@Entity(tableName = "cards")
+@Entity(
+    tableName = "cards",
+    foreignKeys = [
+        ForeignKey(
+            entity = BaralhoEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["baralhoId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+    indices = [Index("baralhoId")],
+)
 data class CardEntity(
     @PrimaryKey val id: String,
     val type: String,
     val category: String,
     val answer: String,
     val clues: List<String>,
+    val baralhoId: String,
 )

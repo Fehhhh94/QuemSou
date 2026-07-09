@@ -1,9 +1,11 @@
 package com.quemsou.app.presentation.game
 
 import androidx.lifecycle.SavedStateHandle
+import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.CardType
+import com.quemsou.app.domain.model.EstadoDoBaralho
 import com.quemsou.app.domain.repository.RepositorioDeCards
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.navigation.JogadorConfigurado
@@ -19,19 +21,30 @@ class PartidaViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private class RepositorioFake(private val cards: List<Card>) : RepositorioDeCards {
-        override suspend fun buscarPorCategoria(categoria: CardCategory) = cards
+    private class RepositorioFake(private val baralhos: List<Baralho>) : RepositorioDeCards {
+        override suspend fun buscarPorIds(ids: List<String>) = baralhos.filter { it.id in ids }
     }
 
     private fun cards(quantidade: Int = 10) = List(quantidade) { indice ->
         Card(
             id = "card-${indice + 1}",
             type = CardType.PESSOA,
-            category = CardCategory.LIVRE,
+            category = CardCategory.PERSONAGEM_FILME,
             answer = "Resposta ${indice + 1}",
             clues = List(Card.QUANTIDADE_DE_DICAS) { "Dica ${it + 1} do card ${indice + 1}" },
         )
     }
+
+    private fun baralhos() = listOf(
+        Baralho(
+            id = "b1",
+            nome = "Baralho de Teste",
+            categoria = CardCategory.PERSONAGEM_FILME,
+            versao = 1,
+            estado = EstadoDoBaralho.FINALIZADO,
+            cards = cards(),
+        ),
+    )
 
     private fun configuracao(
         nomes: List<String> = listOf("Ana", "Bia", "Caio"),
@@ -42,7 +55,7 @@ class PartidaViewModelTest {
         quantidadeDeShots: Int = 2,
     ) = ConfiguracaoDaPartida(
         codigo = "LOBO",
-        categoria = CardCategory.LIVRE,
+        baralhos = listOf("b1"),
         numeroDeRodadas = rodadas,
         leitorPontua = leitorPontua,
         modoShot = modoShot,
@@ -58,7 +71,7 @@ class PartidaViewModelTest {
     private fun viewModel(
         configuracao: ConfiguracaoDaPartida = configuracao(),
         handle: SavedStateHandle = handleDe(configuracao),
-    ) = PartidaViewModel(handle, RepositorioFake(cards()))
+    ) = PartidaViewModel(handle, RepositorioFake(baralhos()))
 
     @Test
     fun `partida completa por eventos ate o placar final`() {
@@ -183,7 +196,7 @@ class PartidaViewModelTest {
     @Test
     fun `morte de processo restaura a mesma fase, posicoes e placar`() {
         val handle = handleDe(configuracao())
-        val antes = PartidaViewModel(handle, RepositorioFake(cards()))
+        val antes = PartidaViewModel(handle, RepositorioFake(baralhos()))
 
         // Rodada 1 completa (Bia acerta com 2 dicas: acertador +9, leitor +1) e metade da rodada 2.
         antes.iniciarTurno()
@@ -199,7 +212,7 @@ class PartidaViewModelTest {
         val estadoAntes = antes.uiState.value as PartidaUiState.Grid
 
         // "Morte de processo": novo ViewModel com o mesmo SavedStateHandle.
-        val depois = PartidaViewModel(handle, RepositorioFake(cards()))
+        val depois = PartidaViewModel(handle, RepositorioFake(baralhos()))
 
         assertEquals(estadoAntes, depois.uiState.value)
 
@@ -219,7 +232,7 @@ class PartidaViewModelTest {
     fun `placar final agrega os pontos por grupo com grupos mistos`() {
         // "Ana & Bia" num grupo; Caio solo — grupos mistos na mesma partida.
         val handle = handleDe(configuracao(grupos = listOf("g1", "g1", null)))
-        val viewModel = PartidaViewModel(handle, RepositorioFake(cards()))
+        val viewModel = PartidaViewModel(handle, RepositorioFake(baralhos()))
 
         // Rodada 1 (leitora Ana): Bia acerta na 1ª dica → grupo "Ana & Bia" +10.
         viewModel.iniciarTurno()
@@ -229,7 +242,7 @@ class PartidaViewModelTest {
         viewModel.proximoTurno()
 
         // Morte de processo entre as rodadas: os pontos por grupo sobrevivem.
-        val restaurado = PartidaViewModel(handle, RepositorioFake(cards()))
+        val restaurado = PartidaViewModel(handle, RepositorioFake(baralhos()))
 
         // Rodada 2 (leitora Bia): Caio acerta na 2ª dica → Caio +9 e a
         // leitora Bia +1 — o ponto da leitora vai para o grupo "Ana & Bia".
@@ -317,13 +330,13 @@ class PartidaViewModelTest {
     @Test
     fun `morte de processo com o overlay do shot aberto restaura o overlay`() {
         val handle = handleDe(configuracao(modoShot = true, quantidadeDeShots = 3))
-        val antes = PartidaViewModel(handle, RepositorioFake(cards()))
+        val antes = PartidaViewModel(handle, RepositorioFake(baralhos()))
         antes.iniciarTurno()
         val overlayAntes = antes.tocarAteAbrirUmShot()
 
         // "Morte de processo": novo ViewModel com o mesmo SavedStateHandle
         // volta EXATAMENTE ao overlay — posição pendente e bebedor incluídos.
-        val depois = PartidaViewModel(handle, RepositorioFake(cards()))
+        val depois = PartidaViewModel(handle, RepositorioFake(baralhos()))
         assertEquals(overlayAntes, depois.uiState.value)
 
         // E o fluxo segue dali: o "Bebi!" revela a mesma posição pendente.

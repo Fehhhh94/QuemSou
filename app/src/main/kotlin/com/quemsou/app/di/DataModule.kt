@@ -12,7 +12,9 @@ import com.quemsou.app.data.importer.CardsVersionStore
 import com.quemsou.app.data.importer.DataStoreCardsVersionStore
 import com.quemsou.app.data.importer.FonteDeCardsJson
 import com.quemsou.app.data.local.AppDatabase
+import com.quemsou.app.data.local.BaralhoDao
 import com.quemsou.app.data.local.CardDao
+import com.quemsou.app.data.local.MIGRACAO_1_2
 import com.quemsou.app.domain.repository.RepositorioDeCards
 import dagger.Binds
 import dagger.Module
@@ -44,7 +46,12 @@ abstract class DataModule {
         @Provides
         @Singleton
         fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
-            Room.databaseBuilder(context, AppDatabase::class.java, "quemsou.db").build()
+            Room.databaseBuilder(context, AppDatabase::class.java, "quemsou.db")
+                .addMigrations(MIGRACAO_1_2)
+                .build()
+
+        @Provides
+        fun provideBaralhoDao(database: AppDatabase): BaralhoDao = database.baralhoDao()
 
         @Provides
         fun provideCardDao(database: AppDatabase): CardDao = database.cardDao()

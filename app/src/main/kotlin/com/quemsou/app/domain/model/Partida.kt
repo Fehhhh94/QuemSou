@@ -17,7 +17,8 @@ package com.quemsou.app.domain.model
  * @property jogadores de [MINIMO_DE_JOGADORES] a [MAXIMO_DE_JOGADORES] jogadores, ids únicos,
  *   na ordem de assento — o rodízio de leitor segue essa ordem.
  * @property regras regras configuradas antes da partida.
- * @property baralho cards já embaralhados pela seed; um card por rodada.
+ * @property monte cards da partida (união determinística dos baralhos
+ *   selecionados) já embaralhados pela seed; um card por rodada.
  * @property seed seed da partida (gerada do código); também deriva o
  *   embaralhamento das dicas de cada turno.
  * @property rodadaAtual rodada em jogo, de 1 a [totalDeRodadas].
@@ -30,7 +31,7 @@ package com.quemsou.app.domain.model
 data class Partida(
     val jogadores: List<Jogador>,
     val regras: RegrasPartida,
-    val baralho: List<Card>,
+    val monte: List<Card>,
     val seed: Long,
     val rodadaAtual: Int = 1,
     val indiceDoLeitor: Int = 0,
@@ -48,8 +49,8 @@ data class Partida(
         require(jogadores.map { it.id }.toSet().size == jogadores.size) {
             "Partida com ids de jogador repetidos."
         }
-        require(baralho.size >= totalDeRodadas) {
-            "Baralho tem ${baralho.size} cards para $totalDeRodadas rodadas."
+        require(monte.size >= totalDeRodadas) {
+            "O monte tem ${monte.size} cards para $totalDeRodadas rodadas."
         }
         require(rodadaAtual in 1..totalDeRodadas) {
             "rodadaAtual $rodadaAtual fora de 1..$totalDeRodadas."
@@ -80,7 +81,7 @@ data class Partida(
         }
 
     /**
-     * Monta o turno da rodada atual: card da vez do baralho, leitor da vez,
+     * Monta o turno da rodada atual: card da vez do monte, leitor da vez,
      * os demais jogadores como adivinhadores e o grid de dicas embaralhado
      * por uma seed derivada da seed da partida e da rodada — determinístico
      * em qualquer aparelho.
@@ -88,7 +89,7 @@ data class Partida(
     fun iniciarTurno(): Turno {
         check(!encerrada) { "A partida já foi encerrada." }
         return Turno.criar(
-            card = baralho[rodadaAtual - 1],
+            card = monte[rodadaAtual - 1],
             leitor = leitorDaVez,
             adivinhadores = jogadores.filter { it.id != leitorDaVez.id },
             regras = regras,

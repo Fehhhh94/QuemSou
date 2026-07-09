@@ -7,7 +7,7 @@ import androidx.room.Query
 
 /**
  * Acesso à tabela `cards`. Todas as operações são one-shot (`suspend`);
- * queries observáveis com `Flow` entram quando a UI precisar delas (Fase 3).
+ * queries observáveis com `Flow` entram quando a UI precisar delas.
  */
 @Dao
 interface CardDao {
@@ -20,15 +20,7 @@ interface CardDao {
     @Query("DELETE FROM cards")
     suspend fun limparTabela()
 
-    /** Busca os cards de uma categoria (`name` da [com.quemsou.app.domain.model.CardCategory]). */
-    @Query("SELECT * FROM cards WHERE category = :categoria")
-    suspend fun buscarPorCategoria(categoria: String): List<CardEntity>
-
-    /** Busca todos os cards da tabela. */
-    @Query("SELECT * FROM cards")
-    suspend fun buscarTodas(): List<CardEntity>
-
-    /** Conta quantos cards existem na tabela. */
-    @Query("SELECT COUNT(*) FROM cards")
-    suspend fun contar(): Int
+    /** Busca os cards dos baralhos com os [baralhoIds] informados. */
+    @Query("SELECT * FROM cards WHERE baralhoId IN (:baralhoIds)")
+    suspend fun buscarPorBaralhos(baralhoIds: List<String>): List<CardEntity>
 }

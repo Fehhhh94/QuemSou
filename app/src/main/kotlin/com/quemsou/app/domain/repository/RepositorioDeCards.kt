@@ -1,18 +1,19 @@
 package com.quemsou.app.domain.repository
 
-import com.quemsou.app.domain.model.Card
-import com.quemsou.app.domain.model.CardCategory
+import com.quemsou.app.domain.model.Baralho
 
 /**
- * Fonte dos cards disponíveis para montar o baralho de uma partida.
- * A implementação real lê do banco Room; testes usam fakes em memória.
+ * Fonte dos baralhos disponíveis no aparelho para montar o monte de uma
+ * partida. A implementação real lê do banco Room; testes usam fakes em
+ * memória.
  */
 interface RepositorioDeCards {
 
     /**
-     * Cards da [categoria] informada. [CardCategory.LIVRE] é um filtro-união:
-     * retorna os cards de todas as categorias (decisão registrada em
-     * docs/GAME_RULES.md — não existem cards exclusivos de LIVRE).
+     * Baralhos dos [ids] informados, cada um com os seus cards. Ids
+     * desconhecidos são ignorados; a ordem do retorno não é garantida — quem
+     * monta o monte é [Baralho.uniaoDeterministica], que ordena por chave
+     * estável.
      */
-    suspend fun buscarPorCategoria(categoria: CardCategory): List<Card>
+    suspend fun buscarPorIds(ids: List<String>): List<Baralho>
 }

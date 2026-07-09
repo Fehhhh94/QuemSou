@@ -1,40 +1,62 @@
 package com.quemsou.app.data.importer
 
+import com.quemsou.app.data.catalogo.ParserDoCatalogo
+import com.quemsou.app.data.catalogo.ResultadoDoParse
+import com.quemsou.app.domain.model.Baralho
+import com.quemsou.app.domain.model.CardCategory
+import com.quemsou.app.domain.model.EstadoDoBaralho
 import com.quemsou.app.domain.validacao.ResultadoValidacao
 import com.quemsou.app.domain.validacao.ValidadorEditorial
+import com.quemsou.app.presentation.setup.BaralhosEmbarcados
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Valida o baralho real de `app/src/main/assets/cards.json` — garante que o
- * conteúdo editorial nunca quebra o app em runtime. As regras por card são
- * as do [ValidadorEditorial] (a mesma régua que a Fase 5 usará para cards
- * gerados por IA); a conversão do importador ([paraDominio]) cobre as regras
- * estruturais (10 dicas etc.) e este teste mantém as regras de baralho
- * inteiro (ids únicos, não vazio). O working directory dos testes JVM é o
+ * Valida os baralhos reais embarcados em `app/src/main/assets/cards.json` —
+ * garante que o conteúdo editorial nunca quebra o app em runtime. Cada
+ * baralho passa pela validação completa do [ParserDoCatalogo] (estrutura +
+ * `ValidadorDeBaralho`: teto de 100, ids únicos, categoria herdada) e cada
+ * card pela régua do [ValidadorEditorial] — as mesmas réguas da fábrica
+ * interna e do download do catálogo. O working directory dos testes JVM é o
  * diretório do módulo `app`, por isso o caminho relativo.
  */
 class BaralhoDeAssetsTest {
 
-    private val baralho: CardsJson by lazy {
+    private val cardsJson: CardsJson by lazy {
         CardsJson.deJson(File("src/main/assets/cards.json").readText())
     }
 
-    private val validador = ValidadorEditorial()
+    private val parser = ParserDoCatalogo()
 
-    @Test
-    fun `todos os cards do baralho real passam na validacao de importacao`() {
-        baralho.cards.forEach { it.paraDominio() }
+    private val baralhos: List<Baralho> by lazy {
+        cardsJson.baralhos.map { baralhoJson ->
+            when (val resultado = parser.validarBaralho(baralhoJson)) {
+                is ResultadoDoParse.Sucesso -> resultado.valor
+                is ResultadoDoParse.Falha -> throw AssertionError(
+                    "Baralho '${baralhoJson.id}' inválido: " +
+                        resultado.violacoes.joinToString("; ") { it.mensagem },
+                )
+            }
+        }
     }
 
     @Test
-    fun `todos os cards do baralho real passam na regua editorial`() {
-        val reprovados = baralho.cards.mapNotNull { cardJson ->
-            val resultado = validador.validar(cardJson.paraDominio())
-            (resultado as? ResultadoValidacao.Reprovado)
-                ?.let { reprovado -> cardJson.id to reprovado.violacoes.map { it.mensagem } }
+    fun `todos os baralhos embarcados passam na validacao completa do parser`() {
+        // Estrutura + ValidadorDeBaralho (teto de 100, ids únicos por
+        // baralho, categoria real e herdada) — materializar a lista valida.
+        assertEquals(2, baralhos.size)
+    }
+
+    @Test
+    fun `todos os cards de todos os baralhos passam na regua editorial`() {
+        val validador = ValidadorEditorial()
+        val reprovados = baralhos.flatMap { baralho ->
+            baralho.cards.mapNotNull { card ->
+                (validador.validar(card) as? ResultadoValidacao.Reprovado)
+                    ?.let { reprovado -> card.id to reprovado.violacoes.map { it.mensagem } }
+            }
         }
 
         assertTrue(
@@ -45,14 +67,40 @@ class BaralhoDeAssetsTest {
     }
 
     @Test
-    fun `ids do baralho real sao unicos`() {
-        val ids = baralho.cards.map { it.id }
+    fun `os dois baralhos embarcados sao os esperados, finalizados e com 30 cards cada`() {
+        val porId = baralhos.associateBy { it.id }
 
-        assertEquals(ids.size, ids.toSet().size)
+        val cinema = requireNotNull(porId[BaralhosEmbarcados.CINEMA_CLASSICO_1])
+        assertEquals("Cinema Clássico — Edição 1", cinema.nome)
+        assertEquals(CardCategory.PERSONAGEM_FILME, cinema.categoria)
+        assertEquals(EstadoDoBaralho.FINALIZADO, cinema.estado)
+        assertEquals(30, cinema.quantidadeDeCards)
+
+        val musica = requireNotNull(porId[BaralhosEmbarcados.MUNDO_DA_MUSICA_1])
+        assertEquals("Mundo da Música — Edição 1", musica.nome)
+        assertEquals(CardCategory.MUNDO_DA_MUSICA, musica.categoria)
+        assertEquals(EstadoDoBaralho.FINALIZADO, musica.estado)
+        assertEquals(30, musica.quantidadeDeCards)
     }
 
     @Test
-    fun `baralho real nao esta vazio`() {
-        assertTrue(baralho.cards.isNotEmpty())
+    fun `ids de baralho sao unicos e ids de card sao unicos no conjunto embarcado`() {
+        val idsDeBaralho = baralhos.map { it.id }
+        assertEquals(idsDeBaralho.size, idsDeBaralho.toSet().size)
+
+        // Únicos por baralho já é regra do ValidadorDeBaralho; no conjunto
+        // embarcado inteiro é qualidade de asset (evita confusão na revisão).
+        val idsDeCard = baralhos.flatMap { baralho -> baralho.cards.map { it.id } }
+        assertEquals(idsDeCard.size, idsDeCard.toSet().size)
+    }
+
+    @Test
+    fun `nenhum baralho embarcado passa do teto de cards`() {
+        baralhos.forEach { baralho ->
+            assertTrue(
+                "Baralho '${baralho.id}' tem ${baralho.quantidadeDeCards} cards (teto ${Baralho.MAXIMO_DE_CARDS}).",
+                baralho.quantidadeDeCards <= Baralho.MAXIMO_DE_CARDS,
+            )
+        }
     }
 }

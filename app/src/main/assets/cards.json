@@ -1,1084 +1,1042 @@
 {
-  "version": 2,
-  "cards": [
+  "version": 3,
+  "baralhos": [
     {
-      "id": "pf_001",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Harry Potter",
-      "clues": [
-        "Minha história começa numa noite de tempestade.",
-        "Perdi meus pais ainda muito jovem.",
-        "Fui criado por parentes que não me queriam por perto.",
-        "Vivo debaixo da escada da casa deles.",
-        "Uma carta muda tudo, mas não chega até mim com facilidade.",
-        "Descubro que pertenço a um mundo escondido dos outros.",
-        "Uma cicatriz no meu rosto tem uma história e tanto.",
-        "Ganho amigos leais logo na primeira viagem de trem.",
-        "Um chapéu velho decide onde vou morar.",
-        "Meu esporte favorito se joga voando em vassouras."
+      "id": "cinema-classico-1",
+      "nome": "Cinema Clássico — Edição 1",
+      "categoria": "PERSONAGEM_FILME",
+      "versao": 1,
+      "estado": "FINALIZADO",
+      "cards": [
+        {
+          "id": "pf_001",
+          "type": "PESSOA",
+          "answer": "Harry Potter",
+          "clues": [
+            "Minha história começa numa noite de tempestade.",
+            "Perdi meus pais ainda muito jovem.",
+            "Fui criado por parentes que não me queriam por perto.",
+            "Vivo debaixo da escada da casa deles.",
+            "Uma carta muda tudo, mas não chega até mim com facilidade.",
+            "Descubro que pertenço a um mundo escondido dos outros.",
+            "Uma cicatriz no meu rosto tem uma história e tanto.",
+            "Ganho amigos leais logo na primeira viagem de trem.",
+            "Um chapéu velho decide onde vou morar.",
+            "Meu esporte favorito se joga voando em vassouras."
+          ]
+        },
+        {
+          "id": "pf_002",
+          "type": "PESSOA",
+          "answer": "Darth Vader",
+          "clues": [
+            "Venho de uma galáxia muito, muito distante.",
+            "Uso uma respiração que dá pra ouvir de longe.",
+            "Praticamente todo o meu corpo é mecânico.",
+            "Já fui bom, antes de escolher o lado sombrio.",
+            "Comando uma frota temida em todo o universo.",
+            "Meu capacete nunca sai da minha cabeça.",
+            "Tenho uma ligação de sangue com o herói da história.",
+            "Uma espada de luz é minha arma preferida.",
+            "Minha respiração pesada é praticamente minha marca registrada.",
+            "Descobri tarde demais que meu filho lutava do outro lado."
+          ]
+        },
+        {
+          "id": "pf_003",
+          "type": "PESSOA",
+          "answer": "Sherlock Holmes",
+          "clues": [
+            "Moro na cidade de Londres, num endereço bem específico.",
+            "Tenho um parceiro que registra minhas aventuras por escrito.",
+            "Toco violino quando preciso pensar.",
+            "Uso um cachimbo e um chapéu de caça bem reconhecíveis.",
+            "Reparo em detalhes que ninguém mais nota.",
+            "Tenho um arquiinimigo tão inteligente quanto eu.",
+            "Trabalho como detetive particular, não da polícia oficial.",
+            "Uso a frase \"elementar\" com frequência.",
+            "Meu endereço é Baker Street, número 221B.",
+            "Meu irmão mais velho trabalha para o governo britânico e é ainda mais inteligente do que eu."
+          ]
+        },
+        {
+          "id": "pf_004",
+          "type": "PESSOA",
+          "answer": "Indiana Jones",
+          "clues": [
+            "Adoro chapéus, mas o meu tem estilo próprio.",
+            "Sou professor na maior parte do tempo.",
+            "Tenho medo de cobras.",
+            "Uso um chicote como ferramenta principal.",
+            "Corro de pedras gigantes rolando atrás de mim.",
+            "Procuro relíquias antigas e perdidas pelo mundo.",
+            "Enfrento nazistas em mais de uma aventura.",
+            "Uma arca sagrada é um dos meus achados mais famosos.",
+            "Meu pai também é professor, e nossas brigas em aventura são lendárias.",
+            "Sou o arqueólogo aventureiro interpretado por Harrison Ford."
+          ]
+        },
+        {
+          "id": "pf_005",
+          "type": "PESSOA",
+          "answer": "Forrest Gump",
+          "clues": [
+            "Cresci correndo, literalmente, minha vida inteira.",
+            "Uma caixa de chocolates é uma metáfora que uso bastante.",
+            "Não sou o mais rápido para entender as coisas, mas o coração compensa.",
+            "Corri por motivos que nem eu sabia explicar direito.",
+            "Joguei ping-pong e futebol americano com talento inesperado.",
+            "Minha mãe sempre teve frases sábias pra me ensinar.",
+            "Amei a mesma mulher a vida toda, de longe.",
+            "Um estado do sul dos EUA é onde minha história se passa.",
+            "Ganhei uma medalha por bravura na guerra do Vietnã.",
+            "Minha frase mais famosa é sobre a vida ser como uma caixa de chocolates."
+          ]
+        },
+        {
+          "id": "pf_006",
+          "type": "PESSOA",
+          "answer": "Shrek",
+          "clues": [
+            "Verde não é só a cor da minha pele, é meu estilo de vida.",
+            "Moro num pântano e gosto assim.",
+            "Meu melhor amigo fala demais e tem quatro patas.",
+            "Resgatei uma princesa que escondia um segredo parecido com o meu.",
+            "Ogros são como cebolas: têm camadas.",
+            "Minha história começa com um livro de contos de fadas sendo usado no banheiro.",
+            "Um lorde baixinho invadiu meu pântano de criaturas mágicas.",
+            "Casei e tive filhos que puxaram ao pai.",
+            "Prefiro ficar sozinho, mas a vida insiste em me dar companhia.",
+            "Meu filme ganhou o primeiro Oscar de animação da história."
+          ]
+        },
+        {
+          "id": "pf_007",
+          "type": "PESSOA",
+          "answer": "Dory",
+          "clues": [
+            "Sou dona de uma memória que dura segundos.",
+            "Azul é a minha cor da cabeça ao rabo.",
+            "Falo a língua das baleias — ou pelo menos tento.",
+            "Ajudei um pai desesperado a atravessar o oceano.",
+            "Esquecer é meu maior defeito e minha maior graça.",
+            "\"Continue a nadar\" é meu lema de vida.",
+            "No meu segundo filme, virei a protagonista procurando meus pais.",
+            "Moro no oceano, perto de um recife colorido.",
+            "P. Sherman, 42 Wallaby Way, Sydney — nunca esqueci esse endereço, ironicamente.",
+            "Meu melhor amigo é um peixe-palhaço superprotetor."
+          ]
+        },
+        {
+          "id": "pf_008",
+          "type": "LUGAR",
+          "answer": "Estrela da Morte",
+          "clues": [
+            "Fico numa galáxia distante, mas todo mundo me conhece.",
+            "Sou redonda como uma lua — e já fui confundida com uma.",
+            "Meu tamanho é de assustar: quilômetros e quilômetros de diâmetro.",
+            "Um raio meu pode apagar um planeta inteiro.",
+            "Fui construída duas vezes, e destruída duas vezes também.",
+            "Tenho um ponto fraco pequeno demais para o meu tamanho.",
+            "Um fazendeiro de um planeta deserto causou minha primeira explosão.",
+            "Sou a arma definitiva de um império.",
+            "Milhares de soldados de armadura branca circulam pelos meus corredores.",
+            "\"Isso não é uma lua\" é a frase mais famosa sobre mim."
+          ]
+        },
+        {
+          "id": "pf_009",
+          "type": "COISA",
+          "answer": "O Um Anel (O Senhor dos Anéis)",
+          "clues": [
+            "Sou pequeno, redondo e dourado.",
+            "Quem me carrega por muito tempo nunca sai ileso.",
+            "Fui forjado dentro de uma montanha de fogo.",
+            "Sussurro promessas para quem me possui.",
+            "Deixo invisível quem me veste.",
+            "Um ser corcunda e magrelo me chama de \"precioso\".",
+            "Minha inscrição só aparece quando me esquentam.",
+            "Uma jornada inteira existe só para me destruir.",
+            "Passei décadas perdido no fundo de um lago.",
+            "Hobbits pequenos carregaram um peso que reis não aguentariam: eu."
+          ]
+        },
+        {
+          "id": "pf_010",
+          "type": "PESSOA",
+          "answer": "Capitão América",
+          "clues": [
+            "Sou do Brooklyn e nunca escondi isso.",
+            "Já fui pequeno e fraco, hoje sou símbolo de força.",
+            "Um experimento científico mudou meu corpo para sempre.",
+            "Passei décadas congelado e acordei em outro século.",
+            "Meu escudo é mais famoso que muita arma por aí.",
+            "Lidero uma equipe de heróis que vive salvando o mundo.",
+            "Listras e estrelas fazem parte do meu uniforme.",
+            "Enfrentei um vilão de rosto vermelho na minha primeira guerra.",
+            "Sou considerado o mais certinho do meu grupo — e me orgulho disso.",
+            "Já fui considerado digno de erguer um martelo que quase ninguém consegue."
+          ]
+        },
+        {
+          "id": "pf_011",
+          "type": "PESSOA",
+          "answer": "Buzz Lightyear",
+          "clues": [
+            "Cheguei achando que era um herói espacial de verdade.",
+            "Descobrir que eu era um brinquedo foi minha maior crise existencial.",
+            "Tenho asas, mas por muito tempo achei que voava — na verdade, caio com estilo.",
+            "Meu rival virou meu melhor amigo.",
+            "Aperte um botão em mim e eu solto minha frase de efeito.",
+            "Um comando espacial fictício é meu \"empregador\".",
+            "Pertenço a um menino chamado Andy.",
+            "Meu traje é branco com detalhes verdes e roxos.",
+            "Fui o presente de aniversário que bagunçou a hierarquia do quarto.",
+            "Minha frase mais famosa fala em ir \"ao infinito\" — e mais longe ainda."
+          ]
+        },
+        {
+          "id": "pf_012",
+          "type": "LUGAR",
+          "answer": "Hogwarts",
+          "clues": [
+            "Sou uma escola, mas nenhum aluno chega a mim de ônibus.",
+            "Minhas escadas mudam de lugar quando querem.",
+            "Os quadros nas minhas paredes conversam e visitam uns aos outros.",
+            "Um chapéu decide em qual das minhas quatro casas cada aluno vai morar.",
+            "Fico num castelo escondido em algum lugar da Escócia.",
+            "Meu esporte oficial é jogado no ar.",
+            "Tenho um salão principal cujo teto imita o céu lá fora.",
+            "Alunos chegam a mim por um trem que parte de uma plataforma que não deveria existir.",
+            "Uma floresta proibida faz parte dos meus terrenos.",
+            "Meu diretor mais famoso tem barba longa e adora doces trouxas."
+          ]
+        },
+        {
+          "id": "pf_013",
+          "type": "COISA",
+          "answer": "DeLorean (De Volta para o Futuro)",
+          "clues": [
+            "Sou um carro, mas meu talento não é velocidade... ou melhor, é uma velocidade bem específica.",
+            "Minhas portas abrem para cima, feito asas.",
+            "Preciso atingir 88 milhas por hora para fazer minha mágica.",
+            "Fui inventado por um cientista de cabelo desgrenhado.",
+            "Sou movido a plutônio — depois aprendi a aceitar lixo como combustível.",
+            "Deixo rastros de fogo no chão quando funciono.",
+            "Um painel com três datas é meu coração.",
+            "Levei um adolescente para conhecer os próprios pais jovens.",
+            "Sou um modelo real dos anos 80 que fracassou nas lojas e virou lenda no cinema.",
+            "Viajar no tempo é literalmente minha função."
+          ]
+        },
+        {
+          "id": "pf_014",
+          "type": "PESSOA",
+          "answer": "Jack Sparrow",
+          "clues": [
+            "Ando como se o chão estivesse sempre balançando.",
+            "Meu navio é minha obsessão — e vivo perdendo ele.",
+            "Delineador borrado e dreadlocks fazem parte do meu visual.",
+            "Prefiro fugir com estilo a lutar com honra.",
+            "Uma bússola que não aponta para o norte é meu tesouro.",
+            "Rum é meu combustível favorito, e vivo perguntando por que ele acabou.",
+            "Sou capitão, e faço questão do título mesmo sem navio.",
+            "Já enganei a Marinha Real, piratas amaldiçoados e até a morte.",
+            "Minha primeira aparição icônica é chegando ao porto num barco afundando.",
+            "Meus inimigos incluem um polvo gigante e um capitão com tentáculos no rosto."
+          ]
+        },
+        {
+          "id": "pf_015",
+          "type": "PESSOA",
+          "answer": "Rocky Balboa",
+          "clues": [
+            "Sou da Filadélfia e minha cidade tem uma estátua minha.",
+            "Comecei como cobrador de agiota antes da minha grande chance.",
+            "Subir escadarias virou meu treino mais famoso.",
+            "Bato em carne pendurada como treinamento.",
+            "Meu apelido é \"Garanhão Italiano\".",
+            "Perdi minha primeira grande luta, mas ganhei o mundo.",
+            "Adrian é o nome que grito no meu momento mais famoso.",
+            "Meu treinador rabugento se chamava Mickey.",
+            "Minha história rendeu uma das trilhas sonoras mais motivacionais do cinema.",
+            "Anos depois, virei treinador do filho do meu maior rival e amigo."
+          ]
+        },
+        {
+          "id": "pf_016",
+          "type": "PESSOA",
+          "answer": "Simba",
+          "clues": [
+            "Nasci para ser rei, mas fugi de casa ainda filhote.",
+            "Meu tio armou a maior traição da minha vida.",
+            "Cresci comendo insetos com dois amigos improváveis.",
+            "\"Sem preocupações\" virou minha filosofia por anos.",
+            "A morte do meu pai me marcou — e não foi acidente.",
+            "Uma savana africana é o meu reino.",
+            "Vi o rosto do meu pai refletido nas estrelas e na água.",
+            "Minha apresentação ao mundo foi no alto de uma pedra, erguido por um macaco sábio.",
+            "Voltei adulto para retomar o trono que era meu.",
+            "Sou um leão, e minha história é um clássico da Disney."
+          ]
+        },
+        {
+          "id": "pf_017",
+          "type": "PESSOA",
+          "answer": "Coringa",
+          "clues": [
+            "Meu sorriso é permanente, mas não é de alegria.",
+            "Caos é meu plano favorito — ou a falta de um.",
+            "Gotham me conhece bem demais.",
+            "Sou o arquiinimigo de um herói vestido de morcego.",
+            "Cabelo verde e terno roxo são meu figurino.",
+            "Já fui interpretado por atores que ganharam Oscar no papel.",
+            "Uma risada é minha marca registrada.",
+            "\"Por que tão sério?\" é uma pergunta que fiz e o mundo nunca esqueceu.",
+            "Minha origem muda a cada versão — e eu gosto assim.",
+            "Cartas de baralho têm tudo a ver com meu nome."
+          ]
+        },
+        {
+          "id": "pf_018",
+          "type": "PESSOA",
+          "answer": "E.T.",
+          "clues": [
+            "Vim de longe e fiquei preso na Terra sem querer.",
+            "Um menino me escondeu no quarto dele.",
+            "Meu dedo brilha, e curo machucados com ele.",
+            "Aprendi a falar poucas palavras da língua humana.",
+            "Minha frase mais famosa é um pedido para ligar para casa.",
+            "Uma bicicleta voadora com uma cesta virou cena eterna do cinema por minha causa.",
+            "Me fantasiaram de fantasma para me esconder no Halloween.",
+            "Doces coloridos foram a isca que me atraiu.",
+            "Meu pescoço estica de um jeito nada humano.",
+            "Sou baixinho, enrugado e vim do espaço."
+          ]
+        },
+        {
+          "id": "pf_019",
+          "type": "COISA",
+          "answer": "Titanic",
+          "clues": [
+            "Fui chamado de inafundável — e o destino não gostou da piada.",
+            "Minha primeira viagem também foi a última.",
+            "Parti da Inglaterra rumo a Nova York em 1912.",
+            "Um bloco de gelo mudou minha história para sempre.",
+            "Não havia botes suficientes para todos a bordo.",
+            "Um casal fictício no meu convés fez o mundo inteiro chorar.",
+            "Meu filme levou 11 estatuetas do Oscar.",
+            "A trilha do meu filme tem uma canção da Celine Dion que tocou no mundo inteiro.",
+            "Repouso no fundo do Atlântico até hoje.",
+            "Uma cena na minha proa, de braços abertos, virou símbolo do romance no cinema."
+          ]
+        },
+        {
+          "id": "pf_020",
+          "type": "LUGAR",
+          "answer": "Wakanda",
+          "clues": [
+            "Para o mundo, sou um país pobre e isolado.",
+            "Minha maior riqueza é um metal que caiu do céu.",
+            "Fico na África, mas não me procure no mapa.",
+            "Minha tecnologia é a mais avançada do planeta — em segredo.",
+            "Um rei que veste um traje felino me governa.",
+            "\"Para sempre\" acompanha meu nome num grito de guerra.",
+            "Uma guarda real formada só por mulheres me protege.",
+            "Um campo de força me esconde dos olhos do mundo.",
+            "Panteras têm tudo a ver com meu trono.",
+            "Sou uma nação fictícia do universo Marvel."
+          ]
+        },
+        {
+          "id": "pf_021",
+          "type": "PESSOA",
+          "answer": "Neo (Matrix)",
+          "clues": [
+            "De dia eu era um programador comum; de noite, um hacker.",
+            "Uma escolha entre duas pílulas mudou minha vida.",
+            "Descobri que o mundo em que vivia não era real.",
+            "Desvio de balas em câmera lenta como ninguém.",
+            "Me chamam de \"o Escolhido\".",
+            "Um homem de óculos escuros e terno me persegue — e se multiplica.",
+            "Aprendi kung fu em segundos, baixado direto no cérebro.",
+            "Meu mentor usa óculos sem hastes e acredita em mim mais do que eu mesmo.",
+            "Máquinas usam humanos como baterias no meu mundo.",
+            "Meu nome de batismo é Thomas Anderson."
+          ]
+        },
+        {
+          "id": "pf_022",
+          "type": "PESSOA",
+          "answer": "Elsa (Frozen)",
+          "clues": [
+            "Nasci com um poder que aprendi a esconder.",
+            "Luvas eram minha prisão diária.",
+            "Congelei o verão do meu reino sem querer.",
+            "\"Livre estou\" é o hino da minha libertação.",
+            "Construí um palácio inteiro de gelo em uma noite.",
+            "Minha irmã atravessou uma nevasca para me salvar.",
+            "Um boneco de neve simpático nasceu da minha magia.",
+            "Sou rainha de um reino chamado Arendelle.",
+            "Meu vestido azul virou fantasia de milhões de crianças.",
+            "Um ato de amor verdadeiro descongelou o que eu tinha feito."
+          ]
+        },
+        {
+          "id": "pf_023",
+          "type": "PESSOA",
+          "answer": "Po (Kung Fu Panda)",
+          "clues": [
+            "Sou gordinho, desajeitado e virei lenda.",
+            "Meu pai adotivo é um ganso dono de restaurante de macarrão.",
+            "Fui escolhido como guerreiro por acidente — ou destino.",
+            "Como demais quando fico nervoso, ou seja, sempre.",
+            "Cinco mestres animais duvidaram de mim no começo.",
+            "Um mestre pequeno e vermelho me treinou usando comida.",
+            "O segredo do pergaminho sagrado é que não há segredo.",
+            "Sou um urso em preto e branco, fã número um de artes marciais.",
+            "Meu golpe mais famoso envolve segurar o dedo mindinho do oponente.",
+            "Vim da China, direto para o coração do público."
+          ]
+        },
+        {
+          "id": "pf_024",
+          "type": "LUGAR",
+          "answer": "Jurassic Park (Parque dos Dinossauros)",
+          "clues": [
+            "Sou um parque, mas nenhuma criança deveria ter entrado em mim.",
+            "Minha atração principal foi extinta há 65 milhões de anos.",
+            "Fico numa ilha isolada, longe do continente.",
+            "A ciência me criou a partir de um mosquito preso no âmbar.",
+            "\"A vida encontra um caminho\" foi dito sobre mim — e estava certo.",
+            "Meus portões gigantes de madeira viraram ícone do cinema.",
+            "Minhas cercas elétricas falharam na pior hora possível.",
+            "Um tiranossauro fugiu do meu controle na estreia.",
+            "Fui idealizado por um velhinho sonhador com uma bengala de âmbar.",
+            "Dinossauros vivos eram minha promessa de ingresso."
+          ]
+        },
+        {
+          "id": "pf_025",
+          "type": "PESSOA",
+          "answer": "Batman",
+          "clues": [
+            "Perdi meus pais numa noite que definiu quem eu sou.",
+            "De dia, sou um bilionário; de noite, outra coisa.",
+            "Não tenho superpoderes — tenho dinheiro, treino e trauma.",
+            "Um mordomo fiel é meu maior aliado.",
+            "Moro numa mansão com um segredo embaixo dela.",
+            "Um sinal luminoso no céu me convoca.",
+            "Gotham é a cidade que jurei proteger.",
+            "Meu carro é tão famoso quanto eu.",
+            "Um animal noturno inspirou meu disfarce e meu nome.",
+            "Um palhaço criminoso é meu inimigo eterno."
+          ]
+        },
+        {
+          "id": "pf_026",
+          "type": "PESSOA",
+          "answer": "Katniss Everdeen",
+          "clues": [
+            "Aprendi a caçar para alimentar minha família.",
+            "Me voluntariei para morrer no lugar da minha irmã.",
+            "Arco e flecha são extensão do meu corpo.",
+            "Venho do distrito mais pobre do meu país.",
+            "Um programa de TV mortal me tornou famosa.",
+            "\"Tordo\" é o símbolo que carrego — e que virou revolução.",
+            "Um broche dourado com um pássaro me acompanha.",
+            "Fingi um romance para sobreviver... ou será que fingi?",
+            "Três dedos erguidos viraram saudação por minha causa.",
+            "Sobrevivi a uma arena que queria me matar — duas vezes."
+          ]
+        },
+        {
+          "id": "pf_027",
+          "type": "LUGAR",
+          "answer": "Pandora (Avatar)",
+          "clues": [
+            "Minhas florestas brilham no escuro.",
+            "Montanhas flutuam no meu céu.",
+            "Sou uma lua, não um planeta.",
+            "Meus habitantes são azuis e altos.",
+            "Humanos vieram até mim atrás de um minério valioso.",
+            "Meu ar é tóxico para visitantes sem máscara.",
+            "Uma árvore gigante e sagrada conecta toda a minha vida.",
+            "Cavalgar criaturas voadoras é rito de passagem por aqui.",
+            "Meus nativos se conectam à natureza por uma trança.",
+            "O filme sobre mim foi por anos a maior bilheteria da história."
+          ]
+        },
+        {
+          "id": "pf_028",
+          "type": "PESSOA",
+          "answer": "Homem-Aranha",
+          "clues": [
+            "Um inseto... aliás, um aracnídeo mudou minha vida com uma picada.",
+            "Sou de Nova York, do Queens, e me orgulho.",
+            "Equilibro lição de casa e salvar a cidade.",
+            "Minha tia me criou depois que perdi meus pais.",
+            "\"Com grandes poderes vêm grandes responsabilidades\" — aprendi do pior jeito.",
+            "Fotografo o herói da cidade... que sou eu mesmo.",
+            "Meu sexto sentido avisa quando o perigo chega.",
+            "Balanço entre prédios pendurado em teias.",
+            "Meu uniforme é vermelho e azul, colado no corpo.",
+            "Sou o herói adolescente mais famoso dos quadrinhos e do cinema."
+          ]
+        },
+        {
+          "id": "pf_029",
+          "type": "COISA",
+          "answer": "Wilson (a bola de Náufrago)",
+          "clues": [
+            "Sou redondo e virei o melhor amigo de um homem.",
+            "Nasci numa fábrica de artigos esportivos.",
+            "Uma mão ensanguentada me deu um rosto.",
+            "Passei anos numa ilha deserta sem reclamar.",
+            "Sou a prova de que a solidão faz a gente conversar com qualquer coisa.",
+            "Meu \"dono\" era funcionário de uma empresa de entregas.",
+            "Me perdi no mar, e o mundo inteiro chorou por uma bola.",
+            "Meu nome é o da marca estampada em mim.",
+            "Um avião caiu para que minha história começasse.",
+            "Sou uma bola de vôlei que virou personagem de cinema."
+          ]
+        },
+        {
+          "id": "pf_030",
+          "type": "PESSOA",
+          "answer": "Mulher-Maravilha",
+          "clues": [
+            "Venho de uma ilha onde não existem homens.",
+            "Sou uma princesa guerreira, filha de rainha.",
+            "Um laço dourado obriga quem eu prender a dizer a verdade.",
+            "Braceletes nos meus pulsos param balas.",
+            "Deuses gregos fazem parte da minha origem.",
+            "Saí do meu paraíso para lutar numa guerra mundial.",
+            "Sou uma das heroínas mais antigas dos quadrinhos.",
+            "Uma tiara dourada completa meu uniforme.",
+            "Faço parte de uma liga de heróis famosa.",
+            "Meu nome junta uma palavra de gênero e uma de espanto."
+          ]
+        }
       ]
     },
     {
-      "id": "pf_002",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Darth Vader",
-      "clues": [
-        "Venho de uma galáxia muito, muito distante.",
-        "Uso uma respiração que dá pra ouvir de longe.",
-        "Praticamente todo o meu corpo é mecânico.",
-        "Já fui bom, antes de escolher o lado sombrio.",
-        "Comando uma frota temida em todo o universo.",
-        "Meu capacete nunca sai da minha cabeça.",
-        "Tenho uma ligação de sangue com o herói da história.",
-        "Uma espada de luz é minha arma preferida.",
-        "Minha respiração pesada é praticamente minha marca registrada.",
-        "Descobri tarde demais que meu filho lutava do outro lado."
-      ]
-    },
-    {
-      "id": "pf_003",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Sherlock Holmes",
-      "clues": [
-        "Moro na cidade de Londres, num endereço bem específico.",
-        "Tenho um parceiro que registra minhas aventuras por escrito.",
-        "Toco violino quando preciso pensar.",
-        "Uso um cachimbo e um chapéu de caça bem reconhecíveis.",
-        "Reparo em detalhes que ninguém mais nota.",
-        "Tenho um arquiinimigo tão inteligente quanto eu.",
-        "Trabalho como detetive particular, não da polícia oficial.",
-        "Uso a frase \"elementar\" com frequência.",
-        "Meu endereço é Baker Street, número 221B.",
-        "Meu irmão mais velho trabalha para o governo britânico e é ainda mais inteligente do que eu."
-      ]
-    },
-    {
-      "id": "pf_004",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Indiana Jones",
-      "clues": [
-        "Adoro chapéus, mas o meu tem estilo próprio.",
-        "Sou professor na maior parte do tempo.",
-        "Tenho medo de cobras.",
-        "Uso um chicote como ferramenta principal.",
-        "Corro de pedras gigantes rolando atrás de mim.",
-        "Procuro relíquias antigas e perdidas pelo mundo.",
-        "Enfrento nazistas em mais de uma aventura.",
-        "Uma arca sagrada é um dos meus achados mais famosos.",
-        "Meu pai também é professor, e nossas brigas em aventura são lendárias.",
-        "Sou o arqueólogo aventureiro interpretado por Harrison Ford."
-      ]
-    },
-    {
-      "id": "pf_005",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Forrest Gump",
-      "clues": [
-        "Cresci correndo, literalmente, minha vida inteira.",
-        "Uma caixa de chocolates é uma metáfora que uso bastante.",
-        "Não sou o mais rápido para entender as coisas, mas o coração compensa.",
-        "Corri por motivos que nem eu sabia explicar direito.",
-        "Joguei ping-pong e futebol americano com talento inesperado.",
-        "Minha mãe sempre teve frases sábias pra me ensinar.",
-        "Amei a mesma mulher a vida toda, de longe.",
-        "Um estado do sul dos EUA é onde minha história se passa.",
-        "Ganhei uma medalha por bravura na guerra do Vietnã.",
-        "Minha frase mais famosa é sobre a vida ser como uma caixa de chocolates."
-      ]
-    },
-    {
-      "id": "pf_006",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Shrek",
-      "clues": [
-        "Verde não é só a cor da minha pele, é meu estilo de vida.",
-        "Moro num pântano e gosto assim.",
-        "Meu melhor amigo fala demais e tem quatro patas.",
-        "Resgatei uma princesa que escondia um segredo parecido com o meu.",
-        "Ogros são como cebolas: têm camadas.",
-        "Minha história começa com um livro de contos de fadas sendo usado no banheiro.",
-        "Um lorde baixinho invadiu meu pântano de criaturas mágicas.",
-        "Casei e tive filhos que puxaram ao pai.",
-        "Prefiro ficar sozinho, mas a vida insiste em me dar companhia.",
-        "Meu filme ganhou o primeiro Oscar de animação da história."
-      ]
-    },
-    {
-      "id": "pf_007",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Dory",
-      "clues": [
-        "Sou dona de uma memória que dura segundos.",
-        "Azul é a minha cor da cabeça ao rabo.",
-        "Falo a língua das baleias — ou pelo menos tento.",
-        "Ajudei um pai desesperado a atravessar o oceano.",
-        "Esquecer é meu maior defeito e minha maior graça.",
-        "\"Continue a nadar\" é meu lema de vida.",
-        "No meu segundo filme, virei a protagonista procurando meus pais.",
-        "Moro no oceano, perto de um recife colorido.",
-        "P. Sherman, 42 Wallaby Way, Sydney — nunca esqueci esse endereço, ironicamente.",
-        "Meu melhor amigo é um peixe-palhaço superprotetor."
-      ]
-    },
-    {
-      "id": "pf_008",
-      "type": "LUGAR",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Estrela da Morte",
-      "clues": [
-        "Fico numa galáxia distante, mas todo mundo me conhece.",
-        "Sou redonda como uma lua — e já fui confundida com uma.",
-        "Meu tamanho é de assustar: quilômetros e quilômetros de diâmetro.",
-        "Um raio meu pode apagar um planeta inteiro.",
-        "Fui construída duas vezes, e destruída duas vezes também.",
-        "Tenho um ponto fraco pequeno demais para o meu tamanho.",
-        "Um fazendeiro de um planeta deserto causou minha primeira explosão.",
-        "Sou a arma definitiva de um império.",
-        "Milhares de soldados de armadura branca circulam pelos meus corredores.",
-        "\"Isso não é uma lua\" é a frase mais famosa sobre mim."
-      ]
-    },
-    {
-      "id": "pf_009",
-      "type": "COISA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "O Um Anel (O Senhor dos Anéis)",
-      "clues": [
-        "Sou pequeno, redondo e dourado.",
-        "Quem me carrega por muito tempo nunca sai ileso.",
-        "Fui forjado dentro de uma montanha de fogo.",
-        "Sussurro promessas para quem me possui.",
-        "Deixo invisível quem me veste.",
-        "Um ser corcunda e magrelo me chama de \"precioso\".",
-        "Minha inscrição só aparece quando me esquentam.",
-        "Uma jornada inteira existe só para me destruir.",
-        "Passei décadas perdido no fundo de um lago.",
-        "Hobbits pequenos carregaram um peso que reis não aguentariam: eu."
-      ]
-    },
-    {
-      "id": "pf_010",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Capitão América",
-      "clues": [
-        "Sou do Brooklyn e nunca escondi isso.",
-        "Já fui pequeno e fraco, hoje sou símbolo de força.",
-        "Um experimento científico mudou meu corpo para sempre.",
-        "Passei décadas congelado e acordei em outro século.",
-        "Meu escudo é mais famoso que muita arma por aí.",
-        "Lidero uma equipe de heróis que vive salvando o mundo.",
-        "Listras e estrelas fazem parte do meu uniforme.",
-        "Enfrentei um vilão de rosto vermelho na minha primeira guerra.",
-        "Sou considerado o mais certinho do meu grupo — e me orgulho disso.",
-        "Já fui considerado digno de erguer um martelo que quase ninguém consegue."
-      ]
-    },
-    {
-      "id": "pf_011",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Buzz Lightyear",
-      "clues": [
-        "Cheguei achando que era um herói espacial de verdade.",
-        "Descobrir que eu era um brinquedo foi minha maior crise existencial.",
-        "Tenho asas, mas por muito tempo achei que voava — na verdade, caio com estilo.",
-        "Meu rival virou meu melhor amigo.",
-        "Aperte um botão em mim e eu solto minha frase de efeito.",
-        "Um comando espacial fictício é meu \"empregador\".",
-        "Pertenço a um menino chamado Andy.",
-        "Meu traje é branco com detalhes verdes e roxos.",
-        "Fui o presente de aniversário que bagunçou a hierarquia do quarto.",
-        "Minha frase mais famosa fala em ir \"ao infinito\" — e mais longe ainda."
-      ]
-    },
-    {
-      "id": "pf_012",
-      "type": "LUGAR",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Hogwarts",
-      "clues": [
-        "Sou uma escola, mas nenhum aluno chega a mim de ônibus.",
-        "Minhas escadas mudam de lugar quando querem.",
-        "Os quadros nas minhas paredes conversam e visitam uns aos outros.",
-        "Um chapéu decide em qual das minhas quatro casas cada aluno vai morar.",
-        "Fico num castelo escondido em algum lugar da Escócia.",
-        "Meu esporte oficial é jogado no ar.",
-        "Tenho um salão principal cujo teto imita o céu lá fora.",
-        "Alunos chegam a mim por um trem que parte de uma plataforma que não deveria existir.",
-        "Uma floresta proibida faz parte dos meus terrenos.",
-        "Meu diretor mais famoso tem barba longa e adora doces trouxas."
-      ]
-    },
-    {
-      "id": "pf_013",
-      "type": "COISA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "DeLorean (De Volta para o Futuro)",
-      "clues": [
-        "Sou um carro, mas meu talento não é velocidade... ou melhor, é uma velocidade bem específica.",
-        "Minhas portas abrem para cima, feito asas.",
-        "Preciso atingir 88 milhas por hora para fazer minha mágica.",
-        "Fui inventado por um cientista de cabelo desgrenhado.",
-        "Sou movido a plutônio — depois aprendi a aceitar lixo como combustível.",
-        "Deixo rastros de fogo no chão quando funciono.",
-        "Um painel com três datas é meu coração.",
-        "Levei um adolescente para conhecer os próprios pais jovens.",
-        "Sou um modelo real dos anos 80 que fracassou nas lojas e virou lenda no cinema.",
-        "Viajar no tempo é literalmente minha função."
-      ]
-    },
-    {
-      "id": "pf_014",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Jack Sparrow",
-      "clues": [
-        "Ando como se o chão estivesse sempre balançando.",
-        "Meu navio é minha obsessão — e vivo perdendo ele.",
-        "Delineador borrado e dreadlocks fazem parte do meu visual.",
-        "Prefiro fugir com estilo a lutar com honra.",
-        "Uma bússola que não aponta para o norte é meu tesouro.",
-        "Rum é meu combustível favorito, e vivo perguntando por que ele acabou.",
-        "Sou capitão, e faço questão do título mesmo sem navio.",
-        "Já enganei a Marinha Real, piratas amaldiçoados e até a morte.",
-        "Minha primeira aparição icônica é chegando ao porto num barco afundando.",
-        "Meus inimigos incluem um polvo gigante e um capitão com tentáculos no rosto."
-      ]
-    },
-    {
-      "id": "pf_015",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Rocky Balboa",
-      "clues": [
-        "Sou da Filadélfia e minha cidade tem uma estátua minha.",
-        "Comecei como cobrador de agiota antes da minha grande chance.",
-        "Subir escadarias virou meu treino mais famoso.",
-        "Bato em carne pendurada como treinamento.",
-        "Meu apelido é \"Garanhão Italiano\".",
-        "Perdi minha primeira grande luta, mas ganhei o mundo.",
-        "Adrian é o nome que grito no meu momento mais famoso.",
-        "Meu treinador rabugento se chamava Mickey.",
-        "Minha história rendeu uma das trilhas sonoras mais motivacionais do cinema.",
-        "Anos depois, virei treinador do filho do meu maior rival e amigo."
-      ]
-    },
-    {
-      "id": "pf_016",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Simba",
-      "clues": [
-        "Nasci para ser rei, mas fugi de casa ainda filhote.",
-        "Meu tio armou a maior traição da minha vida.",
-        "Cresci comendo insetos com dois amigos improváveis.",
-        "\"Sem preocupações\" virou minha filosofia por anos.",
-        "A morte do meu pai me marcou — e não foi acidente.",
-        "Uma savana africana é o meu reino.",
-        "Vi o rosto do meu pai refletido nas estrelas e na água.",
-        "Minha apresentação ao mundo foi no alto de uma pedra, erguido por um macaco sábio.",
-        "Voltei adulto para retomar o trono que era meu.",
-        "Sou um leão, e minha história é um clássico da Disney."
-      ]
-    },
-    {
-      "id": "pf_017",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Coringa",
-      "clues": [
-        "Meu sorriso é permanente, mas não é de alegria.",
-        "Caos é meu plano favorito — ou a falta de um.",
-        "Gotham me conhece bem demais.",
-        "Sou o arquiinimigo de um herói vestido de morcego.",
-        "Cabelo verde e terno roxo são meu figurino.",
-        "Já fui interpretado por atores que ganharam Oscar no papel.",
-        "Uma risada é minha marca registrada.",
-        "\"Por que tão sério?\" é uma pergunta que fiz e o mundo nunca esqueceu.",
-        "Minha origem muda a cada versão — e eu gosto assim.",
-        "Cartas de baralho têm tudo a ver com meu nome."
-      ]
-    },
-    {
-      "id": "pf_018",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "E.T.",
-      "clues": [
-        "Vim de longe e fiquei preso na Terra sem querer.",
-        "Um menino me escondeu no quarto dele.",
-        "Meu dedo brilha, e curo machucados com ele.",
-        "Aprendi a falar poucas palavras da língua humana.",
-        "Minha frase mais famosa é um pedido para ligar para casa.",
-        "Uma bicicleta voadora com uma cesta virou cena eterna do cinema por minha causa.",
-        "Me fantasiaram de fantasma para me esconder no Halloween.",
-        "Doces coloridos foram a isca que me atraiu.",
-        "Meu pescoço estica de um jeito nada humano.",
-        "Sou baixinho, enrugado e vim do espaço."
-      ]
-    },
-    {
-      "id": "pf_019",
-      "type": "COISA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Titanic",
-      "clues": [
-        "Fui chamado de inafundável — e o destino não gostou da piada.",
-        "Minha primeira viagem também foi a última.",
-        "Parti da Inglaterra rumo a Nova York em 1912.",
-        "Um bloco de gelo mudou minha história para sempre.",
-        "Não havia botes suficientes para todos a bordo.",
-        "Um casal fictício no meu convés fez o mundo inteiro chorar.",
-        "Meu filme levou 11 estatuetas do Oscar.",
-        "A trilha do meu filme tem uma canção da Celine Dion que tocou no mundo inteiro.",
-        "Repouso no fundo do Atlântico até hoje.",
-        "Uma cena na minha proa, de braços abertos, virou símbolo do romance no cinema."
-      ]
-    },
-    {
-      "id": "pf_020",
-      "type": "LUGAR",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Wakanda",
-      "clues": [
-        "Para o mundo, sou um país pobre e isolado.",
-        "Minha maior riqueza é um metal que caiu do céu.",
-        "Fico na África, mas não me procure no mapa.",
-        "Minha tecnologia é a mais avançada do planeta — em segredo.",
-        "Um rei que veste um traje felino me governa.",
-        "\"Para sempre\" acompanha meu nome num grito de guerra.",
-        "Uma guarda real formada só por mulheres me protege.",
-        "Um campo de força me esconde dos olhos do mundo.",
-        "Panteras têm tudo a ver com meu trono.",
-        "Sou uma nação fictícia do universo Marvel."
-      ]
-    },
-    {
-      "id": "pf_021",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Neo (Matrix)",
-      "clues": [
-        "De dia eu era um programador comum; de noite, um hacker.",
-        "Uma escolha entre duas pílulas mudou minha vida.",
-        "Descobri que o mundo em que vivia não era real.",
-        "Desvio de balas em câmera lenta como ninguém.",
-        "Me chamam de \"o Escolhido\".",
-        "Um homem de óculos escuros e terno me persegue — e se multiplica.",
-        "Aprendi kung fu em segundos, baixado direto no cérebro.",
-        "Meu mentor usa óculos sem hastes e acredita em mim mais do que eu mesmo.",
-        "Máquinas usam humanos como baterias no meu mundo.",
-        "Meu nome de batismo é Thomas Anderson."
-      ]
-    },
-    {
-      "id": "pf_022",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Elsa (Frozen)",
-      "clues": [
-        "Nasci com um poder que aprendi a esconder.",
-        "Luvas eram minha prisão diária.",
-        "Congelei o verão do meu reino sem querer.",
-        "\"Livre estou\" é o hino da minha libertação.",
-        "Construí um palácio inteiro de gelo em uma noite.",
-        "Minha irmã atravessou uma nevasca para me salvar.",
-        "Um boneco de neve simpático nasceu da minha magia.",
-        "Sou rainha de um reino chamado Arendelle.",
-        "Meu vestido azul virou fantasia de milhões de crianças.",
-        "Um ato de amor verdadeiro descongelou o que eu tinha feito."
-      ]
-    },
-    {
-      "id": "pf_023",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Po (Kung Fu Panda)",
-      "clues": [
-        "Sou gordinho, desajeitado e virei lenda.",
-        "Meu pai adotivo é um ganso dono de restaurante de macarrão.",
-        "Fui escolhido como guerreiro por acidente — ou destino.",
-        "Como demais quando fico nervoso, ou seja, sempre.",
-        "Cinco mestres animais duvidaram de mim no começo.",
-        "Um mestre pequeno e vermelho me treinou usando comida.",
-        "O segredo do pergaminho sagrado é que não há segredo.",
-        "Sou um urso em preto e branco, fã número um de artes marciais.",
-        "Meu golpe mais famoso envolve segurar o dedo mindinho do oponente.",
-        "Vim da China, direto para o coração do público."
-      ]
-    },
-    {
-      "id": "pf_024",
-      "type": "LUGAR",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Jurassic Park (Parque dos Dinossauros)",
-      "clues": [
-        "Sou um parque, mas nenhuma criança deveria ter entrado em mim.",
-        "Minha atração principal foi extinta há 65 milhões de anos.",
-        "Fico numa ilha isolada, longe do continente.",
-        "A ciência me criou a partir de um mosquito preso no âmbar.",
-        "\"A vida encontra um caminho\" foi dito sobre mim — e estava certo.",
-        "Meus portões gigantes de madeira viraram ícone do cinema.",
-        "Minhas cercas elétricas falharam na pior hora possível.",
-        "Um tiranossauro fugiu do meu controle na estreia.",
-        "Fui idealizado por um velhinho sonhador com uma bengala de âmbar.",
-        "Dinossauros vivos eram minha promessa de ingresso."
-      ]
-    },
-    {
-      "id": "pf_025",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Batman",
-      "clues": [
-        "Perdi meus pais numa noite que definiu quem eu sou.",
-        "De dia, sou um bilionário; de noite, outra coisa.",
-        "Não tenho superpoderes — tenho dinheiro, treino e trauma.",
-        "Um mordomo fiel é meu maior aliado.",
-        "Moro numa mansão com um segredo embaixo dela.",
-        "Um sinal luminoso no céu me convoca.",
-        "Gotham é a cidade que jurei proteger.",
-        "Meu carro é tão famoso quanto eu.",
-        "Um animal noturno inspirou meu disfarce e meu nome.",
-        "Um palhaço criminoso é meu inimigo eterno."
-      ]
-    },
-    {
-      "id": "pf_026",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Katniss Everdeen",
-      "clues": [
-        "Aprendi a caçar para alimentar minha família.",
-        "Me voluntariei para morrer no lugar da minha irmã.",
-        "Arco e flecha são extensão do meu corpo.",
-        "Venho do distrito mais pobre do meu país.",
-        "Um programa de TV mortal me tornou famosa.",
-        "\"Tordo\" é o símbolo que carrego — e que virou revolução.",
-        "Um broche dourado com um pássaro me acompanha.",
-        "Fingi um romance para sobreviver... ou será que fingi?",
-        "Três dedos erguidos viraram saudação por minha causa.",
-        "Sobrevivi a uma arena que queria me matar — duas vezes."
-      ]
-    },
-    {
-      "id": "pf_027",
-      "type": "LUGAR",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Pandora (Avatar)",
-      "clues": [
-        "Minhas florestas brilham no escuro.",
-        "Montanhas flutuam no meu céu.",
-        "Sou uma lua, não um planeta.",
-        "Meus habitantes são azuis e altos.",
-        "Humanos vieram até mim atrás de um minério valioso.",
-        "Meu ar é tóxico para visitantes sem máscara.",
-        "Uma árvore gigante e sagrada conecta toda a minha vida.",
-        "Cavalgar criaturas voadoras é rito de passagem por aqui.",
-        "Meus nativos se conectam à natureza por uma trança.",
-        "O filme sobre mim foi por anos a maior bilheteria da história."
-      ]
-    },
-    {
-      "id": "pf_028",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Homem-Aranha",
-      "clues": [
-        "Um inseto... aliás, um aracnídeo mudou minha vida com uma picada.",
-        "Sou de Nova York, do Queens, e me orgulho.",
-        "Equilibro lição de casa e salvar a cidade.",
-        "Minha tia me criou depois que perdi meus pais.",
-        "\"Com grandes poderes vêm grandes responsabilidades\" — aprendi do pior jeito.",
-        "Fotografo o herói da cidade... que sou eu mesmo.",
-        "Meu sexto sentido avisa quando o perigo chega.",
-        "Balanço entre prédios pendurado em teias.",
-        "Meu uniforme é vermelho e azul, colado no corpo.",
-        "Sou o herói adolescente mais famoso dos quadrinhos e do cinema."
-      ]
-    },
-    {
-      "id": "pf_029",
-      "type": "COISA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Wilson (a bola de Náufrago)",
-      "clues": [
-        "Sou redondo e virei o melhor amigo de um homem.",
-        "Nasci numa fábrica de artigos esportivos.",
-        "Uma mão ensanguentada me deu um rosto.",
-        "Passei anos numa ilha deserta sem reclamar.",
-        "Sou a prova de que a solidão faz a gente conversar com qualquer coisa.",
-        "Meu \"dono\" era funcionário de uma empresa de entregas.",
-        "Me perdi no mar, e o mundo inteiro chorou por uma bola.",
-        "Meu nome é o da marca estampada em mim.",
-        "Um avião caiu para que minha história começasse.",
-        "Sou uma bola de vôlei que virou personagem de cinema."
-      ]
-    },
-    {
-      "id": "pf_030",
-      "type": "PESSOA",
-      "category": "PERSONAGEM_FILME",
-      "answer": "Mulher-Maravilha",
-      "clues": [
-        "Venho de uma ilha onde não existem homens.",
-        "Sou uma princesa guerreira, filha de rainha.",
-        "Um laço dourado obriga quem eu prender a dizer a verdade.",
-        "Braceletes nos meus pulsos param balas.",
-        "Deuses gregos fazem parte da minha origem.",
-        "Saí do meu paraíso para lutar numa guerra mundial.",
-        "Sou uma das heroínas mais antigas dos quadrinhos.",
-        "Uma tiara dourada completa meu uniforme.",
-        "Faço parte de uma liga de heróis famosa.",
-        "Meu nome junta uma palavra de gênero e uma de espanto."
-      ]
-    },
-    {
-      "id": "mm_001",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Xuxa",
-      "clues": [
-        "Nasci no Brasil, mas conquistei o mundo inteiro.",
-        "Comecei a carreira ainda criança, ao lado da minha família.",
-        "Minha voz é considerada uma das mais potentes do país.",
-        "Sou conhecida por uma cor no meu nome artístico... ou quase isso.",
-        "Fiz história em novelas antes de dominar os palcos.",
-        "\"Rainha dos baixinhos\" é o apelido que me acompanha há décadas.",
-        "Meus programas de TV marcaram gerações de crianças.",
-        "Tenho uma nave como marca registrada dos meus shows.",
-        "Meu nome verdadeiro é Maria da Graça.",
-        "Comandei o programa infantil de maior audiência da TV brasileira."
-      ]
-    },
-    {
-      "id": "mm_002",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Paul McCartney",
-      "clues": [
-        "Minha carreira começou numa cidade portuária da Inglaterra.",
-        "Éramos quatro, e mudamos a música pop para sempre.",
-        "Toco baixo, mas canto tanto quanto componho.",
-        "Sou canhoto, e isso aparece no palco.",
-        "Escrevi uma das músicas mais regravadas da história, sonhando com ela.",
-        "Depois do fim da banda, formei outra com minha esposa.",
-        "\"Yesterday\" e \"Hey Jude\" saíram da minha caneta.",
-        "Fui nomeado cavaleiro pela rainha da Inglaterra.",
-        "Meu parceiro de composição mais famoso foi John Lennon.",
-        "Dos quatro de Liverpool, sou o que segue lotando estádios até hoje."
-      ]
-    },
-    {
-      "id": "mm_003",
-      "type": "COISA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Guitarra",
-      "clues": [
-        "Tenho cordas, mas não sou para amarrar nada.",
-        "Existo em versão acústica e elétrica.",
-        "Sou provavelmente o instrumento mais popular do mundo.",
-        "Rock, sertanejo, MPB: estou em quase todo estilo.",
-        "Tenho um braço, mas não tenho mãos.",
-        "Meu corpo pode ser oco ou maciço.",
-        "Normalmente tenho seis cordas, mas existo com sete ou doze.",
-        "Jimi Hendrix me tocava até com os dentes.",
-        "Solos épicos de rock geralmente nascem em mim.",
-        "Sou o instrumento que todo adolescente sonha em tocar na garagem."
-      ]
-    },
-    {
-      "id": "mm_004",
-      "type": "LUGAR",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Woodstock",
-      "clues": [
-        "Recebo multidões que chegam dispostas a acampar por dias.",
-        "Lama e chuva fazem parte da minha lenda.",
-        "Nasci em 1969 e virei símbolo de uma geração.",
-        "Aconteci numa fazenda, não numa cidade grande.",
-        "Paz e amor eram meu lema não oficial.",
-        "Jimi Hendrix tocou o hino americano na guitarra em mim.",
-        "Fico no estado de Nova York, mas não na cidade.",
-        "Meio milhão de pessoas apareceram, bem mais que o esperado.",
-        "Sou considerado o festival de música mais famoso da história.",
-        "O documentário sobre mim ganhou o Oscar."
-      ]
-    },
-    {
-      "id": "mm_005",
-      "type": "COISA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Disco de vinil",
-      "clues": [
-        "Já fui o jeito mais comum de ouvir música em casa.",
-        "Sou feito de um material que gira.",
-        "Preciso de uma agulha para funcionar.",
-        "Quase morri com a chegada do CD, mas voltei com tudo.",
-        "Colecionadores pagam caro por versões raras de mim.",
-        "Tenho dois lados, A e B.",
-        "Meu tamanho se mede em polegadas e rotações por minuto.",
-        "Sou vendido dentro de capas que viraram arte por si só.",
-        "Hoje sou símbolo de quem ouve música \"raiz\".",
-        "DJs me arranham de propósito para fazer música."
-      ]
-    },
-    {
-      "id": "mm_006",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Michael Jackson",
-      "clues": [
-        "Comecei a cantar em grupo, ao lado dos meus irmãos, ainda criança.",
-        "Uma luva brilhante em uma mão só virou minha marca.",
-        "Meu passo de dança mais famoso parece desafiar a física.",
-        "Fiz o videoclipe mais influente da história, com zumbis dançando.",
-        "Meu jeito de cantar inclui gritos agudos que viraram assinatura.",
-        "\"Rei do Pop\" é o título que o mundo me deu.",
-        "Meu álbum mais famoso segue entre os mais vendidos de todos os tempos.",
-        "Minha aparência mudou drasticamente ao longo da carreira.",
-        "Transformei o chapéu inclinado e a meia branca em espetáculo.",
-        "Morri em 2009, dias antes de uma turnê de retorno."
-      ]
-    },
-    {
-      "id": "mm_007",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Roberto Carlos",
-      "clues": [
-        "Me chamam de \"Rei\" no Brasil há mais de meio século.",
-        "Todo fim de ano, meu especial de TV é tradição nas famílias.",
-        "Comecei na Jovem Guarda, ao lado do meu grande parceiro Erasmo.",
-        "Carros e estradas aparecem com frequência nas minhas canções.",
-        "Azul é a cor que virou sinônimo do meu romantismo.",
-        "Canto para \"essa mulher\" há décadas e as fãs jogam flores no palco.",
-        "Tenho uma relação famosa de mania com repetição de palavras e superstições.",
-        "Já gravei em espanhol e fiz sucesso pela América Latina inteira.",
-        "Minha carreira começou antes de a Bossa Nova estourar.",
-        "Sou de Cachoeiro de Itapemirim, e isso virou até letra de música."
-      ]
-    },
-    {
-      "id": "mm_008",
-      "type": "COISA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Bateria",
-      "clues": [
-        "Sou o coração rítmico de quase toda banda.",
-        "Quem me toca usa o corpo inteiro: mãos e pés.",
-        "Sou na verdade um conjunto de peças, não uma só.",
-        "Pratos fazem parte de mim, mas ninguém come neles.",
-        "Sou o instrumento mais barulhento da sala de ensaio.",
-        "Vizinhos odeiam quando alguém me compra.",
-        "Uso baquetas como ferramenta principal.",
-        "Ringo Starr e Phil Collins ficaram famosos me tocando.",
-        "Meu pedal mais grave marca o pulso da música.",
-        "Em show, meu solo costuma ser o momento de fúria do músico."
-      ]
-    },
-    {
-      "id": "mm_009",
-      "type": "LUGAR",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Rock in Rio",
-      "clues": [
-        "Nasci no Brasil em 1985 e virei um dos maiores eventos do planeta.",
-        "Recebi Queen, Guns N' Roses e Iron Maiden em edições históricas.",
-        "Meu palco principal é gigante, mas o nome dele é \"Mundo\".",
-        "Aconteço também em Lisboa: levei minha marca para fora do país.",
-        "Sou uma cidade temporária: monto e desmonto a cada edição.",
-        "Meu nome junta um gênero musical e uma cidade brasileira.",
-        "Filas quilométricas e tirolesa fazem parte da minha fama.",
-        "Freddie Mercury fez uma das apresentações mais lendárias da vida dele em mim.",
-        "Milhões de ingressos meus esgotam em poucas horas.",
-        "Fico numa área apelidada de \"Cidade do Rock\"."
-      ]
-    },
-    {
-      "id": "mm_010",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Elvis Presley",
-      "clues": [
-        "Nasci pobre no sul dos Estados Unidos e virei o artista mais icônico do meu país.",
-        "Meu topete e meus macacões brilhantes viraram fantasia de festa.",
-        "Comecei misturando country com música negra americana, e isso chocou.",
-        "Meu jeito de dançar era tão ousado que a TV só me filmava da cintura pra cima.",
-        "Servi no exército no auge da fama.",
-        "Minha mansão em Memphis virou ponto turístico visitado até hoje.",
-        "Me chamam de \"Rei\" — do rock, no meu caso.",
-        "Teorias de que estou vivo circulam desde a minha morte em 1977.",
-        "Casei com uma mulher que depois foi sogra do Michael Jackson.",
-        "Morri no banheiro da minha própria casa, aos 42 anos."
-      ]
-    },
-    {
-      "id": "mm_011",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Freddie Mercury",
-      "clues": [
-        "Nasci em Zanzibar, mas o mundo me conheceu pela Inglaterra.",
-        "Minha extensão vocal é estudada até hoje.",
-        "Um bigode marcante definiu minha fase mais icônica.",
-        "Comandei o público de Wembley como ninguém.",
-        "Minha banda tem nome de realeza.",
-        "Escrevi uma rapsódia que mistura ópera e rock.",
-        "\"Êêô!\" — eu gritava, e o estádio inteiro respondia.",
-        "Um filme sobre minha vida deu Oscar ao ator que me interpretou.",
-        "Gatos eram minha paixão fora dos palcos.",
-        "Morri em 1991, um dia depois de anunciar minha doença ao mundo."
-      ]
-    },
-    {
-      "id": "mm_012",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Madonna",
-      "clues": [
-        "Me chamam de rainha de um gênero inteiro.",
-        "Me reinvento a cada década há mais de 40 anos.",
-        "Sou americana, de Michigan, com nome de santidade.",
-        "\"Como uma virgem\" é um dos meus hinos.",
-        "Escandalizei igrejas, TVs e governos — de propósito.",
-        "Meu show em Copacabana reuniu mais de um milhão de pessoas.",
-        "Um sutiã de cones virou figurino histórico por minha causa.",
-        "Sou a artista feminina que mais vendeu discos na história.",
-        "Vogue não é só revista no meu vocabulário.",
-        "\"Material Girl\" é um apelido que aceito com orgulho."
-      ]
-    },
-    {
-      "id": "mm_013",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Anitta",
-      "clues": [
-        "Saí de Honório Gurgel, subúrbio carioca, para o mundo.",
-        "Comecei cantando em igreja antes de dominar os bailes.",
-        "Meu nome artístico veio de uma personagem de minissérie.",
-        "Fui a primeira brasileira no topo do ranking global do Spotify.",
-        "\"Envolver\" me rendeu recorde mundial e uma dancinha viral.",
-        "Canto em português, espanhol e inglês, às vezes na mesma música.",
-        "Virei empresária do próprio nome ainda bem cedo.",
-        "O Rio de Janeiro é meu cenário e minha bandeira.",
-        "Já me apresentei no Coachella e no Rock in Rio.",
-        "Sou a maior estrela pop que o funk brasileiro já produziu."
-      ]
-    },
-    {
-      "id": "mm_014",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Bob Marley",
-      "clues": [
-        "Nasci numa ilha do Caribe e a coloquei no mapa da música.",
-        "Meus cabelos eram parte da minha fé.",
-        "Espalhei uma mensagem de paz e liberdade pelo mundo.",
-        "\"Não se preocupe com nada\" resume uma das minhas canções mais famosas.",
-        "Fui alvo de um atentado e mesmo assim subi no palco dias depois.",
-        "Verde, amarelo e vermelho são cores ligadas à minha imagem.",
-        "Meu gênero musical nasceu na Jamaica.",
-        "Futebol era minha segunda paixão.",
-        "Morri aos 36 anos, de um câncer que começou no dedo do pé.",
-        "Sou o maior nome que o reggae já teve."
-      ]
-    },
-    {
-      "id": "mm_015",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Beethoven",
-      "clues": [
-        "Componho há mais de 200 anos e ainda toco em todo lugar.",
-        "Perdi justamente o sentido mais importante para o meu trabalho.",
-        "Minha Quinta começa com quatro notas que todo mundo conhece.",
-        "Sou alemão, de Bonn, mas Viena foi meu palco.",
-        "Compus minha obra máxima já completamente surdo.",
-        "A \"Ode à Alegria\" saiu da minha pena.",
-        "Meu temperamento era tão famoso quanto meu talento.",
-        "\"Für Elise\" é aquela minha peça que todo iniciante de piano tenta tocar.",
-        "Nove sinfonias carregam meu nome.",
-        "Um cachorro São Bernardo do cinema foi batizado em minha homenagem."
-      ]
-    },
-    {
-      "id": "mm_016",
-      "type": "COISA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Piano",
-      "clues": [
-        "Tenho 88 dentes: uns brancos, uns pretos.",
-        "Sou grande demais para levar no ônibus.",
-        "Martelos trabalham dentro de mim, mas não constroem nada.",
-        "Existo de cauda, de parede e até digital.",
-        "Beethoven e Chopin fizeram história em mim.",
-        "Três pedais mudam meu humor.",
-        "Sou obrigatório em qualquer conservatório.",
-        "Bares elegantes costumam ter um músico dedicado só a mim.",
-        "Elton John e Freddie Mercury me tocavam cantando.",
-        "Minhas teclas respondem à força do toque — por isso meu nome completo termina em \"forte\"."
-      ]
-    },
-    {
-      "id": "mm_017",
-      "type": "COISA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Microfone",
-      "clues": [
-        "Sem mim, o cantor não alcança a arquibancada.",
-        "Já fui de fio; hoje vivo sem ele.",
-        "Testar-me virou frase universal: \"som, teste, um, dois\".",
-        "Cantores me seguram; palestrantes me prendem na roupa.",
-        "Solto um apito ensurdecedor quando me apontam para a caixa errada.",
-        "Me derrubar no chão de propósito virou gesto de vitória no rap.",
-        "Transformo voz em eletricidade.",
-        "Em estúdio, uso uma tela redonda para segurar os \"pês\" e \"bês\".",
-        "Karaokê nenhum existe sem mim.",
-        "Sou o objeto que todo mundo já fingiu segurar usando uma escova de cabelo."
-      ]
-    },
-    {
-      "id": "mm_018",
-      "type": "COISA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Sanfona (acordeom)",
-      "clues": [
-        "Respiro para fazer som: abro e fecho como um pulmão.",
-        "Sou rainha do forró e do baião.",
-        "Tenho teclas de um lado e botões do outro.",
-        "Luiz Gonzaga me eternizou no Nordeste.",
-        "Meu fole é meu coração.",
-        "Também me chamam por outro nome, de origem mais europeia.",
-        "Em festa junina, sou presença obrigatória.",
-        "Peso nos ombros de quem me toca — literalmente.",
-        "O tango argentino usa um primo meu, o bandoneón.",
-        "Sou o instrumento símbolo do sertão brasileiro."
-      ]
-    },
-    {
-      "id": "mm_019",
-      "type": "COISA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Karaokê",
-      "clues": [
-        "Nasci no Japão e conquistei festas no mundo todo.",
-        "Transformo qualquer pessoa em cantor por uma noite.",
-        "Uma tela com letras é minha alma.",
-        "Coragem líquida costuma anteceder meu uso.",
-        "Meu nome significa algo como \"orquestra vazia\".",
-        "Bares dedicados a mim têm salinhas privativas.",
-        "A música toca, mas a voz principal fica por sua conta.",
-        "Desafinar comigo é regra, não exceção.",
-        "Sou pedida certa em festa de fim de ano de empresa.",
-        "No final, dou uma nota para o seu desempenho, sem piedade."
-      ]
-    },
-    {
-      "id": "mm_020",
-      "type": "LUGAR",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Broadway",
-      "clues": [
-        "Sou uma avenida, mas meu nome virou sinônimo de um gênero inteiro.",
-        "Fico em Manhattan, coração de Nova York.",
-        "Meus letreiros luminosos são atração turística por si só.",
-        "Musicais são minha especialidade.",
-        "O Rei Leão e O Fantasma da Ópera moram em mim há décadas.",
-        "Ganhar um prêmio Tony é o sonho de quem pisa nos meus palcos.",
-        "A Times Square é minha esquina mais famosa.",
-        "Atores, cantores e dançarinos disputam vagas em mim a vida inteira.",
-        "Hamilton virou febre mundial a partir de mim.",
-        "Sou o destino final de quem sonha com teatro musical."
-      ]
-    },
-    {
-      "id": "mm_021",
-      "type": "LUGAR",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Sambódromo",
-      "clues": [
-        "Fico vazio quase o ano inteiro, mas em fevereiro sou o centro do mundo.",
-        "Fui desenhado por Oscar Niemeyer.",
-        "Sou uma avenida com arquibancadas dos dois lados.",
-        "Escolas inteiras desfilam em mim — mas ninguém estuda nelas.",
-        "Meu endereço oficial é a Marquês de Sapucaí.",
-        "Baterias de centenas de ritmistas fazem meu chão tremer.",
-        "Uma apuração de notas na quarta-feira define meu campeão.",
-        "Carros alegóricos gigantes atravessam meu asfalto.",
-        "Fico no Rio, e São Paulo tem um primo meu, o Anhembi.",
-        "Sou o palco do maior espetáculo de Carnaval do planeta."
-      ]
-    },
-    {
-      "id": "mm_022",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Tim Maia",
-      "clues": [
-        "Minha voz é uma das mais potentes que o Brasil já ouviu.",
-        "Cresci na Tijuca vendendo os quitutes que minha mãe fazia.",
-        "Fui amigo de juventude de Roberto e Erasmo Carlos.",
-        "Morei nos Estados Unidos e voltei deportado.",
-        "Misturei soul e funk americano com música brasileira como ninguém.",
-        "Entrei numa seita e gravei discos \"racionais\" que viraram lenda.",
-        "Faltar aos próprios shows virou parte da minha fama.",
-        "\"Você\" e \"Gostava Tanto de Você\" embalam românticos até hoje.",
-        "Meu gênio era difícil; minha risada, inesquecível.",
-        "Me apelidaram de \"Síndico\" da música brasileira."
-      ]
-    },
-    {
-      "id": "mm_023",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Elis Regina",
-      "clues": [
-        "Me chamavam de \"Pimentinha\" pelo temperamento.",
-        "Nasci em Porto Alegre e virei uma das maiores vozes do Brasil.",
-        "\"Águas de Março\" em dueto com Tom Jobim é um dos registros mais amados da MPB.",
-        "Revelei compositores que viraram gigantes.",
-        "Meu jeito de cantar com o corpo inteiro virou marca.",
-        "Brilhei nos festivais históricos da música brasileira nos anos 60.",
-        "\"Como Nossos Pais\" na minha voz virou hino de gerações.",
-        "Parti cedo demais, aos 36 anos, em 1982.",
-        "Minha filha seguiu meu caminho na música.",
-        "Sou considerada por muitos a maior cantora da história do Brasil."
-      ]
-    },
-    {
-      "id": "mm_024",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Luiz Gonzaga",
-      "clues": [
-        "Nasci no sertão de Pernambuco, no pé da serra.",
-        "Levei o Nordeste para o rádio do Brasil inteiro.",
-        "Meu chapéu de couro imita o de Lampião.",
-        "\"Asa Branca\" é meu hino — e quase um hino nacional.",
-        "Me coroaram \"Rei do Baião\".",
-        "Meu instrumento respira: abre e fecha como um fole.",
-        "Meu filho seguiu na música e cantou \"O Que É, O Que É\".",
-        "Cantei a seca, a saudade e a volta pra casa.",
-        "Junho é o mês em que minha música toca sem parar.",
-        "Exu, minha cidade natal, virou lugar de peregrinação."
-      ]
-    },
-    {
-      "id": "mm_025",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Beyoncé",
-      "clues": [
-        "Comecei num trio feminino que dominou os anos 2000.",
-        "Me chamam de \"Queen B\".",
-        "Sou de Houston, Texas, e canto isso com orgulho.",
-        "\"Single Ladies\" criou uma coreografia de mão que o mundo copiou.",
-        "Sou casada com um dos maiores rappers do planeta.",
-        "Lancei um álbum surpresa sem nenhum aviso e mudei a indústria.",
-        "Minha apresentação no Coachella foi tão histórica que ganhou apelido próprio.",
-        "Sou a mulher com mais Grammys da história.",
-        "Minha irmã caçula também é cantora.",
-        "Virei até voz de leoa em um clássico da Disney."
-      ]
-    },
-    {
-      "id": "mm_026",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Rolling Stones",
-      "clues": [
-        "Somos uma banda em atividade há mais de 60 anos.",
-        "Uma língua de fora é nossa logomarca.",
-        "Nosso vocalista dança no palco até hoje, já passando dos 80.",
-        "\"Satisfaction\" é nosso grito eterno de inquietação.",
-        "Somos ingleses e eternos rivais amistosos dos Beatles.",
-        "Nosso guitarrista é lendário por sobreviver a tudo.",
-        "Fizemos um show gratuito histórico em Copacabana, para mais de um milhão de pessoas.",
-        "Nosso nome vem de uma pedra que não para quieta.",
-        "Nos chamam de \"a maior banda de rock do mundo\" — e não discutimos.",
-        "Mick e Keith são nossa dupla fundadora."
-      ]
-    },
-    {
-      "id": "mm_027",
-      "type": "COISA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Fone de ouvido",
-      "clues": [
-        "Crio um mundo particular em lugares lotados.",
-        "Já tive fio que embolava no bolso; hoje muitos de mim vivem numa caixinha.",
-        "Sou o motivo de tanta gente não ouvir quando é chamada.",
-        "Músicos de estúdio me usam para ouvir a si mesmos.",
-        "DJs me seguram com o ombro num gesto clássico.",
-        "Em avião, sou distribuído para ver filme.",
-        "Perder um lado meu virou tragédia moderna.",
-        "Aviso com um bip quando minha bateria está acabando.",
-        "Existo em versão que abraça a orelha e versão que entra nela.",
-        "Transformo qualquer caminhada num clipe particular."
-      ]
-    },
-    {
-      "id": "mm_028",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Shakira",
-      "clues": [
-        "Meus quadris não mentem — nem em espanhol, nem em inglês.",
-        "Sou colombiana, de Barranquilla.",
-        "Comecei no rock em espanhol antes do pop mundial.",
-        "Cantei o hino de uma Copa do Mundo que o planeta inteiro dançou.",
-        "Meu timbre de voz é inconfundível — meio \"caprino\", dizem com carinho.",
-        "A dança do ventre faz parte da minha herança libanesa.",
-        "Fui casada com um zagueiro espanhol famoso — e a separação virou música.",
-        "\"Waka Waka\" levou a África para o mundo pela minha voz.",
-        "Loira de cachos, virei uma das latinas mais famosas da história.",
-        "Uma indireta minha num hit com produtor argentino quebrou a internet."
-      ]
-    },
-    {
-      "id": "mm_029",
-      "type": "COISA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Bossa Nova",
-      "clues": [
-        "Nasci no fim dos anos 50, em apartamentos de Copacabana e Ipanema.",
-        "Sou um jeito brasileiro de sussurrar o samba.",
-        "Violão e voz baixinha são minha essência.",
-        "Uma garota passando pela praia virou meu cartão de visita mundial.",
-        "Tom e Vinícius são meus pais mais famosos.",
-        "João Gilberto criou minha batida no violão.",
-        "Conquistei os Estados Unidos nos anos 60 e virei sinônimo de charme.",
-        "Meu nome sugere algo recém-chegado, com um toque de elegância.",
-        "Frank Sinatra gravou no meu estilo.",
-        "Sou um gênero musical, não uma pessoa nem um lugar."
-      ]
-    },
-    {
-      "id": "mm_030",
-      "type": "PESSOA",
-      "category": "MUNDO_DA_MUSICA",
-      "answer": "Ivete Sangalo",
-      "clues": [
-        "Comando trios elétricos como ninguém.",
-        "Minha fama começou numa banda chamada Eva.",
-        "Salvador é minha casa e meu palco.",
-        "Meu sorriso é tão famoso quanto minha voz.",
-        "Gravei DVDs históricos no Madison Square Garden e no Maracanã.",
-        "\"Veveta\" é como o Brasil me chama com intimidade.",
-        "Multidões me tratam como a rainha do axé.",
-        "Já fui técnica de reality show musical na TV.",
-        "Minha energia no palco parece não ter fim, mesmo depois de horas de show.",
-        "Carnaval sem mim não é a mesma coisa."
+      "id": "mundo-da-musica-1",
+      "nome": "Mundo da Música — Edição 1",
+      "categoria": "MUNDO_DA_MUSICA",
+      "versao": 1,
+      "estado": "FINALIZADO",
+      "cards": [
+        {
+          "id": "mm_001",
+          "type": "PESSOA",
+          "answer": "Xuxa",
+          "clues": [
+            "Nasci no Brasil, mas conquistei o mundo inteiro.",
+            "Comecei a carreira ainda criança, ao lado da minha família.",
+            "Minha voz é considerada uma das mais potentes do país.",
+            "Sou conhecida por uma cor no meu nome artístico... ou quase isso.",
+            "Fiz história em novelas antes de dominar os palcos.",
+            "\"Rainha dos baixinhos\" é o apelido que me acompanha há décadas.",
+            "Meus programas de TV marcaram gerações de crianças.",
+            "Tenho uma nave como marca registrada dos meus shows.",
+            "Meu nome verdadeiro é Maria da Graça.",
+            "Comandei o programa infantil de maior audiência da TV brasileira."
+          ]
+        },
+        {
+          "id": "mm_002",
+          "type": "PESSOA",
+          "answer": "Paul McCartney",
+          "clues": [
+            "Minha carreira começou numa cidade portuária da Inglaterra.",
+            "Éramos quatro, e mudamos a música pop para sempre.",
+            "Toco baixo, mas canto tanto quanto componho.",
+            "Sou canhoto, e isso aparece no palco.",
+            "Escrevi uma das músicas mais regravadas da história, sonhando com ela.",
+            "Depois do fim da banda, formei outra com minha esposa.",
+            "\"Yesterday\" e \"Hey Jude\" saíram da minha caneta.",
+            "Fui nomeado cavaleiro pela rainha da Inglaterra.",
+            "Meu parceiro de composição mais famoso foi John Lennon.",
+            "Dos quatro de Liverpool, sou o que segue lotando estádios até hoje."
+          ]
+        },
+        {
+          "id": "mm_003",
+          "type": "COISA",
+          "answer": "Guitarra",
+          "clues": [
+            "Tenho cordas, mas não sou para amarrar nada.",
+            "Existo em versão acústica e elétrica.",
+            "Sou provavelmente o instrumento mais popular do mundo.",
+            "Rock, sertanejo, MPB: estou em quase todo estilo.",
+            "Tenho um braço, mas não tenho mãos.",
+            "Meu corpo pode ser oco ou maciço.",
+            "Normalmente tenho seis cordas, mas existo com sete ou doze.",
+            "Jimi Hendrix me tocava até com os dentes.",
+            "Solos épicos de rock geralmente nascem em mim.",
+            "Sou o instrumento que todo adolescente sonha em tocar na garagem."
+          ]
+        },
+        {
+          "id": "mm_004",
+          "type": "LUGAR",
+          "answer": "Woodstock",
+          "clues": [
+            "Recebo multidões que chegam dispostas a acampar por dias.",
+            "Lama e chuva fazem parte da minha lenda.",
+            "Nasci em 1969 e virei símbolo de uma geração.",
+            "Aconteci numa fazenda, não numa cidade grande.",
+            "Paz e amor eram meu lema não oficial.",
+            "Jimi Hendrix tocou o hino americano na guitarra em mim.",
+            "Fico no estado de Nova York, mas não na cidade.",
+            "Meio milhão de pessoas apareceram, bem mais que o esperado.",
+            "Sou considerado o festival de música mais famoso da história.",
+            "O documentário sobre mim ganhou o Oscar."
+          ]
+        },
+        {
+          "id": "mm_005",
+          "type": "COISA",
+          "answer": "Disco de vinil",
+          "clues": [
+            "Já fui o jeito mais comum de ouvir música em casa.",
+            "Sou feito de um material que gira.",
+            "Preciso de uma agulha para funcionar.",
+            "Quase morri com a chegada do CD, mas voltei com tudo.",
+            "Colecionadores pagam caro por versões raras de mim.",
+            "Tenho dois lados, A e B.",
+            "Meu tamanho se mede em polegadas e rotações por minuto.",
+            "Sou vendido dentro de capas que viraram arte por si só.",
+            "Hoje sou símbolo de quem ouve música \"raiz\".",
+            "DJs me arranham de propósito para fazer música."
+          ]
+        },
+        {
+          "id": "mm_006",
+          "type": "PESSOA",
+          "answer": "Michael Jackson",
+          "clues": [
+            "Comecei a cantar em grupo, ao lado dos meus irmãos, ainda criança.",
+            "Uma luva brilhante em uma mão só virou minha marca.",
+            "Meu passo de dança mais famoso parece desafiar a física.",
+            "Fiz o videoclipe mais influente da história, com zumbis dançando.",
+            "Meu jeito de cantar inclui gritos agudos que viraram assinatura.",
+            "\"Rei do Pop\" é o título que o mundo me deu.",
+            "Meu álbum mais famoso segue entre os mais vendidos de todos os tempos.",
+            "Minha aparência mudou drasticamente ao longo da carreira.",
+            "Transformei o chapéu inclinado e a meia branca em espetáculo.",
+            "Morri em 2009, dias antes de uma turnê de retorno."
+          ]
+        },
+        {
+          "id": "mm_007",
+          "type": "PESSOA",
+          "answer": "Roberto Carlos",
+          "clues": [
+            "Me chamam de \"Rei\" no Brasil há mais de meio século.",
+            "Todo fim de ano, meu especial de TV é tradição nas famílias.",
+            "Comecei na Jovem Guarda, ao lado do meu grande parceiro Erasmo.",
+            "Carros e estradas aparecem com frequência nas minhas canções.",
+            "Azul é a cor que virou sinônimo do meu romantismo.",
+            "Canto para \"essa mulher\" há décadas e as fãs jogam flores no palco.",
+            "Tenho uma relação famosa de mania com repetição de palavras e superstições.",
+            "Já gravei em espanhol e fiz sucesso pela América Latina inteira.",
+            "Minha carreira começou antes de a Bossa Nova estourar.",
+            "Sou de Cachoeiro de Itapemirim, e isso virou até letra de música."
+          ]
+        },
+        {
+          "id": "mm_008",
+          "type": "COISA",
+          "answer": "Bateria",
+          "clues": [
+            "Sou o coração rítmico de quase toda banda.",
+            "Quem me toca usa o corpo inteiro: mãos e pés.",
+            "Sou na verdade um conjunto de peças, não uma só.",
+            "Pratos fazem parte de mim, mas ninguém come neles.",
+            "Sou o instrumento mais barulhento da sala de ensaio.",
+            "Vizinhos odeiam quando alguém me compra.",
+            "Uso baquetas como ferramenta principal.",
+            "Ringo Starr e Phil Collins ficaram famosos me tocando.",
+            "Meu pedal mais grave marca o pulso da música.",
+            "Em show, meu solo costuma ser o momento de fúria do músico."
+          ]
+        },
+        {
+          "id": "mm_009",
+          "type": "LUGAR",
+          "answer": "Rock in Rio",
+          "clues": [
+            "Nasci no Brasil em 1985 e virei um dos maiores eventos do planeta.",
+            "Recebi Queen, Guns N' Roses e Iron Maiden em edições históricas.",
+            "Meu palco principal é gigante, mas o nome dele é \"Mundo\".",
+            "Aconteço também em Lisboa: levei minha marca para fora do país.",
+            "Sou uma cidade temporária: monto e desmonto a cada edição.",
+            "Meu nome junta um gênero musical e uma cidade brasileira.",
+            "Filas quilométricas e tirolesa fazem parte da minha fama.",
+            "Freddie Mercury fez uma das apresentações mais lendárias da vida dele em mim.",
+            "Milhões de ingressos meus esgotam em poucas horas.",
+            "Fico numa área apelidada de \"Cidade do Rock\"."
+          ]
+        },
+        {
+          "id": "mm_010",
+          "type": "PESSOA",
+          "answer": "Elvis Presley",
+          "clues": [
+            "Nasci pobre no sul dos Estados Unidos e virei o artista mais icônico do meu país.",
+            "Meu topete e meus macacões brilhantes viraram fantasia de festa.",
+            "Comecei misturando country com música negra americana, e isso chocou.",
+            "Meu jeito de dançar era tão ousado que a TV só me filmava da cintura pra cima.",
+            "Servi no exército no auge da fama.",
+            "Minha mansão em Memphis virou ponto turístico visitado até hoje.",
+            "Me chamam de \"Rei\" — do rock, no meu caso.",
+            "Teorias de que estou vivo circulam desde a minha morte em 1977.",
+            "Casei com uma mulher que depois foi sogra do Michael Jackson.",
+            "Morri no banheiro da minha própria casa, aos 42 anos."
+          ]
+        },
+        {
+          "id": "mm_011",
+          "type": "PESSOA",
+          "answer": "Freddie Mercury",
+          "clues": [
+            "Nasci em Zanzibar, mas o mundo me conheceu pela Inglaterra.",
+            "Minha extensão vocal é estudada até hoje.",
+            "Um bigode marcante definiu minha fase mais icônica.",
+            "Comandei o público de Wembley como ninguém.",
+            "Minha banda tem nome de realeza.",
+            "Escrevi uma rapsódia que mistura ópera e rock.",
+            "\"Êêô!\" — eu gritava, e o estádio inteiro respondia.",
+            "Um filme sobre minha vida deu Oscar ao ator que me interpretou.",
+            "Gatos eram minha paixão fora dos palcos.",
+            "Morri em 1991, um dia depois de anunciar minha doença ao mundo."
+          ]
+        },
+        {
+          "id": "mm_012",
+          "type": "PESSOA",
+          "answer": "Madonna",
+          "clues": [
+            "Me chamam de rainha de um gênero inteiro.",
+            "Me reinvento a cada década há mais de 40 anos.",
+            "Sou americana, de Michigan, com nome de santidade.",
+            "\"Como uma virgem\" é um dos meus hinos.",
+            "Escandalizei igrejas, TVs e governos — de propósito.",
+            "Meu show em Copacabana reuniu mais de um milhão de pessoas.",
+            "Um sutiã de cones virou figurino histórico por minha causa.",
+            "Sou a artista feminina que mais vendeu discos na história.",
+            "Vogue não é só revista no meu vocabulário.",
+            "\"Material Girl\" é um apelido que aceito com orgulho."
+          ]
+        },
+        {
+          "id": "mm_013",
+          "type": "PESSOA",
+          "answer": "Anitta",
+          "clues": [
+            "Saí de Honório Gurgel, subúrbio carioca, para o mundo.",
+            "Comecei cantando em igreja antes de dominar os bailes.",
+            "Meu nome artístico veio de uma personagem de minissérie.",
+            "Fui a primeira brasileira no topo do ranking global do Spotify.",
+            "\"Envolver\" me rendeu recorde mundial e uma dancinha viral.",
+            "Canto em português, espanhol e inglês, às vezes na mesma música.",
+            "Virei empresária do próprio nome ainda bem cedo.",
+            "O Rio de Janeiro é meu cenário e minha bandeira.",
+            "Já me apresentei no Coachella e no Rock in Rio.",
+            "Sou a maior estrela pop que o funk brasileiro já produziu."
+          ]
+        },
+        {
+          "id": "mm_014",
+          "type": "PESSOA",
+          "answer": "Bob Marley",
+          "clues": [
+            "Nasci numa ilha do Caribe e a coloquei no mapa da música.",
+            "Meus cabelos eram parte da minha fé.",
+            "Espalhei uma mensagem de paz e liberdade pelo mundo.",
+            "\"Não se preocupe com nada\" resume uma das minhas canções mais famosas.",
+            "Fui alvo de um atentado e mesmo assim subi no palco dias depois.",
+            "Verde, amarelo e vermelho são cores ligadas à minha imagem.",
+            "Meu gênero musical nasceu na Jamaica.",
+            "Futebol era minha segunda paixão.",
+            "Morri aos 36 anos, de um câncer que começou no dedo do pé.",
+            "Sou o maior nome que o reggae já teve."
+          ]
+        },
+        {
+          "id": "mm_015",
+          "type": "PESSOA",
+          "answer": "Beethoven",
+          "clues": [
+            "Componho há mais de 200 anos e ainda toco em todo lugar.",
+            "Perdi justamente o sentido mais importante para o meu trabalho.",
+            "Minha Quinta começa com quatro notas que todo mundo conhece.",
+            "Sou alemão, de Bonn, mas Viena foi meu palco.",
+            "Compus minha obra máxima já completamente surdo.",
+            "A \"Ode à Alegria\" saiu da minha pena.",
+            "Meu temperamento era tão famoso quanto meu talento.",
+            "\"Für Elise\" é aquela minha peça que todo iniciante de piano tenta tocar.",
+            "Nove sinfonias carregam meu nome.",
+            "Um cachorro São Bernardo do cinema foi batizado em minha homenagem."
+          ]
+        },
+        {
+          "id": "mm_016",
+          "type": "COISA",
+          "answer": "Piano",
+          "clues": [
+            "Tenho 88 dentes: uns brancos, uns pretos.",
+            "Sou grande demais para levar no ônibus.",
+            "Martelos trabalham dentro de mim, mas não constroem nada.",
+            "Existo de cauda, de parede e até digital.",
+            "Beethoven e Chopin fizeram história em mim.",
+            "Três pedais mudam meu humor.",
+            "Sou obrigatório em qualquer conservatório.",
+            "Bares elegantes costumam ter um músico dedicado só a mim.",
+            "Elton John e Freddie Mercury me tocavam cantando.",
+            "Minhas teclas respondem à força do toque — por isso meu nome completo termina em \"forte\"."
+          ]
+        },
+        {
+          "id": "mm_017",
+          "type": "COISA",
+          "answer": "Microfone",
+          "clues": [
+            "Sem mim, o cantor não alcança a arquibancada.",
+            "Já fui de fio; hoje vivo sem ele.",
+            "Testar-me virou frase universal: \"som, teste, um, dois\".",
+            "Cantores me seguram; palestrantes me prendem na roupa.",
+            "Solto um apito ensurdecedor quando me apontam para a caixa errada.",
+            "Me derrubar no chão de propósito virou gesto de vitória no rap.",
+            "Transformo voz em eletricidade.",
+            "Em estúdio, uso uma tela redonda para segurar os \"pês\" e \"bês\".",
+            "Karaokê nenhum existe sem mim.",
+            "Sou o objeto que todo mundo já fingiu segurar usando uma escova de cabelo."
+          ]
+        },
+        {
+          "id": "mm_018",
+          "type": "COISA",
+          "answer": "Sanfona (acordeom)",
+          "clues": [
+            "Respiro para fazer som: abro e fecho como um pulmão.",
+            "Sou rainha do forró e do baião.",
+            "Tenho teclas de um lado e botões do outro.",
+            "Luiz Gonzaga me eternizou no Nordeste.",
+            "Meu fole é meu coração.",
+            "Também me chamam por outro nome, de origem mais europeia.",
+            "Em festa junina, sou presença obrigatória.",
+            "Peso nos ombros de quem me toca — literalmente.",
+            "O tango argentino usa um primo meu, o bandoneón.",
+            "Sou o instrumento símbolo do sertão brasileiro."
+          ]
+        },
+        {
+          "id": "mm_019",
+          "type": "COISA",
+          "answer": "Karaokê",
+          "clues": [
+            "Nasci no Japão e conquistei festas no mundo todo.",
+            "Transformo qualquer pessoa em cantor por uma noite.",
+            "Uma tela com letras é minha alma.",
+            "Coragem líquida costuma anteceder meu uso.",
+            "Meu nome significa algo como \"orquestra vazia\".",
+            "Bares dedicados a mim têm salinhas privativas.",
+            "A música toca, mas a voz principal fica por sua conta.",
+            "Desafinar comigo é regra, não exceção.",
+            "Sou pedida certa em festa de fim de ano de empresa.",
+            "No final, dou uma nota para o seu desempenho, sem piedade."
+          ]
+        },
+        {
+          "id": "mm_020",
+          "type": "LUGAR",
+          "answer": "Broadway",
+          "clues": [
+            "Sou uma avenida, mas meu nome virou sinônimo de um gênero inteiro.",
+            "Fico em Manhattan, coração de Nova York.",
+            "Meus letreiros luminosos são atração turística por si só.",
+            "Musicais são minha especialidade.",
+            "O Rei Leão e O Fantasma da Ópera moram em mim há décadas.",
+            "Ganhar um prêmio Tony é o sonho de quem pisa nos meus palcos.",
+            "A Times Square é minha esquina mais famosa.",
+            "Atores, cantores e dançarinos disputam vagas em mim a vida inteira.",
+            "Hamilton virou febre mundial a partir de mim.",
+            "Sou o destino final de quem sonha com teatro musical."
+          ]
+        },
+        {
+          "id": "mm_021",
+          "type": "LUGAR",
+          "answer": "Sambódromo",
+          "clues": [
+            "Fico vazio quase o ano inteiro, mas em fevereiro sou o centro do mundo.",
+            "Fui desenhado por Oscar Niemeyer.",
+            "Sou uma avenida com arquibancadas dos dois lados.",
+            "Escolas inteiras desfilam em mim — mas ninguém estuda nelas.",
+            "Meu endereço oficial é a Marquês de Sapucaí.",
+            "Baterias de centenas de ritmistas fazem meu chão tremer.",
+            "Uma apuração de notas na quarta-feira define meu campeão.",
+            "Carros alegóricos gigantes atravessam meu asfalto.",
+            "Fico no Rio, e São Paulo tem um primo meu, o Anhembi.",
+            "Sou o palco do maior espetáculo de Carnaval do planeta."
+          ]
+        },
+        {
+          "id": "mm_022",
+          "type": "PESSOA",
+          "answer": "Tim Maia",
+          "clues": [
+            "Minha voz é uma das mais potentes que o Brasil já ouviu.",
+            "Cresci na Tijuca vendendo os quitutes que minha mãe fazia.",
+            "Fui amigo de juventude de Roberto e Erasmo Carlos.",
+            "Morei nos Estados Unidos e voltei deportado.",
+            "Misturei soul e funk americano com música brasileira como ninguém.",
+            "Entrei numa seita e gravei discos \"racionais\" que viraram lenda.",
+            "Faltar aos próprios shows virou parte da minha fama.",
+            "\"Você\" e \"Gostava Tanto de Você\" embalam românticos até hoje.",
+            "Meu gênio era difícil; minha risada, inesquecível.",
+            "Me apelidaram de \"Síndico\" da música brasileira."
+          ]
+        },
+        {
+          "id": "mm_023",
+          "type": "PESSOA",
+          "answer": "Elis Regina",
+          "clues": [
+            "Me chamavam de \"Pimentinha\" pelo temperamento.",
+            "Nasci em Porto Alegre e virei uma das maiores vozes do Brasil.",
+            "\"Águas de Março\" em dueto com Tom Jobim é um dos registros mais amados da MPB.",
+            "Revelei compositores que viraram gigantes.",
+            "Meu jeito de cantar com o corpo inteiro virou marca.",
+            "Brilhei nos festivais históricos da música brasileira nos anos 60.",
+            "\"Como Nossos Pais\" na minha voz virou hino de gerações.",
+            "Parti cedo demais, aos 36 anos, em 1982.",
+            "Minha filha seguiu meu caminho na música.",
+            "Sou considerada por muitos a maior cantora da história do Brasil."
+          ]
+        },
+        {
+          "id": "mm_024",
+          "type": "PESSOA",
+          "answer": "Luiz Gonzaga",
+          "clues": [
+            "Nasci no sertão de Pernambuco, no pé da serra.",
+            "Levei o Nordeste para o rádio do Brasil inteiro.",
+            "Meu chapéu de couro imita o de Lampião.",
+            "\"Asa Branca\" é meu hino — e quase um hino nacional.",
+            "Me coroaram \"Rei do Baião\".",
+            "Meu instrumento respira: abre e fecha como um fole.",
+            "Meu filho seguiu na música e cantou \"O Que É, O Que É\".",
+            "Cantei a seca, a saudade e a volta pra casa.",
+            "Junho é o mês em que minha música toca sem parar.",
+            "Exu, minha cidade natal, virou lugar de peregrinação."
+          ]
+        },
+        {
+          "id": "mm_025",
+          "type": "PESSOA",
+          "answer": "Beyoncé",
+          "clues": [
+            "Comecei num trio feminino que dominou os anos 2000.",
+            "Me chamam de \"Queen B\".",
+            "Sou de Houston, Texas, e canto isso com orgulho.",
+            "\"Single Ladies\" criou uma coreografia de mão que o mundo copiou.",
+            "Sou casada com um dos maiores rappers do planeta.",
+            "Lancei um álbum surpresa sem nenhum aviso e mudei a indústria.",
+            "Minha apresentação no Coachella foi tão histórica que ganhou apelido próprio.",
+            "Sou a mulher com mais Grammys da história.",
+            "Minha irmã caçula também é cantora.",
+            "Virei até voz de leoa em um clássico da Disney."
+          ]
+        },
+        {
+          "id": "mm_026",
+          "type": "PESSOA",
+          "answer": "Rolling Stones",
+          "clues": [
+            "Somos uma banda em atividade há mais de 60 anos.",
+            "Uma língua de fora é nossa logomarca.",
+            "Nosso vocalista dança no palco até hoje, já passando dos 80.",
+            "\"Satisfaction\" é nosso grito eterno de inquietação.",
+            "Somos ingleses e eternos rivais amistosos dos Beatles.",
+            "Nosso guitarrista é lendário por sobreviver a tudo.",
+            "Fizemos um show gratuito histórico em Copacabana, para mais de um milhão de pessoas.",
+            "Nosso nome vem de uma pedra que não para quieta.",
+            "Nos chamam de \"a maior banda de rock do mundo\" — e não discutimos.",
+            "Mick e Keith são nossa dupla fundadora."
+          ]
+        },
+        {
+          "id": "mm_027",
+          "type": "COISA",
+          "answer": "Fone de ouvido",
+          "clues": [
+            "Crio um mundo particular em lugares lotados.",
+            "Já tive fio que embolava no bolso; hoje muitos de mim vivem numa caixinha.",
+            "Sou o motivo de tanta gente não ouvir quando é chamada.",
+            "Músicos de estúdio me usam para ouvir a si mesmos.",
+            "DJs me seguram com o ombro num gesto clássico.",
+            "Em avião, sou distribuído para ver filme.",
+            "Perder um lado meu virou tragédia moderna.",
+            "Aviso com um bip quando minha bateria está acabando.",
+            "Existo em versão que abraça a orelha e versão que entra nela.",
+            "Transformo qualquer caminhada num clipe particular."
+          ]
+        },
+        {
+          "id": "mm_028",
+          "type": "PESSOA",
+          "answer": "Shakira",
+          "clues": [
+            "Meus quadris não mentem — nem em espanhol, nem em inglês.",
+            "Sou colombiana, de Barranquilla.",
+            "Comecei no rock em espanhol antes do pop mundial.",
+            "Cantei o hino de uma Copa do Mundo que o planeta inteiro dançou.",
+            "Meu timbre de voz é inconfundível — meio \"caprino\", dizem com carinho.",
+            "A dança do ventre faz parte da minha herança libanesa.",
+            "Fui casada com um zagueiro espanhol famoso — e a separação virou música.",
+            "\"Waka Waka\" levou a África para o mundo pela minha voz.",
+            "Loira de cachos, virei uma das latinas mais famosas da história.",
+            "Uma indireta minha num hit com produtor argentino quebrou a internet."
+          ]
+        },
+        {
+          "id": "mm_029",
+          "type": "COISA",
+          "answer": "Bossa Nova",
+          "clues": [
+            "Nasci no fim dos anos 50, em apartamentos de Copacabana e Ipanema.",
+            "Sou um jeito brasileiro de sussurrar o samba.",
+            "Violão e voz baixinha são minha essência.",
+            "Uma garota passando pela praia virou meu cartão de visita mundial.",
+            "Tom e Vinícius são meus pais mais famosos.",
+            "João Gilberto criou minha batida no violão.",
+            "Conquistei os Estados Unidos nos anos 60 e virei sinônimo de charme.",
+            "Meu nome sugere algo recém-chegado, com um toque de elegância.",
+            "Frank Sinatra gravou no meu estilo.",
+            "Sou um gênero musical, não uma pessoa nem um lugar."
+          ]
+        },
+        {
+          "id": "mm_030",
+          "type": "PESSOA",
+          "answer": "Ivete Sangalo",
+          "clues": [
+            "Comando trios elétricos como ninguém.",
+            "Minha fama começou numa banda chamada Eva.",
+            "Salvador é minha casa e meu palco.",
+            "Meu sorriso é tão famoso quanto minha voz.",
+            "Gravei DVDs históricos no Madison Square Garden e no Maracanã.",
+            "\"Veveta\" é como o Brasil me chama com intimidade.",
+            "Multidões me tratam como a rainha do axé.",
+            "Já fui técnica de reality show musical na TV.",
+            "Minha energia no palco parece não ter fim, mesmo depois de horas de show.",
+            "Carnaval sem mim não é a mesma coisa."
+          ]
+        }
       ]
     }
   ]

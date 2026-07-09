@@ -202,7 +202,9 @@ class SetupViewModel @Inject constructor() : ViewModel() {
         }
         _configuracaoPronta.value = ConfiguracaoDaPartida(
             codigo = gerarCodigo(),
-            categoria = estado.categoria,
+            // Transitório (5A parte 1): a categoria dos chips vira a lista de
+            // baralhos embarcados equivalente; a parte 2 troca por seleção real.
+            baralhos = BaralhosEmbarcados.idsPara(estado.categoria),
             numeroDeRodadas = estado.numeroDeRodadas,
             leitorPontua = estado.leitorPontua,
             modoShot = estado.modoShot,

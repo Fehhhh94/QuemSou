@@ -1,21 +1,19 @@
 package com.quemsou.app.data.importer
 
-import com.quemsou.app.domain.model.Card
-import com.quemsou.app.domain.model.CardCategory
-import com.quemsou.app.domain.model.CardType
+import com.quemsou.app.data.catalogo.BaralhoJson
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 /**
- * Estrutura de `assets/cards.json`: uma versão inteira crescente e a lista
- * completa de cards. O importador só recarrega o banco quando [version] é
- * maior que a última versão importada.
+ * Estrutura de `assets/cards.json`: uma versão inteira crescente e os
+ * baralhos embarcados no APK, cada um no **mesmo formato do catálogo**
+ * ([BaralhoJson], documentado em `docs/CATALOG_FORMAT.md`). O importador só
+ * recarrega o banco quando [version] é maior que a última versão importada.
  */
 @Serializable
 data class CardsJson(
     val version: Int,
-    val cards: List<CardJson>,
+    val baralhos: List<BaralhoJson>,
 ) {
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
@@ -23,33 +21,10 @@ data class CardsJson(
         /**
          * Faz o parse do conteúdo de `cards.json`. Lança
          * [kotlinx.serialization.SerializationException] se a estrutura for
-         * inválida ou faltar campo obrigatório.
+         * inválida ou faltar campo obrigatório — falha ruidosa por design: o
+         * asset embarcado quebrado é bug de release, não entrada do usuário
+         * (o `BaralhoDeAssetsTest` o valida antes de qualquer release).
          */
         fun deJson(conteudo: String): CardsJson = json.decodeFromString(conteudo)
     }
-}
-
-/** Um card como declarado no JSON de assets. */
-@Serializable
-data class CardJson(
-    val id: String,
-    val type: CardType,
-    val category: CardCategory,
-    val answer: String,
-    val clues: List<String>,
-)
-
-/**
- * Valida e converte o card do JSON no modelo de domínio.
- *
- * Falha ruidosa por design: card inválido lança [IllegalArgumentException]
- * com o id do card — melhor quebrar no debug do que jogar com card capenga.
- */
-fun CardJson.paraDominio(): Card {
-    require(answer.isNotBlank()) { "Card '$id' inválido: answer vazio." }
-    require(clues.size == Card.QUANTIDADE_DE_DICAS) {
-        "Card '$id' inválido: deve ter exatamente ${Card.QUANTIDADE_DE_DICAS} dicas, mas tem ${clues.size}."
-    }
-    require(clues.none { it.isBlank() }) { "Card '$id' inválido: contém dica vazia." }
-    return Card(id = id, type = type, category = category, answer = answer, clues = clues)
 }

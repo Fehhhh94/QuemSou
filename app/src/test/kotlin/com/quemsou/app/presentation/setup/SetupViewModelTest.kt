@@ -1,5 +1,6 @@
 package com.quemsou.app.presentation.setup
 
+import com.quemsou.app.domain.model.CardCategory
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -199,6 +200,35 @@ class SetupViewModelTest {
         val configuracao = viewModel.configuracaoPronta.value!!
         assertTrue(configuracao.modoShot)
         assertEquals(1, configuracao.quantidadeDeShots)
+    }
+
+    @Test
+    fun `categoria dos chips vira a lista de baralhos embarcados equivalente`() {
+        // Ponte transitória da 5A parte 1: LIVRE = todos os baralhos; as
+        // demais categorias = o baralho embarcado correspondente.
+        val viewModel = viewModelComNomes()
+
+        viewModel.confirmar()
+        assertEquals(
+            listOf(BaralhosEmbarcados.CINEMA_CLASSICO_1, BaralhosEmbarcados.MUNDO_DA_MUSICA_1),
+            viewModel.configuracaoPronta.value!!.baralhos,
+        )
+        viewModel.consumirConfiguracaoPronta()
+
+        viewModel.selecionarCategoria(CardCategory.PERSONAGEM_FILME)
+        viewModel.confirmar()
+        assertEquals(
+            listOf(BaralhosEmbarcados.CINEMA_CLASSICO_1),
+            viewModel.configuracaoPronta.value!!.baralhos,
+        )
+        viewModel.consumirConfiguracaoPronta()
+
+        viewModel.selecionarCategoria(CardCategory.MUNDO_DA_MUSICA)
+        viewModel.confirmar()
+        assertEquals(
+            listOf(BaralhosEmbarcados.MUNDO_DA_MUSICA_1),
+            viewModel.configuracaoPronta.value!!.baralhos,
+        )
     }
 
     @Test

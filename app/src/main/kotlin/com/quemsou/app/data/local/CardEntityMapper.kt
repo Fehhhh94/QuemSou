@@ -17,11 +17,12 @@ fun CardEntity.paraDominio(): Card = Card(
     clues = clues,
 )
 
-/** Converte o modelo de domínio na entidade persistida. */
-fun Card.paraEntidade(): CardEntity = CardEntity(
+/** Converte o modelo de domínio na entidade persistida, dona do vínculo com o baralho. */
+fun Card.paraEntidade(baralhoId: String): CardEntity = CardEntity(
     id = id,
     type = type.name,
     category = category.name,
     answer = answer,
     clues = clues,
+    baralhoId = baralhoId,
 )

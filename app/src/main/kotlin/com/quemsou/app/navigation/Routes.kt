@@ -1,6 +1,5 @@
 package com.quemsou.app.navigation
 
-import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.RegrasPartida
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -31,12 +30,14 @@ object SetupRoute
 data class PartidaRoute(val configuracao: String)
 
 /**
- * Configuração mínima para recriar uma partida em qualquer aparelho: o baralho
- * e os grids de dicas derivam da seed do [codigo] (determinismo da Fase 1),
- * então nada além disto precisa viajar pela navegação.
+ * Configuração mínima para recriar uma partida em qualquer aparelho: o monte
+ * e os grids de dicas derivam da seed do [codigo] (determinismo da Fase 1) e
+ * da união determinística dos [baralhos], então nada além disto precisa
+ * viajar pela navegação.
  *
  * @property codigo código da partida; a seed deriva dele.
- * @property categoria filtro do baralho ([CardCategory.LIVRE] = todas).
+ * @property baralhos ids dos baralhos selecionados (1+); o monte da partida é
+ *   a união determinística dos seus cards.
  * @property numeroDeRodadas total de rodadas.
  * @property leitorPontua se o leitor ganha 1 ponto por dica revelada sem acerto.
  * @property modoShot se algumas posições do grid pedem um shot antes de
@@ -48,7 +49,7 @@ data class PartidaRoute(val configuracao: String)
 @Serializable
 data class ConfiguracaoDaPartida(
     val codigo: String,
-    val categoria: CardCategory,
+    val baralhos: List<String>,
     val numeroDeRodadas: Int,
     val leitorPontua: Boolean,
     val jogadores: List<JogadorConfigurado>,
