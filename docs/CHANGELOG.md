@@ -2,6 +2,21 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Reprioritização do roadmap — Fase 4 adiada, Fase 5 é o próximo passo (2026-07-09)
+
+Sem mudança de código — apenas documentação (`docs/CLAUDE.md` v14).
+Reprioritização decidida pelo Felipe.
+
+- **Fase 4 (Nearby Connections / multiplayer local): adiada para o
+  backlog**, sem previsão de retomada por agora. Quando for retomada,
+  continua valendo o combinado do fechamento da Fase 3: começar pelo desenho
+  da arquitetura da camada Nearby antes de qualquer código.
+- **Fase 5 (Fábrica de Cards com Gemini): passa a ser o próximo passo em
+  execução**, pulando a ordem original e sem depender da Fase 4 — gera →
+  valida (mesma régua do importador) → tela de revisão → Room; a partida
+  segue 100% offline, só a geração de cards usa rede.
+- A **numeração original das fases é mantida** (não há renumeração).
+
 ## Fechamento da Fase 3 — validação física concluída (2026-07-09)
 
 Sem mudança de código — apenas documentação (`docs/CLAUDE.md` v13).

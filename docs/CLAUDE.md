@@ -70,6 +70,11 @@
   pelo desenho da arquitetura da camada Nearby (anúncio de sala, descoberta,
   sincronização de estado) antes de qualquer código; validação passa a
   exigir 2+ aparelhos físicos (emulador não testa Nearby).
+- **v14** (2026-07-09) — reprioritização do roadmap (decisão do Felipe):
+  **Fase 4 (Nearby Connections) adiada para o backlog**, sem previsão de
+  retomada por agora; **Fase 5 (Fábrica de Cards com Gemini) passa a ser o
+  próximo passo**, sem depender da Fase 4. Numeração original das fases
+  mantida (sem renumeração). Nenhuma mudança de código.
 
 ## Visão geral
 
@@ -118,16 +123,19 @@
   `2273342`) e modelo unificado de Grupos — especificação v4 (v12, commit
   `88735fd`). **110 testes verdes, push feito, validação física concluída —
   Fase 3 encerrada em 2026-07-09.**
-- **Fase 4 — próxima**: multiplayer local via Nearby Connections (é quando a
-  biblioteca `play-services-nearby` é instalada), modelo estrela com o
-  anfitrião como fonte da verdade. Começa pelo **desenho da arquitetura da
-  camada Nearby** (anúncio de sala, descoberta, sincronização de estado)
-  antes de qualquer prompt de código. Validação exige 2+ aparelhos físicos —
-  o emulador não serve para testar Nearby.
-- **Fase 5 — planejada**: fábrica de cards com Gemini — gera → valida (mesma
-  régua do importador) → tela de revisão → Room. A partida em si segue 100%
-  offline; só a geração de cards usa rede.
-- **Backlog**: salas online à distância (Firebase).
+- **Fase 4 — adiada (ver backlog)**: multiplayer local via Nearby Connections
+  (é quando a biblioteca `play-services-nearby` é instalada), modelo estrela
+  com o anfitrião como fonte da verdade. Adiada na reprioritização de
+  2026-07-09 (v14), sem previsão de retomada. Quando retomada, começa pelo
+  **desenho da arquitetura da camada Nearby** (anúncio de sala, descoberta,
+  sincronização de estado) antes de qualquer prompt de código; validação
+  exige 2+ aparelhos físicos — o emulador não serve para testar Nearby.
+- **Fase 5 — próxima a ser trabalhada**: fábrica de cards com Gemini — gera →
+  valida (mesma régua do importador) → tela de revisão → Room. Não depende
+  da Fase 4. A partida em si segue 100% offline; só a geração de cards usa
+  rede.
+- **Backlog**: Fase 4 — multiplayer local via Nearby Connections (adiada em
+  2026-07-09) · salas online à distância (Firebase).
 
 ## Arquitetura de multiplayer
 
