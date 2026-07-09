@@ -23,6 +23,8 @@ data class SetupUiState(
     val jogadores: List<JogadorEmEdicao> = List(Partida.MINIMO_DE_JOGADORES) { JogadorEmEdicao() },
     val numeroDeRodadas: Int = 5,
     val leitorPontua: Boolean = true,
+    val jogadoresTocados: Set<Int> = emptySet(),
+    val tentouComecar: Boolean = false,
 ) {
     /** Primeiro motivo que impede a partida de começar; `null` se está tudo certo. */
     val motivoDoBloqueio: MotivoDoBloqueio?
@@ -42,6 +44,28 @@ data class SetupUiState(
     /** `true` quando a configuração é válida e a partida pode começar. */
     val podeComecar: Boolean
         get() = motivoDoBloqueio == null
+
+    /**
+     * [motivoDoBloqueio] pronto para exibição. [MotivoDoBloqueio.NOMES_VAZIOS]
+     * fica escondido até que o usuário interaja — os 2 jogadores em branco do
+     * estado inicial já disparariam essa mensagem assim que a tela abre, sem
+     * nenhuma ação do usuário. Ela só aparece quando um campo de nome vazio
+     * já foi tocado ([jogadoresTocados]) ou quando o usuário tentou começar a
+     * partida ([tentouComecar]) com a configuração inválida. Os demais
+     * motivos (times incompletos/insuficientes, poucos jogadores) só surgem
+     * como consequência direta de uma interação real (trocar para o modo
+     * Times, remover jogador) e continuam aparecendo imediatamente.
+     */
+    val motivoDoBloqueioVisivel: MotivoDoBloqueio?
+        get() {
+            val motivo = motivoDoBloqueio ?: return null
+            if (motivo != MotivoDoBloqueio.NOMES_VAZIOS) return motivo
+            if (tentouComecar) return motivo
+            val campoTocadoEVazio = jogadores.withIndex().any { (indice, jogador) ->
+                indice in jogadoresTocados && jogador.nome.isBlank()
+            }
+            return motivo.takeIf { campoTocadoEVazio }
+        }
 }
 
 /** Um jogador em edição no Setup. */
@@ -96,12 +120,25 @@ class SetupViewModel @Inject constructor() : ViewModel() {
         _uiState.update { estado ->
             if (estado.jogadores.size <= Partida.MINIMO_DE_JOGADORES) return@update estado
             if (indice !in estado.jogadores.indices) return@update estado
-            estado.copy(jogadores = estado.jogadores.filterIndexed { i, _ -> i != indice })
+            estado.copy(
+                jogadores = estado.jogadores.filterIndexed { i, _ -> i != indice },
+                // Os índices tocados após o removido deslizam uma posição para trás,
+                // acompanhando o mesmo deslocamento da lista de jogadores.
+                jogadoresTocados = estado.jogadoresTocados
+                    .filter { it != indice }
+                    .map { if (it > indice) it - 1 else it }
+                    .toSet(),
+            )
         }
     }
 
     fun renomearJogador(indice: Int, nome: String) {
         atualizarJogador(indice) { it.copy(nome = nome) }
+    }
+
+    /** Marca o campo de nome do [indice] como já tocado (perdeu o foco ao menos uma vez). */
+    fun marcarJogadorTocado(indice: Int) {
+        _uiState.update { it.copy(jogadoresTocados = it.jogadoresTocados + indice) }
     }
 
     /** Atribui o [timeId] ao jogador do [indice] (modo TIMES). */
@@ -121,7 +158,8 @@ class SetupViewModel @Inject constructor() : ViewModel() {
 
     /**
      * Monta a configuração e a publica em [configuracaoPronta]; ignorado
-     * enquanto [SetupUiState.podeComecar] for `false`.
+     * enquanto [SetupUiState.podeComecar] for `false` — nesse caso, marca
+     * [SetupUiState.tentouComecar] para revelar o motivo do bloqueio.
      *
      * O código da partida é sorteado aqui (4 letras): aleatoriedade de verdade
      * é desejada na *escolha* do código — o determinismo sagrado do projeto
@@ -129,7 +167,10 @@ class SetupViewModel @Inject constructor() : ViewModel() {
      */
     fun confirmar() {
         val estado = _uiState.value
-        if (!estado.podeComecar) return
+        if (!estado.podeComecar) {
+            _uiState.update { it.copy(tentouComecar = true) }
+            return
+        }
         _configuracaoPronta.value = ConfiguracaoDaPartida(
             codigo = gerarCodigo(),
             categoria = estado.categoria,

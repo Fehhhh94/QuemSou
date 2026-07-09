@@ -2,6 +2,8 @@ package com.quemsou.app.presentation.setup
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,8 +36,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,6 +51,7 @@ import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.ModoDeJogo
 import com.quemsou.app.domain.model.Partida
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
+import com.quemsou.app.presentation.ui.components.BarraDeAcaoInferior
 
 /** Tela de configuração da partida: categoria, modo, jogadores e regras. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,8 +73,8 @@ fun SetupScreen(
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.setup_title)) }) },
         bottomBar = {
-            Column(modifier = Modifier.padding(24.dp)) {
-                uiState.motivoDoBloqueio?.let { motivo ->
+            BarraDeAcaoInferior {
+                uiState.motivoDoBloqueioVisivel?.let { motivo ->
                     Text(
                         text = textoDoBloqueio(motivo),
                         style = MaterialTheme.typography.bodySmall,
@@ -114,6 +121,7 @@ fun SetupScreen(
                     modoDeJogo = uiState.modoDeJogo,
                     podeRemover = uiState.jogadores.size > Partida.MINIMO_DE_JOGADORES,
                     onNomeAlterado = { viewModel.renomearJogador(indice, it) },
+                    onNomeCampoPerdeuFoco = { viewModel.marcarJogadorTocado(indice) },
                     onTimeSelecionado = { viewModel.atribuirTime(indice, it) },
                     onRemover = { viewModel.removerJogador(indice) },
                 )
@@ -139,6 +147,7 @@ fun SetupScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SecaoCategoria(
     categoria: CardCategory,
@@ -147,7 +156,10 @@ private fun SecaoCategoria(
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(R.string.setup_categoria_titulo), style = MaterialTheme.typography.titleMedium)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // FlowRow (não Row): os 3 chips não cabem numa única linha em telas
+        // estreitas (ex.: tela externa do Z Fold) — sem quebra de linha, o
+        // chip "Livre" ficava fora da área visível.
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(
                 CardCategory.PERSONAGEM_FILME to R.string.setup_categoria_personagem_filme,
                 CardCategory.MUNDO_DA_MUSICA to R.string.setup_categoria_mundo_musica,
@@ -191,9 +203,14 @@ private fun LinhaDeJogador(
     modoDeJogo: ModoDeJogo,
     podeRemover: Boolean,
     onNomeAlterado: (String) -> Unit,
+    onNomeCampoPerdeuFoco: () -> Unit,
     onTimeSelecionado: (String) -> Unit,
     onRemover: () -> Unit,
 ) {
+    // `onFocusChanged` dispara uma vez na composição inicial com foco=false;
+    // sem essa guarda, todo campo nasceria "tocado" e o Bug 1 voltaria.
+    var campoRecebeuFoco by remember { mutableStateOf(false) }
+
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
@@ -203,7 +220,14 @@ private fun LinhaDeJogador(
                 singleLine = true,
                 modifier = Modifier
                     .weight(1f)
-                    .height(56.dp),
+                    .height(56.dp)
+                    .onFocusChanged { estadoDoFoco ->
+                        if (estadoDoFoco.isFocused) {
+                            campoRecebeuFoco = true
+                        } else if (campoRecebeuFoco) {
+                            onNomeCampoPerdeuFoco()
+                        }
+                    },
             )
             if (podeRemover) {
                 IconButton(onClick = onRemover, modifier = Modifier.size(48.dp)) {

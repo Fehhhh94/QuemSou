@@ -26,6 +26,66 @@ class SetupViewModelTest {
     }
 
     @Test
+    fun `estado inicial nao mostra o motivo do bloqueio antes de qualquer interacao`() {
+        // Bug 1: os 2 campos de nome em branco do estado inicial não podem
+        // disparar a mensagem de erro antes do usuário tocar em algo.
+        val estado = SetupViewModel().uiState.value
+
+        assertEquals(MotivoDoBloqueio.NOMES_VAZIOS, estado.motivoDoBloqueio)
+        assertNull(estado.motivoDoBloqueioVisivel)
+    }
+
+    @Test
+    fun `tocar um campo de nome vazio revela o motivo do bloqueio`() {
+        val viewModel = SetupViewModel()
+
+        viewModel.marcarJogadorTocado(0)
+
+        assertEquals(MotivoDoBloqueio.NOMES_VAZIOS, viewModel.uiState.value.motivoDoBloqueioVisivel)
+    }
+
+    @Test
+    fun `tocar um campo ja preenchido nao revela bloqueio de outro campo vazio`() {
+        val viewModel = SetupViewModel()
+        viewModel.renomearJogador(0, "Ana")
+
+        viewModel.marcarJogadorTocado(0)
+
+        assertNull(viewModel.uiState.value.motivoDoBloqueioVisivel)
+    }
+
+    @Test
+    fun `tentar comecar com campos invalidos revela o motivo do bloqueio`() {
+        val viewModel = SetupViewModel()
+
+        viewModel.confirmar()
+
+        assertTrue(viewModel.uiState.value.tentouComecar)
+        assertEquals(MotivoDoBloqueio.NOMES_VAZIOS, viewModel.uiState.value.motivoDoBloqueioVisivel)
+    }
+
+    @Test
+    fun `remover jogador desloca os indices tocados junto com a lista`() {
+        val viewModel = viewModelComNomes(3)
+        viewModel.marcarJogadorTocado(1) // toca o "Jogador 2"
+        viewModel.removerJogador(0) // remove o "Jogador 1": o tocado agora é o indice 0
+
+        viewModel.renomearJogador(0, "   ") // esvazia o jogador tocado (era o indice 1)
+
+        assertEquals(MotivoDoBloqueio.NOMES_VAZIOS, viewModel.uiState.value.motivoDoBloqueioVisivel)
+    }
+
+    @Test
+    fun `motivo de bloqueio do modo times aparece sem precisar tocar ou tentar comecar`() {
+        // Só NOMES_VAZIOS é escondido antes da interação: trocar para o modo
+        // Times já é, em si, uma interação real do usuário.
+        val viewModel = viewModelComNomes()
+        viewModel.selecionarModo(ModoDeJogo.TIMES)
+
+        assertEquals(MotivoDoBloqueio.TIMES_INCOMPLETOS, viewModel.uiState.value.motivoDoBloqueioVisivel)
+    }
+
+    @Test
     fun `nomear todos os jogadores libera o comecar`() {
         val viewModel = viewModelComNomes()
 

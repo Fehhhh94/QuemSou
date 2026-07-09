@@ -82,7 +82,7 @@
     <string name="partida_anuncio_resposta_era">A resposta era:</string>
     <string name="partida_anuncio_pontos_acertador">+%1$d pts</string>
     <string name="partida_anuncio_pontos_leitor">%1$s (leitor): +%2$d pts</string>
-    <string name="partida_anuncio_proximo_turno">Próximo turno</string>
+    <string name="partida_anuncio_proximo_turno">Próxima jogada</string>
     <string name="partida_anuncio_ver_placar">Ver placar</string>
 
     <!-- Partida — PlacarFinal -->

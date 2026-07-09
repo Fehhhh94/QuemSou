@@ -2,6 +2,32 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Correções de UI pós-teste físico da Fase 3 (2026-07-08)
+
+3 bugs e 1 melhoria encontrados no teste de jogo físico (Samsung Galaxy Z
+Fold, Android 16), registrados em detalhe em `docs/BUGS.md` e
+`docs/IMPROVEMENTS.md`. Escopo só de `presentation/ui` — nenhuma mudança de
+regra de jogo ou de domínio.
+
+- **Bug 1 — validação prematura no Setup**: `SetupUiState` ganhou
+  `jogadoresTocados`/`tentouComecar` e a propriedade `motivoDoBloqueioVisivel`;
+  a mensagem "Dê um nome a todos os jogadores" não aparece mais assim que a
+  tela abre, só depois de um campo vazio ser tocado ou de uma tentativa de
+  confirmar com a configuração inválida.
+- **Bug 2 — chip "Livre" ausente**: os 3 chips de categoria já existiam no
+  código; o `Row` sem quebra de linha cortava o terceiro chip em telas
+  estreitas (Z Fold). Trocado por `FlowRow`.
+- **Bug 3 — botão cortado pela barra de navegação**: o `bottomBar` do Setup
+  não recebia o inset de `WindowInsets.systemBars` como o `content` do
+  `Scaffold` recebe. Novo componente `ui/components/BarraDeAcaoInferior`
+  (com `Modifier.navigationBarsPadding()`) resolve e fica pronto para reuso;
+  as demais telas do fluxo (Home, Partida) já usavam só `content` e não
+  tinham o problema.
+- **Melhoria — "Próxima jogada"**: texto do botão da tela Anuncio trocado de
+  "Próximo turno" para a linguagem usada à mesa; só o texto exibido mudou.
+- **103 testes verdes** (6 novos cobrindo o Bug 1). **Validação final no Z
+  Fold físico: PENDENTE** — Felipe valida na próxima sessão de jogo.
+
 ## Especificação v3: pontuação do leitor por dica sem acerto (cabo de guerra) (2026-07-08)
 
 Mudança de especificação motivada pelo teste de jogo completo no Z Fold

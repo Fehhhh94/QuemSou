@@ -41,6 +41,14 @@
   `Partida` e `PartidaUiState.Anuncio` atualizados; 97 testes verdes.
   **Validação final no Z Fold físico (acerto tardio + card queimado):
   PENDENTE.**
+- **v11** (2026-07-08) — correções de UI do mesmo teste físico (Z Fold,
+  Android 16), detalhadas em `docs/BUGS.md`/`docs/IMPROVEMENTS.md`: validação
+  prematura no Setup (novo `motivoDoBloqueioVisivel`), chip "Livre" cortado
+  por `Row` sem quebra de linha (trocado por `FlowRow`), botão do Setup sob
+  a barra de navegação (`bottomBar` não recebia inset de sistema — novo
+  `ui/components/BarraDeAcaoInferior`), e texto "Próxima jogada" no anúncio.
+  Só `presentation/ui`, nenhuma mudança de domínio; 103 testes verdes.
+  **Validação final no Z Fold físico: PENDENTE.**
 
 ## Visão geral
 
@@ -178,6 +186,14 @@
 - **Nome do app** — EM ABERTO: código, pacote (`com.quemsou.app`) e strings
   usam "QuemSou" provisoriamente; é a única decisão de produto ainda sem
   fechamento.
+- **Insets em telas edge-to-edge** — RESOLVIDA (v11, 2026-07-08): o app usa
+  `enableEdgeToEdge()` na `MainActivity`, então o `content` do `Scaffold`
+  recebe `WindowInsets.systemBars` automaticamente via `innerPadding`, mas um
+  `bottomBar` customizado (um `Column` comum, não um componente M3 dedicado
+  como `NavigationBar`) **não** recebe esse inset sozinho. Toda barra de ação
+  fora do `content` do `Scaffold` deve usar
+  `presentation/ui/components/BarraDeAcaoInferior` (aplica
+  `Modifier.navigationBarsPadding()`), como no `bottomBar` do Setup.
 - **Determinismo é sagrado**: seed e embaralhamento não podem usar `hashCode()`
   da plataforma, `kotlin.random.Random` nem `java.util.Random`. As
   implementações próprias vivem em `domain/rules/` (hash polinomial +
