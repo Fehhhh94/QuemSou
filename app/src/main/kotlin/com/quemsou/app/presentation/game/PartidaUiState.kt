@@ -63,26 +63,33 @@ sealed interface PartidaUiState {
      *
      * @property ultimaRodada `true` quando fechar este anúncio leva ao
      *   [PlacarFinal] — a UI troca o texto do botão de avançar por "Ver placar".
+     * @property pontosDoLeitor pontos que o leitor ganha neste turno (0
+     *   quando a regra `leitorPontua` está desligada) — especificação v3:
+     *   1 ponto por dica revelada sem acerto, 10 quando o card queima.
      */
     sealed interface Anuncio : PartidaUiState {
         val resposta: String
         val dicasUsadas: Int
         val ultimaRodada: Boolean
+        val nomeDoLeitor: String
+        val pontosDoLeitor: Int
 
         data class Acerto(
             override val resposta: String,
             override val dicasUsadas: Int,
             override val ultimaRodada: Boolean,
+            override val nomeDoLeitor: String,
+            override val pontosDoLeitor: Int,
             val nomeDoAcertador: String,
-            val nomeDoLeitor: String,
             val pontosDoAcertador: Int,
-            val pontosDoLeitor: Int,
         ) : Anuncio
 
         data class Queimado(
             override val resposta: String,
             override val dicasUsadas: Int,
             override val ultimaRodada: Boolean,
+            override val nomeDoLeitor: String,
+            override val pontosDoLeitor: Int,
         ) : Anuncio
     }
 

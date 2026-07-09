@@ -131,7 +131,10 @@ data class Turno(
         )
     }
 
-    /** Os adivinhadores desistem: o card queima e ninguém pontua. */
+    /**
+     * Os adivinhadores desistem: o card queima e o leitor ganha os pontos do
+     * card queimado via [CalculadoraDePontos.ninguemAcertou].
+     */
     fun queimarCard(): Turno {
         check(estado !is EstadoDoTurno.TurnoEncerrado) { "O turno já foi encerrado." }
         return queimar()
@@ -141,6 +144,7 @@ data class Turno(
         estado = EstadoDoTurno.TurnoEncerrado.Queimado(
             resposta = card.answer,
             dicasUsadas = dicasUsadas,
+            pontosLeitor = CalculadoraDePontos.ninguemAcertou(regras).pontosLeitor,
         ),
     )
 

@@ -369,6 +369,8 @@ class PartidaViewModel @Inject constructor(
                 resposta = fim.resposta,
                 dicasUsadas = fim.dicasUsadas,
                 ultimaRodada = ultimaRodada,
+                nomeDoLeitor = checkNotNull(turno).leitor.nome,
+                pontosDoLeitor = fim.pontosLeitor,
             )
 
             else -> error("Anúncio sem turno encerrado (estado: $fim).")

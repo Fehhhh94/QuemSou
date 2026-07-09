@@ -78,7 +78,7 @@
     <string name="partida_anuncio_acerto_titulo">%1$s acertou!</string>
     <string name="partida_anuncio_acerto_subtitulo">na dica %1$d</string>
     <string name="partida_anuncio_queimado_titulo">Ninguém acertou</string>
-    <string name="partida_anuncio_queimado_subtitulo">card queimado · 0 pts</string>
+    <string name="partida_anuncio_queimado_subtitulo">card queimado</string>
     <string name="partida_anuncio_resposta_era">A resposta era:</string>
     <string name="partida_anuncio_pontos_acertador">+%1$d pts</string>
     <string name="partida_anuncio_pontos_leitor">%1$s (leitor): +%2$d pts</string>

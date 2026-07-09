@@ -105,6 +105,7 @@ data class Partida(
                 .adicionar(leitorDaVez.id, fim.pontosLeitor)
 
             is EstadoDoTurno.TurnoEncerrado.Queimado -> placar
+                .adicionar(leitorDaVez.id, fim.pontosLeitor)
         }
         return if (rodadaAtual == totalDeRodadas) {
             copy(placar = novoPlacar, encerrada = true)

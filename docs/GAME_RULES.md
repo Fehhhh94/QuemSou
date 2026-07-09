@@ -34,14 +34,26 @@ código deve estar registrada aqui.
   **10ª dica sem acerto** (queima automaticamente). O fim de turno é anunciado
   com a **resposta revelada**, as dicas usadas e os pontos de cada um.
 
-## Pontuação
+## Pontuação (especificação v3 — "cabo de guerra")
 
 - Quem acerta tendo usado **N** dicas (N de 1 a 10) ganha **11 − N** pontos:
   acertou com 1 dica usada → 10 pontos; com 5 → 6 pontos; com 10 → 1 ponto.
+  **Inalterado** desde a v1.
 - **Leitor**: configurável por partida (`RegrasPartida.leitorPontua`, padrão
-  **SIM**). Quando ativo, o leitor ganha os **mesmos pontos** do acertador;
-  quando desativado, o leitor ganha 0.
-- **Ninguém acertou**: ninguém pontua (0 para o acertador, 0 para o leitor).
+  **SIM**). Quando ativo, o leitor ganha **1 ponto por dica revelada sem
+  acerto** — ou seja, acerto na dica N dá ao leitor **N − 1** pontos:
+  - acerto na dica 3 → acertador 8, leitor 2.
+  - acerto na dica 10 → acertador 1, leitor 9.
+  - acerto na dica 1 → acertador 10, leitor **0** (nenhuma dica foi revelada
+    sem acerto).
+
+  Quando desativado, o leitor ganha 0.
+- **Card queimado** (10 dicas sem acerto, ou desistência): o acertador não
+  pontua e o leitor ganha **10 pontos** (0 se `leitorPontua` estiver
+  desligado) — as 10 dicas foram todas reveladas sem ninguém acertar.
+- **Invariante**: com o leitor pontuando, todo turno distribui **exatamente
+  10 pontos** no total — acertador + leitor somam 10 num acerto; o card
+  queimado dá os 10 pontos inteiros ao leitor.
 
 ## Partida
 

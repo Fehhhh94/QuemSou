@@ -350,14 +350,14 @@ internal fun AnuncioContent(
                 Text(estado.resposta, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
             }
         }
-        if (estado is PartidaUiState.Anuncio.Acerto) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (estado is PartidaUiState.Anuncio.Acerto) {
                 AssistChipDePontos(stringResource(R.string.partida_anuncio_pontos_acertador, estado.pontosDoAcertador))
-                if (estado.pontosDoLeitor > 0) {
-                    AssistChipDePontos(
-                        stringResource(R.string.partida_anuncio_pontos_leitor, estado.nomeDoLeitor, estado.pontosDoLeitor),
-                    )
-                }
+            }
+            if (estado.pontosDoLeitor > 0) {
+                AssistChipDePontos(
+                    stringResource(R.string.partida_anuncio_pontos_leitor, estado.nomeDoLeitor, estado.pontosDoLeitor),
+                )
             }
         }
         Button(

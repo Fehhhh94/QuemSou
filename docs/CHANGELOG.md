@@ -2,6 +2,31 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Especificação v3: pontuação do leitor por dica sem acerto (cabo de guerra) (2026-07-08)
+
+Mudança de especificação motivada pelo teste de jogo completo no Z Fold
+físico: a regra antiga (leitor ganha os mesmos pontos do acertador) foi
+substituída por uma dinâmica de "cabo de guerra" entre leitor e adivinhadores.
+
+- `CalculadoraDePontos.calcular`: o acertador continua ganhando `11 − N`
+  pontos (inalterado); o leitor agora ganha **1 ponto por dica revelada sem
+  acerto** (`N − 1`) quando `RegrasPartida.leitorPontua`. Acerto na dica 1 →
+  leitor 0; acerto na dica 10 → leitor 9.
+- `CalculadoraDePontos.ninguemAcertou` passa a receber `RegrasPartida`: o card
+  queimado agora dá **10 pontos ao leitor** (antes: ninguém pontuava).
+  `EstadoDoTurno.TurnoEncerrado.Queimado` e `Partida.encerrarTurno` foram
+  atualizados para propagar esses pontos ao placar.
+- Novo teste de invariante: com o leitor pontuando, todo turno distribui
+  exatamente 10 pontos no total (acertador + leitor num acerto; os 10 inteiros
+  para o leitor num card queimado).
+- `PartidaUiState.Anuncio` ganhou `nomeDoLeitor`/`pontosDoLeitor` no nível do
+  sealed interface (antes só em `Acerto`), então o anúncio de card queimado
+  também exibe o chip de pontos do leitor — sem lógica de pontuação na UI, que
+  só exibe o que o domínio calculou.
+- `docs/GAME_RULES.md` atualizado com a nova fórmula e exemplos numéricos.
+- **Validação final no Z Fold físico (acerto tardio + card queimado):
+  PENDENTE** — Felipe valida na próxima sessão de jogo.
+
 ## Fechamento documental da Fase 3 (2026-07-04)
 
 Sem mudança de código — apenas documentação (`docs/CLAUDE.md`,

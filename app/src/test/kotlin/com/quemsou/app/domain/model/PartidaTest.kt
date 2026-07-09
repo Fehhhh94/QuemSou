@@ -97,19 +97,21 @@ class PartidaTest {
     }
 
     @Test
-    fun `acerto soma pontos ao acertador e ao leitor`() {
+    fun `acerto na primeira dica soma pontos ao acertador e nada ao leitor`() {
         val partida = partida(quantidadeDeJogadores = 3).rodadaComAcertoDe("j2")
 
         assertEquals(10, partida.placar.pontosDe("j2"))
-        assertEquals(10, partida.placar.pontosDe("j1"))
+        assertEquals(0, partida.placar.pontosDe("j1"))
         assertEquals(0, partida.placar.pontosDe("j3"))
     }
 
     @Test
-    fun `card queimado nao pontua ninguem`() {
+    fun `card queimado da 10 pontos ao leitor e nada aos demais`() {
         val partida = partida().rodadaQueimada()
 
-        assertTrue(partida.placar.pontosPorJogador.values.all { it == 0 })
+        assertEquals(10, partida.placar.pontosDe("j1"))
+        assertEquals(0, partida.placar.pontosDe("j2"))
+        assertEquals(0, partida.placar.pontosDe("j3"))
     }
 
     @Test
@@ -125,8 +127,8 @@ class PartidaTest {
     fun `empate e declarado com todos os vencedores`() {
         var partida = partida(quantidadeDeJogadores = 2, rodadas = 2)
 
-        partida = partida.rodadaComAcertoDe("j2") // leitor j1: ambos +10
-        partida = partida.rodadaComAcertoDe("j1") // leitor j2: ambos +10
+        partida = partida.rodadaComAcertoDe("j2") // j2 (acertador) +10, j1 (leitor) +0
+        partida = partida.rodadaComAcertoDe("j1") // j1 (acertador) +10, j2 (leitor) +0
 
         assertTrue(partida.encerrada)
         assertEquals(listOf("j1", "j2"), partida.vencedores())

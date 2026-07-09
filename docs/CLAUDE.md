@@ -33,6 +33,14 @@
   declarado no placar, "Livre" via `buscarTodas()`) e novo item em aberto
   (nome do app). **Validação de jogo completo no Z Fold físico: PENDENTE** —
   a Fase 3 só fecha depois dela.
+- **v10** (2026-07-08) — especificação v3 de pontuação ("cabo de guerra"),
+  motivada pelo teste no Z Fold físico: o leitor deixa de ganhar os mesmos
+  pontos do acertador e passa a ganhar 1 ponto por dica revelada sem acerto
+  (acerto na dica N → leitor N − 1 pontos); card queimado passa a dar 10
+  pontos ao leitor (antes: ninguém pontuava). `CalculadoraDePontos`, `Turno`,
+  `Partida` e `PartidaUiState.Anuncio` atualizados; 97 testes verdes.
+  **Validação final no Z Fold físico (acerto tardio + card queimado):
+  PENDENTE.**
 
 ## Visão geral
 
@@ -101,8 +109,13 @@
 
 ## Decisões de design
 
-- **Leitor pontua** — RESOLVIDA: configurável em `RegrasPartida.leitorPontua`,
-  padrão SIM; quando ativo, o leitor ganha os **mesmos** pontos do acertador.
+- **Leitor pontua** — RESOLVIDA, especificação v3 ("cabo de guerra",
+  2026-07-08): configurável em `RegrasPartida.leitorPontua`, padrão SIM;
+  quando ativo, o leitor ganha **1 ponto por dica revelada sem acerto**
+  (acerto na dica N → leitor N − 1 pontos; card queimado → leitor 10 pontos).
+  Todo turno distribui exatamente 10 pontos no total. Ver
+  `docs/GAME_RULES.md` para a fórmula completa e `CalculadoraDePontos` no
+  domínio.
 - **Destino do card queimado** — RESOLVIDA: descartado (não volta ao baralho).
   Campo `RegrasPartida.descartarCardQueimado`, padrão SIM (criado na Fase 2).
 - **Categoria "Livre"** — RESOLVIDA: é um **filtro** de baralho, a união de

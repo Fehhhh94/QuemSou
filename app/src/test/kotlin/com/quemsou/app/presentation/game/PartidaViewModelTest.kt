@@ -97,14 +97,14 @@ class PartidaViewModelTest {
         // Caio é o escolhedor da vez agora, então entra primeiro na lista.
         assertEquals(listOf("Caio", "Bia"), quemAcertou.adivinhadores.map { it.nome })
         assertEquals(9, quemAcertou.pontosEmJogo)
-        assertEquals(9, quemAcertou.pontosDoLeitor)
+        assertEquals(1, quemAcertou.pontosDoLeitor)
 
         viewModel.registrarAcerto("j2")
         val anuncio = viewModel.uiState.value as PartidaUiState.Anuncio.Acerto
         assertEquals("Bia", anuncio.nomeDoAcertador)
         assertEquals(2, anuncio.dicasUsadas)
         assertEquals(9, anuncio.pontosDoAcertador)
-        assertEquals(9, anuncio.pontosDoLeitor)
+        assertEquals(1, anuncio.pontosDoLeitor)
 
         // Rodada 2: leitor girou para Bia.
         viewModel.proximoTurno()
@@ -123,15 +123,15 @@ class PartidaViewModelTest {
         viewModel.proximoTurno()
         val placarFinal = viewModel.uiState.value as PartidaUiState.PlacarFinal
         assertEquals(
-            listOf(LinhaDoPlacar("Ana", 19), LinhaDoPlacar("Bia", 19), LinhaDoPlacar("Caio", 0)),
+            listOf(LinhaDoPlacar("Ana", 11), LinhaDoPlacar("Bia", 9), LinhaDoPlacar("Caio", 0)),
             placarFinal.ranking,
         )
-        assertEquals(listOf("Ana", "Bia"), placarFinal.vencedores)
-        assertTrue(placarFinal.empate)
+        assertEquals(listOf("Ana"), placarFinal.vencedores)
+        assertFalse(placarFinal.empate)
     }
 
     @Test
-    fun `dez dicas sem acerto queimam o card com a resposta no anuncio`() {
+    fun `dez dicas sem acerto queimam o card com a resposta e 10 pontos para o leitor no anuncio`() {
         val viewModel = viewModel()
         viewModel.iniciarTurno()
         val resposta = (viewModel.uiState.value as PartidaUiState.Grid).respostaParaOLeitor
@@ -145,6 +145,8 @@ class PartidaViewModelTest {
         val anuncio = viewModel.uiState.value as PartidaUiState.Anuncio.Queimado
         assertEquals(resposta, anuncio.resposta)
         assertEquals(10, anuncio.dicasUsadas)
+        assertEquals("Ana", anuncio.nomeDoLeitor)
+        assertEquals(10, anuncio.pontosDoLeitor)
     }
 
     @Test
@@ -178,7 +180,7 @@ class PartidaViewModelTest {
         val handle = handleDe(configuracao())
         val antes = PartidaViewModel(handle, RepositorioFake(cards()))
 
-        // Rodada 1 completa (Bia acerta com 2 dicas: +9/+9) e metade da rodada 2.
+        // Rodada 1 completa (Bia acerta com 2 dicas: acertador +9, leitor +1) e metade da rodada 2.
         antes.iniciarTurno()
         antes.revelarDica(3)
         antes.outraDica()
@@ -203,7 +205,7 @@ class PartidaViewModelTest {
         depois.proximoTurno()
         val placarFinal = depois.uiState.value as PartidaUiState.PlacarFinal
         assertEquals(
-            listOf(LinhaDoPlacar("Ana", 18), LinhaDoPlacar("Bia", 18), LinhaDoPlacar("Caio", 0)),
+            listOf(LinhaDoPlacar("Ana", 10), LinhaDoPlacar("Bia", 10), LinhaDoPlacar("Caio", 0)),
             placarFinal.ranking,
         )
     }

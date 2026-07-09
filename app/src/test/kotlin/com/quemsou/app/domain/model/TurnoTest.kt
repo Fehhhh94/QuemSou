@@ -38,7 +38,7 @@ class TurnoTest {
     // region Máquina de estados
 
     @Test
-    fun `caminho feliz - acerto na primeira dica vale 10 pontos para acertador e leitor`() {
+    fun `caminho feliz - acerto na primeira dica vale 10 pontos para o acertador e 0 para o leitor`() {
         val encerrado = turno().revelarDica(posicao = 5).registrarAcerto("adv-1")
 
         assertEquals(
@@ -47,20 +47,20 @@ class TurnoTest {
                 dicasUsadas = 1,
                 acertadorId = "adv-1",
                 pontosAcertador = 10,
-                pontosLeitor = 10,
+                pontosLeitor = 0,
             ),
             encerrado.estado,
         )
     }
 
     @Test
-    fun `acerto com as 10 dicas usadas vale 1 ponto`() {
+    fun `acerto com as 10 dicas usadas vale 1 ponto para o acertador e 9 para o leitor`() {
         val encerrado = turnoComDezDicasReveladas().registrarAcerto("adv-2")
 
         val acerto = encerrado.estado as EstadoDoTurno.TurnoEncerrado.Acerto
         assertEquals(10, acerto.dicasUsadas)
         assertEquals(1, acerto.pontosAcertador)
-        assertEquals(1, acerto.pontosLeitor)
+        assertEquals(9, acerto.pontosLeitor)
     }
 
     @Test
@@ -75,21 +75,21 @@ class TurnoTest {
     }
 
     @Test
-    fun `queimar card por desistencia encerra com a resposta revelada`() {
+    fun `queimar card por desistencia encerra com a resposta revelada e 10 pontos para o leitor`() {
         val encerrado = turno().revelarDica(posicao = 3).queimarCard()
 
         assertEquals(
-            EstadoDoTurno.TurnoEncerrado.Queimado(resposta = "Resposta Secreta", dicasUsadas = 1),
+            EstadoDoTurno.TurnoEncerrado.Queimado(resposta = "Resposta Secreta", dicasUsadas = 1, pontosLeitor = 10),
             encerrado.estado,
         )
     }
 
     @Test
-    fun `outra dica apos a decima queima o card`() {
+    fun `outra dica apos a decima queima o card com 10 pontos para o leitor`() {
         val encerrado = turnoComDezDicasReveladas().outraDica()
 
         assertEquals(
-            EstadoDoTurno.TurnoEncerrado.Queimado(resposta = "Resposta Secreta", dicasUsadas = 10),
+            EstadoDoTurno.TurnoEncerrado.Queimado(resposta = "Resposta Secreta", dicasUsadas = 10, pontosLeitor = 10),
             encerrado.estado,
         )
     }

@@ -45,10 +45,15 @@ sealed interface EstadoDoTurno {
             val pontosLeitor: Int,
         ) : TurnoEncerrado
 
-        /** Card queimado (desistência ou 10 dicas sem acerto): ninguém pontua. */
+        /**
+         * Card queimado (desistência ou 10 dicas sem acerto): o acertador não
+         * pontua e o leitor ganha [pontosLeitor] — 10 pontos (0 quando
+         * [RegrasPartida.leitorPontua] está desligado).
+         */
         data class Queimado(
             override val resposta: String,
             override val dicasUsadas: Int,
+            val pontosLeitor: Int,
         ) : TurnoEncerrado
     }
 }
