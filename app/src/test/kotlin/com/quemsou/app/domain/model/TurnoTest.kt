@@ -3,6 +3,7 @@ package com.quemsou.app.domain.model
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TurnoTest {
@@ -24,7 +25,8 @@ class TurnoTest {
         quantidadeDeAdivinhadores: Int = 3,
         regras: RegrasPartida = RegrasPartida(),
         seed: Long = 42L,
-    ) = Turno.criar(card(), leitor, adivinhadores(quantidadeDeAdivinhadores), regras, seed)
+        seedDosShots: Long = 99L,
+    ) = Turno.criar(card(), leitor, adivinhadores(quantidadeDeAdivinhadores), regras, seed, seedDosShots)
 
     /** Revela as 10 posições do grid pedindo outra dica entre uma e outra. */
     private fun turnoComDezDicasReveladas(): Turno {
@@ -180,7 +182,7 @@ class TurnoTest {
     @Test
     fun `leitor entre os adivinhadores e rejeitado`() {
         assertThrows(IllegalArgumentException::class.java) {
-            Turno.criar(card(), leitor, adivinhadores(2) + leitor, RegrasPartida(), seedDasDicas = 42L)
+            Turno.criar(card(), leitor, adivinhadores(2) + leitor, RegrasPartida(), seedDasDicas = 42L, seedDosShots = 99L)
         }
     }
 
@@ -204,6 +206,51 @@ class TurnoTest {
     @Test
     fun `seeds diferentes geram grids diferentes`() {
         assertNotEquals(turno(seed = 1L).dicasNoGrid, turno(seed = 2L).dicasNoGrid)
+    }
+
+    // endregion
+
+    // region Modo Shot
+
+    @Test
+    fun `modo shot desligado nao sorteia posicao nenhuma`() {
+        assertEquals(emptySet<Int>(), turno().posicoesComShot)
+    }
+
+    @Test
+    fun `mesma seed sorteia as mesmas posicoes de shot e seeds diferentes sorteiam outras`() {
+        val regras = RegrasPartida(modoShot = true)
+
+        assertEquals(
+            turno(regras = regras, seedDosShots = 7L).posicoesComShot,
+            turno(regras = regras, seedDosShots = 7L).posicoesComShot,
+        )
+        assertNotEquals(
+            turno(regras = regras, seedDosShots = 7L).posicoesComShot,
+            turno(regras = regras, seedDosShots = 8L).posicoesComShot,
+        )
+    }
+
+    @Test
+    fun `sorteio respeita a quantidade de shots sem repetir posicoes do grid`() {
+        for (quantidade in RegrasPartida.MINIMO_DE_SHOTS..RegrasPartida.MAXIMO_DE_SHOTS) {
+            val sorteadas = turno(
+                regras = RegrasPartida(modoShot = true, quantidadeDeShots = quantidade),
+            ).posicoesComShot
+
+            // Set garante sem repetição; o tamanho garante a quantidade exata.
+            assertEquals(quantidade, sorteadas.size)
+            assertTrue(sorteadas.all { it in 1..Card.QUANTIDADE_DE_DICAS })
+        }
+    }
+
+    @Test
+    fun `temShot responde exatamente pelas posicoes sorteadas`() {
+        val turno = turno(regras = RegrasPartida(modoShot = true))
+
+        for (posicao in 1..Card.QUANTIDADE_DE_DICAS) {
+            assertEquals(posicao in turno.posicoesComShot, turno.temShot(posicao))
+        }
     }
 
     // endregion

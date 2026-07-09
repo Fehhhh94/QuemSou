@@ -1,6 +1,8 @@
 package com.quemsou.app.domain.model
 
+import com.quemsou.app.domain.rules.EmbaralhadorDeCards
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -248,6 +250,51 @@ class PartidaTest {
             rodadasJogadas++
             assertEquals(10 * rodadasJogadas, partida.grupos.sumOf { it.pontos })
         }
+    }
+
+    @Test
+    fun `posicoes de shot sao deterministicas e mudam entre rodadas`() {
+        val regras = RegrasPartida(numeroDeRodadas = 3, modoShot = true)
+        val umaPartida = partida(regras = regras)
+
+        val shotsDaRodada1 = umaPartida.iniciarTurno().posicoesComShot
+        assertEquals(RegrasPartida.QUANTIDADE_PADRAO_DE_SHOTS, shotsDaRodada1.size)
+        // A mesma partida recriada sorteia as mesmas posições.
+        assertEquals(shotsDaRodada1, partida(regras = regras).iniciarTurno().posicoesComShot)
+        // A rodada seguinte sorteia posições próprias.
+        assertNotEquals(shotsDaRodada1, umaPartida.rodadaQueimada().iniciarTurno().posicoesComShot)
+    }
+
+    @Test
+    fun `seed dos shots tem fator proprio e nao mexe no grid de dicas`() {
+        val comShot = partida(regras = RegrasPartida(numeroDeRodadas = 3, modoShot = true)).iniciarTurno()
+
+        // O grid de dicas é idêntico com o modo ligado ou desligado: o sorteio
+        // dos shots não consome o PRNG das dicas.
+        assertEquals(partida().iniciarTurno().dicasNoGrid, comShot.dicasNoGrid)
+        // E as posições sorteadas não saem da seed das dicas (seed × 31 +
+        // rodada, a fórmula documentada em GAME_RULES): fator próprio.
+        val seShotsReusassemASeedDasDicas = EmbaralhadorDeCards
+            .embaralhar((1..Card.QUANTIDADE_DE_DICAS).toList(), 42L * 31 + 1)
+            .take(RegrasPartida.QUANTIDADE_PADRAO_DE_SHOTS)
+            .toSet()
+        assertNotEquals(seShotsReusassemASeedDasDicas, comShot.posicoesComShot)
+    }
+
+    @Test
+    fun `modo shot nao muda a pontuacao e mantem a invariante dos 10 pontos por turno`() {
+        var partida = partida(regras = RegrasPartida(numeroDeRodadas = 3, modoShot = true))
+
+        // Acerto na 3ª dica: acertador 8, leitor 2 — exatamente como sem o modo.
+        partida = partida.rodadaComAcertoDe("j2", dicasUsadas = 3)
+        assertEquals(8, partida.grupoDe("j2").pontos)
+        assertEquals(2, partida.grupoDe("j1").pontos)
+
+        // Card queimado na rodada 2 (leitor j2): 10 pontos ao leitor, como sempre.
+        partida = partida.rodadaQueimada()
+        assertEquals(8 + 10, partida.grupoDe("j2").pontos)
+
+        assertEquals(10 * 2, partida.grupos.sumOf { it.pontos })
     }
 
     @Test

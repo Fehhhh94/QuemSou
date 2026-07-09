@@ -93,6 +93,7 @@ data class Partida(
             adivinhadores = jogadores.filter { it.id != leitorDaVez.id },
             regras = regras,
             seedDasDicas = seedDasDicas(rodadaAtual),
+            seedDosShots = seedDosShots(rodadaAtual),
         )
     }
 
@@ -156,6 +157,14 @@ data class Partida(
      */
     private fun seedDasDicas(rodada: Int): Long = seed * BASE_DA_SEED_DE_DICAS + rodada
 
+    /**
+     * Seed do sorteio das posições com shot da [rodada] (Modo Shot): continua
+     * o polinômio de [seedDasDicas] com um fator próprio — determinística e
+     * independente do embaralhamento das dicas do mesmo turno.
+     */
+    private fun seedDosShots(rodada: Int): Long =
+        seedDasDicas(rodada) * BASE_DA_SEED_DE_DICAS + FATOR_DA_SEED_DE_SHOTS
+
     companion object {
         /** Mínimo de jogadores por partida (1 leitor + 1 adivinhador). */
         const val MINIMO_DE_JOGADORES = 2
@@ -164,5 +173,7 @@ data class Partida(
         const val MAXIMO_DE_JOGADORES = 4
 
         private const val BASE_DA_SEED_DE_DICAS = 31L
+
+        private const val FATOR_DA_SEED_DE_SHOTS = 7L
     }
 }

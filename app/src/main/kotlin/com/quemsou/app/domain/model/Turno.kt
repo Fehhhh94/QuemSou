@@ -22,6 +22,9 @@ import com.quemsou.app.domain.rules.EmbaralhadorDeCards
  * @property adivinhadores todos os jogadores menos o leitor (1 a 3).
  * @property regras regras da partida (leitor pontua etc.).
  * @property dicasNoGrid as 10 dicas embaralhadas; índice 0 = posição 1 do grid.
+ * @property posicoesComShot posições do grid com shot (Modo Shot; vazio com o
+ *   modo desligado). O shot é pedágio da UI antes de revelar — não é um estado
+ *   desta máquina e não muda a pontuação em nada.
  * @property indiceDoEscolhedor índice em [adivinhadores] de quem escolhe agora.
  * @property posicoesReveladas posições já reveladas, na ordem de revelação.
  * @property estado estado atual da máquina ([EstadoDoTurno]).
@@ -32,6 +35,7 @@ data class Turno(
     val adivinhadores: List<Jogador>,
     val regras: RegrasPartida,
     val dicasNoGrid: List<String>,
+    val posicoesComShot: Set<Int> = emptySet(),
     val indiceDoEscolhedor: Int = 0,
     val posicoesReveladas: List<Int> = emptyList(),
     val estado: EstadoDoTurno = EstadoDoTurno.EscolhendoDica,
@@ -55,7 +59,16 @@ data class Turno(
         require(posicoesReveladas.toSet().size == posicoesReveladas.size) {
             "Posições reveladas repetidas: $posicoesReveladas."
         }
+        require(posicoesComShot.all { it in 1..Card.QUANTIDADE_DE_DICAS }) {
+            "Posições com shot fora do grid 1–${Card.QUANTIDADE_DE_DICAS}: $posicoesComShot."
+        }
     }
+
+    /**
+     * `true` se a [posicao] (1–10) tem shot — a consulta que a UI faz no
+     * momento do toque, antes de revelar a dica.
+     */
+    fun temShot(posicao: Int): Boolean = posicao in posicoesComShot
 
     /** Adivinhador que escolhe a próxima posição do grid. */
     val escolhedorDaVez: Jogador
@@ -155,7 +168,9 @@ data class Turno(
         /**
          * Cria o turno embaralhando as 10 dicas do [card] nas posições do grid
          * de forma determinística pela [seedDasDicas] — mesmo turno, mesmo grid
-         * em qualquer aparelho (base do multiplayer da Fase 4).
+         * em qualquer aparelho (base do multiplayer da Fase 4). Com o Modo Shot
+         * ligado, sorteia também as posições com shot pela [seedDosShots] —
+         * independente do grid, pelo mesmo PRNG determinístico.
          */
         fun criar(
             card: Card,
@@ -163,12 +178,28 @@ data class Turno(
             adivinhadores: List<Jogador>,
             regras: RegrasPartida,
             seedDasDicas: Long,
+            seedDosShots: Long,
         ): Turno = Turno(
             card = card,
             leitor = leitor,
             adivinhadores = adivinhadores,
             regras = regras,
             dicasNoGrid = EmbaralhadorDeCards.embaralhar(card.clues, seedDasDicas),
+            posicoesComShot = sortearPosicoesComShot(regras, seedDosShots),
         )
+
+        /**
+         * Sorteia as posições com shot do turno: embaralha as posições 1–10 com
+         * o PRNG determinístico e toma as [RegrasPartida.quantidadeDeShots]
+         * primeiras — sem repetição. Modo desligado → nenhuma posição.
+         */
+        private fun sortearPosicoesComShot(regras: RegrasPartida, seedDosShots: Long): Set<Int> =
+            if (!regras.modoShot) {
+                emptySet()
+            } else {
+                EmbaralhadorDeCards.embaralhar((1..Card.QUANTIDADE_DE_DICAS).toList(), seedDosShots)
+                    .take(regras.quantidadeDeShots)
+                    .toSet()
+            }
     }
 }
