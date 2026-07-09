@@ -1,6 +1,5 @@
 package com.quemsou.app.presentation.setup
 
-import com.quemsou.app.domain.model.ModoDeJogo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -21,6 +20,7 @@ class SetupViewModelTest {
         val estado = SetupViewModel().uiState.value
 
         assertEquals(2, estado.jogadores.size)
+        assertFalse(estado.jogarEmTimes)
         assertFalse(estado.podeComecar)
         assertEquals(MotivoDoBloqueio.NOMES_VAZIOS, estado.motivoDoBloqueio)
     }
@@ -76,16 +76,6 @@ class SetupViewModelTest {
     }
 
     @Test
-    fun `motivo de bloqueio do modo times aparece sem precisar tocar ou tentar comecar`() {
-        // Só NOMES_VAZIOS é escondido antes da interação: trocar para o modo
-        // Times já é, em si, uma interação real do usuário.
-        val viewModel = viewModelComNomes()
-        viewModel.selecionarModo(ModoDeJogo.TIMES)
-
-        assertEquals(MotivoDoBloqueio.TIMES_INCOMPLETOS, viewModel.uiState.value.motivoDoBloqueioVisivel)
-    }
-
-    @Test
     fun `nomear todos os jogadores libera o comecar`() {
         val viewModel = viewModelComNomes()
 
@@ -115,18 +105,73 @@ class SetupViewModelTest {
     }
 
     @Test
-    fun `modo times bloqueia sem time em todos e com um so time`() {
+    fun `ciclar grupo percorre sem grupo, grupos 1 a 3 e volta`() {
         val viewModel = viewModelComNomes()
-        viewModel.selecionarModo(ModoDeJogo.TIMES)
+        viewModel.alternarJogarEmTimes()
 
-        assertEquals(MotivoDoBloqueio.TIMES_INCOMPLETOS, viewModel.uiState.value.motivoDoBloqueio)
+        assertNull(viewModel.uiState.value.jogadores[0].grupo)
 
-        viewModel.atribuirTime(0, "time-a")
-        viewModel.atribuirTime(1, "time-a")
-        assertEquals(MotivoDoBloqueio.TIMES_INSUFICIENTES, viewModel.uiState.value.motivoDoBloqueio)
+        viewModel.ciclarGrupo(0)
+        assertEquals(1, viewModel.uiState.value.jogadores[0].grupo)
 
-        viewModel.atribuirTime(1, "time-b")
+        viewModel.ciclarGrupo(0)
+        assertEquals(2, viewModel.uiState.value.jogadores[0].grupo)
+
+        viewModel.ciclarGrupo(0)
+        assertEquals(3, viewModel.uiState.value.jogadores[0].grupo)
+
+        viewModel.ciclarGrupo(0)
+        assertNull(viewModel.uiState.value.jogadores[0].grupo)
+    }
+
+    @Test
+    fun `jogar em times ligado nao bloqueia nenhum agrupamento`() {
+        // Especificação v4: nenhum agrupamento é inválido — grupos de 1 e 2+
+        // podem conviver, então o toggle não cria motivo de bloqueio.
+        val viewModel = viewModelComNomes(3)
+        viewModel.alternarJogarEmTimes()
+
         assertTrue(viewModel.uiState.value.podeComecar)
+
+        viewModel.ciclarGrupo(0) // só o primeiro jogador tem grupo
+        assertTrue(viewModel.uiState.value.podeComecar)
+    }
+
+    @Test
+    fun `confirmar sem jogar em times monta todos os jogadores sem grupo`() {
+        val viewModel = viewModelComNomes(3)
+
+        viewModel.confirmar()
+
+        val configuracao = viewModel.configuracaoPronta.value!!
+        assertTrue(configuracao.jogadores.all { it.grupoId == null })
+    }
+
+    @Test
+    fun `confirmar com jogar em times leva o agrupamento escolhido`() {
+        val viewModel = viewModelComNomes(3)
+        viewModel.alternarJogarEmTimes()
+        viewModel.ciclarGrupo(0) // Grupo 1
+        viewModel.ciclarGrupo(2) // Grupo 1 — mesmo grupo do jogador 1
+        // Jogador 2 fica "Sem grupo": grupo próprio de 1 na partida.
+
+        viewModel.confirmar()
+
+        val configuracao = viewModel.configuracaoPronta.value!!
+        assertEquals(listOf("g1", null, "g1"), configuracao.jogadores.map { it.grupoId })
+    }
+
+    @Test
+    fun `desligar jogar em times descarta o agrupamento no confirmar`() {
+        val viewModel = viewModelComNomes()
+        viewModel.alternarJogarEmTimes()
+        viewModel.ciclarGrupo(0)
+        viewModel.alternarJogarEmTimes() // desliga de volta
+
+        viewModel.confirmar()
+
+        val configuracao = viewModel.configuracaoPronta.value!!
+        assertTrue(configuracao.jogadores.all { it.grupoId == null })
     }
 
     @Test

@@ -49,6 +49,15 @@
   `ui/components/BarraDeAcaoInferior`), e texto "Próxima jogada" no anúncio.
   Só `presentation/ui`, nenhuma mudança de domínio; 103 testes verdes.
   **Validação final no Z Fold físico: PENDENTE.**
+- **v12** (2026-07-09) — especificação v4: modelo unificado de **Grupos**,
+  fim da distinção Individual/Times. Novo `domain/model/Grupo` (id, nome de
+  exibição, jogadores, pontos); `ModoDeJogo`, `Jogador.timeId` e `Placar`
+  removidos; `Partida` carrega `List<Grupo>` (padrão: cada jogador em grupo
+  próprio de 1) e credita os pontos ao grupo de quem pontuou; fórmula v3 e
+  rodízios inalterados. Setup: toggle "Jogar em times" + chip cíclico de
+  grupo no lugar do segmentado; placar final agregado por grupo. 110 testes
+  verdes. **Validação final no Z Fold físico (2 solos + 1 grupo de 2):
+  PENDENTE.**
 
 ## Visão geral
 
@@ -166,12 +175,26 @@
   recriada por seed.
 - **Jogadores por partida** — RESOLVIDA: mínimo 2, máximo 4 (1 leitor + 1 a 3
   adivinhadores por rodada).
-- **Modo de jogo** — RESOLVIDA: individual ou times, configurável antes da
-  partida; ambos os modos entram na v1.
+- **Grupos (especificação v4)** — RESOLVIDA (2026-07-09), substitui a antiga
+  decisão "Modo de jogo": não existe mais bifurcação Individual/Times. Todo
+  jogador pertence a um `Grupo`; por padrão cada um nasce em grupo próprio de
+  tamanho 1 (`Grupo.individuais`) — o "individual" é o estado padrão, e
+  "times" é só mesclar 2+ jogadores num grupo. Grupos mistos (1 e 2+) na
+  mesma partida são permitidos sem validação especial e **não há constante
+  de máximo de grupos** (teto natural = número de jogadores). Os pontos de
+  acertador/leitor vão para o grupo do jogador que pontuou
+  (`Partida.grupoDe`); a fórmula v3 e a invariante dos 10 pontos por turno
+  continuam, somando por grupo. O rodízio de leitor/escolhedor **continua
+  por jogador individual**. Nome de exibição do grupo: nome do jogador se
+  solo, nomes concatenados ("Ana & Bruno") se 2+. No Setup, o agrupamento é
+  opcional via toggle "Jogar em times" + chip cíclico por jogador (Sem grupo
+  → Grupo 1–3 → Sem grupo; ciclo só de exibição).
 - **Placar** — RESOLVIDA: exibido em todos os aparelhos, sincronizado pelo
-  anfitrião via Nearby (ver "Arquitetura de multiplayer" acima). **Empate
-  final é declarado, sem desempate**: `Placar.vencedores()`/`vencedoresPorTime`
-  retornam todos os empatados na maior pontuação (v1).
+  anfitrião via Nearby (ver "Arquitetura de multiplayer" acima). Desde a v4 o
+  placar é **agregado por grupo** (`Partida.ranking()`, pontos vivem em
+  `Grupo.pontos`). **Empate final é declarado, sem desempate**:
+  `Partida.vencedores()` retorna todos os grupos empatados na maior
+  pontuação (v1).
 - **Evento `reiniciarPartida`** (3.3) — único evento novo autorizado no
   `PartidaViewModel`: no `PlacarFinal`, gera um código novo (seed nova) para os
   mesmos jogadores/modo/regras/categoria e reembaralha o baralho do zero —

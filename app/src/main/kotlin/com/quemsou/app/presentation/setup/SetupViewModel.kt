@@ -2,7 +2,6 @@ package com.quemsou.app.presentation.setup
 
 import androidx.lifecycle.ViewModel
 import com.quemsou.app.domain.model.CardCategory
-import com.quemsou.app.domain.model.ModoDeJogo
 import com.quemsou.app.domain.model.Partida
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.navigation.JogadorConfigurado
@@ -16,10 +15,15 @@ import kotlinx.coroutines.flow.update
 /**
  * Estado da tela de configuração da partida, com validação viva:
  * [podeComecar] e [motivoDoBloqueio] são recalculados a cada mudança.
+ *
+ * Não existe mais "modo de jogo" (especificação v4): [jogarEmTimes] só liga a
+ * UI de agrupamento — desligado, todo jogador joga em grupo próprio de 1.
+ * Nenhum agrupamento é inválido (grupos mistos são permitidos), então o
+ * toggle não cria motivo de bloqueio.
  */
 data class SetupUiState(
     val categoria: CardCategory = CardCategory.LIVRE,
-    val modoDeJogo: ModoDeJogo = ModoDeJogo.INDIVIDUAL,
+    val jogarEmTimes: Boolean = false,
     val jogadores: List<JogadorEmEdicao> = List(Partida.MINIMO_DE_JOGADORES) { JogadorEmEdicao() },
     val numeroDeRodadas: Int = 5,
     val leitorPontua: Boolean = true,
@@ -31,13 +35,6 @@ data class SetupUiState(
         get() = when {
             jogadores.size < Partida.MINIMO_DE_JOGADORES -> MotivoDoBloqueio.POUCOS_JOGADORES
             jogadores.any { it.nome.isBlank() } -> MotivoDoBloqueio.NOMES_VAZIOS
-            modoDeJogo == ModoDeJogo.TIMES && jogadores.any { it.timeId.isNullOrBlank() } ->
-                MotivoDoBloqueio.TIMES_INCOMPLETOS
-
-            modoDeJogo == ModoDeJogo.TIMES &&
-                jogadores.mapNotNull { it.timeId }.toSet().size < 2 ->
-                MotivoDoBloqueio.TIMES_INSUFICIENTES
-
             else -> null
         }
 
@@ -51,10 +48,9 @@ data class SetupUiState(
      * estado inicial já disparariam essa mensagem assim que a tela abre, sem
      * nenhuma ação do usuário. Ela só aparece quando um campo de nome vazio
      * já foi tocado ([jogadoresTocados]) ou quando o usuário tentou começar a
-     * partida ([tentouComecar]) com a configuração inválida. Os demais
-     * motivos (times incompletos/insuficientes, poucos jogadores) só surgem
-     * como consequência direta de uma interação real (trocar para o modo
-     * Times, remover jogador) e continuam aparecendo imediatamente.
+     * partida ([tentouComecar]) com a configuração inválida. O outro motivo
+     * (poucos jogadores) só surge como consequência direta de uma interação
+     * real (remover jogador) e continua aparecendo imediatamente.
      */
     val motivoDoBloqueioVisivel: MotivoDoBloqueio?
         get() {
@@ -68,25 +64,28 @@ data class SetupUiState(
         }
 }
 
-/** Um jogador em edição no Setup. */
+/**
+ * Um jogador em edição no Setup.
+ *
+ * @property grupo número do grupo escolhido no ciclo do chip (1, 2, 3…);
+ *   `null` = "Sem grupo", ou seja, grupo próprio de tamanho 1.
+ */
 data class JogadorEmEdicao(
     val nome: String = "",
-    val timeId: String? = null,
+    val grupo: Int? = null,
 )
 
 /** Por que o botão de começar está bloqueado. */
 enum class MotivoDoBloqueio {
     POUCOS_JOGADORES,
     NOMES_VAZIOS,
-    TIMES_INCOMPLETOS,
-    TIMES_INSUFICIENTES,
 }
 
 /**
  * ViewModel da tela de configuração. Edita a lista de jogadores (2–4, com
- * clamp nos eventos de adicionar/remover), o modo, a categoria e as regras;
- * ao [confirmar], monta a [ConfiguracaoDaPartida] e a expõe em
- * [configuracaoPronta] para a UI navegar até a rota Partida.
+ * clamp nos eventos de adicionar/remover), o agrupamento em times, a
+ * categoria e as regras; ao [confirmar], monta a [ConfiguracaoDaPartida] e a
+ * expõe em [configuracaoPronta] para a UI navegar até a rota Partida.
  */
 @HiltViewModel
 class SetupViewModel @Inject constructor() : ViewModel() {
@@ -103,8 +102,13 @@ class SetupViewModel @Inject constructor() : ViewModel() {
         _uiState.update { it.copy(categoria = categoria) }
     }
 
-    fun selecionarModo(modoDeJogo: ModoDeJogo) {
-        _uiState.update { it.copy(modoDeJogo = modoDeJogo) }
+    /**
+     * Liga/desliga a UI de agrupamento em times. Desligado (padrão), cada
+     * jogador joga em grupo próprio de 1 — o agrupamento escolhido é mantido
+     * no estado, mas descartado ao [confirmar].
+     */
+    fun alternarJogarEmTimes() {
+        _uiState.update { it.copy(jogarEmTimes = !it.jogarEmTimes) }
     }
 
     /** Adiciona um jogador em branco; ignorado se a partida já tem 4. */
@@ -141,9 +145,17 @@ class SetupViewModel @Inject constructor() : ViewModel() {
         _uiState.update { it.copy(jogadoresTocados = it.jogadoresTocados + indice) }
     }
 
-    /** Atribui o [timeId] ao jogador do [indice] (modo TIMES). */
-    fun atribuirTime(indice: Int, timeId: String) {
-        atualizarJogador(indice) { it.copy(timeId = timeId) }
+    /**
+     * Cicla o grupo do jogador do [indice]: Sem grupo → Grupo 1 → Grupo 2 →
+     * Grupo 3 → Sem grupo. O ciclo é só de exibição (com o teto de 4
+     * jogadores da partida, 3 grupos nomeados cobrem qualquer agrupamento) —
+     * o domínio não valida quantidade de grupos.
+     */
+    fun ciclarGrupo(indice: Int) {
+        atualizarJogador(indice) { jogador ->
+            val proximo = (jogador.grupo ?: 0) + 1
+            jogador.copy(grupo = proximo.takeIf { it <= ULTIMO_GRUPO_DO_CICLO })
+        }
     }
 
     /** Define o total de rodadas; ignorado se menor que 1. */
@@ -161,6 +173,10 @@ class SetupViewModel @Inject constructor() : ViewModel() {
      * enquanto [SetupUiState.podeComecar] for `false` — nesse caso, marca
      * [SetupUiState.tentouComecar] para revelar o motivo do bloqueio.
      *
+     * O agrupamento vira [JogadorConfigurado.grupoId] ("g1", "g2"…) apenas
+     * com [SetupUiState.jogarEmTimes] ligado; caso contrário todo jogador sai
+     * sem grupo — grupo próprio de 1, o estado padrão do modelo v4.
+     *
      * O código da partida é sorteado aqui (4 letras): aleatoriedade de verdade
      * é desejada na *escolha* do código — o determinismo sagrado do projeto
      * começa na seed derivada dele.
@@ -174,13 +190,12 @@ class SetupViewModel @Inject constructor() : ViewModel() {
         _configuracaoPronta.value = ConfiguracaoDaPartida(
             codigo = gerarCodigo(),
             categoria = estado.categoria,
-            modoDeJogo = estado.modoDeJogo,
             numeroDeRodadas = estado.numeroDeRodadas,
             leitorPontua = estado.leitorPontua,
             jogadores = estado.jogadores.map { jogador ->
                 JogadorConfigurado(
                     nome = jogador.nome.trim(),
-                    timeId = jogador.timeId.takeIf { estado.modoDeJogo == ModoDeJogo.TIMES },
+                    grupoId = jogador.grupo?.let { "g$it" }.takeIf { estado.jogarEmTimes },
                 )
             },
         )
@@ -208,5 +223,8 @@ class SetupViewModel @Inject constructor() : ViewModel() {
 
     private companion object {
         const val TAMANHO_DO_CODIGO = 4
+
+        /** Último grupo do ciclo do chip — limite de exibição, não do domínio. */
+        const val ULTIMO_GRUPO_DO_CICLO = 3
     }
 }

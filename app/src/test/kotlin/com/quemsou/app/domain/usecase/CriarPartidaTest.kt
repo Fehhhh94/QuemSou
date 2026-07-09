@@ -4,7 +4,6 @@ import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.CardType
 import com.quemsou.app.domain.model.Jogador
-import com.quemsou.app.domain.model.ModoDeJogo
 import com.quemsou.app.domain.model.RegrasPartida
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -30,7 +29,6 @@ class CriarPartidaTest {
     private fun criar(codigo: String) = CriarPartida.executar(
         codigo = codigo,
         jogadores = jogadores,
-        modoDeJogo = ModoDeJogo.INDIVIDUAL,
         regras = RegrasPartida(),
         cardsDisponiveis = cards,
     )
@@ -54,5 +52,13 @@ class CriarPartidaTest {
         val baralho = criar("LOBO").baralho
 
         assertEquals(cards.map { it.id }.sorted(), baralho.map { it.id }.sorted())
+    }
+
+    @Test
+    fun `sem grupos informados cada jogador nasce em grupo proprio de 1`() {
+        val partida = criar("LOBO")
+
+        assertEquals(listOf("j1", "j2"), partida.grupos.map { it.id })
+        assertEquals(listOf("Ana", "Bia"), partida.grupos.map { it.nome })
     }
 }

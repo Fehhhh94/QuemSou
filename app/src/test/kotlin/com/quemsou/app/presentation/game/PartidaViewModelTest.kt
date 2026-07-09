@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.CardType
-import com.quemsou.app.domain.model.ModoDeJogo
 import com.quemsou.app.domain.repository.RepositorioDeCards
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.navigation.JogadorConfigurado
@@ -38,13 +37,15 @@ class PartidaViewModelTest {
         nomes: List<String> = listOf("Ana", "Bia", "Caio"),
         rodadas: Int = 2,
         leitorPontua: Boolean = true,
+        grupos: List<String?> = nomes.map { null },
     ) = ConfiguracaoDaPartida(
         codigo = "LOBO",
         categoria = CardCategory.LIVRE,
-        modoDeJogo = ModoDeJogo.INDIVIDUAL,
         numeroDeRodadas = rodadas,
         leitorPontua = leitorPontua,
-        jogadores = nomes.map { JogadorConfigurado(nome = it) },
+        jogadores = nomes.mapIndexed { indice, nome ->
+            JogadorConfigurado(nome = nome, grupoId = grupos[indice])
+        },
     )
 
     private fun handleDe(configuracao: ConfiguracaoDaPartida) =
@@ -208,6 +209,41 @@ class PartidaViewModelTest {
             listOf(LinhaDoPlacar("Ana", 10), LinhaDoPlacar("Bia", 10), LinhaDoPlacar("Caio", 0)),
             placarFinal.ranking,
         )
+    }
+
+    @Test
+    fun `placar final agrega os pontos por grupo com grupos mistos`() {
+        // "Ana & Bia" num grupo; Caio solo — grupos mistos na mesma partida.
+        val handle = handleDe(configuracao(grupos = listOf("g1", "g1", null)))
+        val viewModel = PartidaViewModel(handle, RepositorioFake(cards()))
+
+        // Rodada 1 (leitora Ana): Bia acerta na 1ª dica → grupo "Ana & Bia" +10.
+        viewModel.iniciarTurno()
+        viewModel.revelarDica(1)
+        viewModel.abrirQuemAcertou()
+        viewModel.registrarAcerto("j2")
+        viewModel.proximoTurno()
+
+        // Morte de processo entre as rodadas: os pontos por grupo sobrevivem.
+        val restaurado = PartidaViewModel(handle, RepositorioFake(cards()))
+
+        // Rodada 2 (leitora Bia): Caio acerta na 2ª dica → Caio +9 e a
+        // leitora Bia +1 — o ponto da leitora vai para o grupo "Ana & Bia".
+        restaurado.iniciarTurno()
+        restaurado.revelarDica(3)
+        restaurado.outraDica()
+        restaurado.revelarDica(5)
+        restaurado.abrirQuemAcertou()
+        restaurado.registrarAcerto("j3")
+        restaurado.proximoTurno()
+
+        val placarFinal = restaurado.uiState.value as PartidaUiState.PlacarFinal
+        assertEquals(
+            listOf(LinhaDoPlacar("Ana & Bia", 11), LinhaDoPlacar("Caio", 9)),
+            placarFinal.ranking,
+        )
+        assertEquals(listOf("Ana & Bia"), placarFinal.vencedores)
+        assertFalse(placarFinal.empate)
     }
 
     @Test

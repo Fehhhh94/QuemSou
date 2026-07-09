@@ -2,6 +2,51 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Especificação v4: modelo unificado de Grupos (fim da distinção Individual/Times) (2026-07-09)
+
+Mudança de especificação: os modos "Individual" e "Times" deixam de existir
+como bifurcação de código e viram um único conceito de domínio, o **Grupo**.
+
+- **Domínio**: novo modelo `Grupo` (id, nome de exibição, jogadores, pontos).
+  Todo jogador pertence a exatamente um grupo; por padrão, cada um nasce em
+  um grupo próprio de tamanho 1 (`Grupo.individuais`) — o "individual" é o
+  estado padrão do modelo, não um caso especial, e "times" é só mesclar 2+
+  jogadores num grupo. `ModoDeJogo`, `Jogador.timeId` e `Placar` (pontos por
+  jogador) foram **removidos**: `Partida` agora carrega `List<Grupo>` e
+  credita os pontos de acertador e leitor ao grupo do jogador que pontuou
+  (`Partida.grupoDe`); `ranking()`/`vencedores()` operam por grupo, com
+  empate declarado. Grupos mistos (tamanho 1 e 2+) na mesma partida são
+  permitidos sem validação especial e não há constante de máximo de grupos.
+  A fórmula v3 de pontuação **não mudou** (acertador 11 − N, leitor N − 1,
+  queima = 10 pro leitor; a invariante dos 10 pontos por turno agora soma por
+  grupo), nem o rodízio de leitor/escolhedor (continua por jogador).
+- **Navegação**: `ConfiguracaoDaPartida` perde `modoDeJogo`;
+  `JogadorConfigurado` troca `timeId` por `grupoId` opcional (`null` = grupo
+  próprio de 1). JSONs antigos seguem decodificáveis (`ignoreUnknownKeys`).
+- **Setup**: o segmentado "Individual | Times" foi removido. Novo toggle
+  "Jogar em times" (desligado por padrão — nenhuma UI extra); ligado, cada
+  jogador ganha um chip que cicla Sem grupo → Grupo 1 → Grupo 2 → Grupo 3 →
+  Sem grupo (ciclo só de exibição — com o teto de 4 jogadores, 3 grupos
+  nomeados cobrem qualquer agrupamento). Os motivos de bloqueio
+  `TIMES_INCOMPLETOS`/`TIMES_INSUFICIENTES` sumiram: nenhum agrupamento é
+  inválido.
+- **Placar final**: agregado por grupo, com o nome de exibição (nome do
+  jogador se solo, "Ana & Bia" se time). As telas do turno seguem nomeando o
+  jogador que agiu (leitor/acertador) — o turno continua por jogador. O
+  `SavedStateHandle` agora persiste os pontos por grupo.
+- Texto do diálogo "Como jogar" da Home atualizado: ainda descrevia a
+  pontuação pré-v3 (leitor ganhando os mesmos pontos do acertador, card
+  queimado sem pontos) e foi reescrito com a regra v3 e o modelo de grupos.
+- `docs/GAME_RULES.md` reescrito: seção "Jogadores e grupos" no lugar de
+  "Modo de jogo", destino dos pontos por grupo e exemplo de partida mista.
+- **Testes: 110 verdes** — novos casos de regressão (grupo de 1 se comporta
+  exatamente como o "individual" de antes), soma por grupo quando qualquer
+  membro pontua, partida mista (grupo de 2 + dois solos, incluindo
+  companheiro do leitor acertando) e a invariante dos 10 pontos por turno
+  somando por grupo; `PlacarTest` substituído por `GrupoTest`.
+- **Validação final no Z Fold físico (partida com 2 solos + 1 grupo de 2):
+  PENDENTE** — Felipe valida na próxima sessão de jogo.
+
 ## Correções de UI pós-teste físico da Fase 3 (2026-07-08)
 
 3 bugs e 1 melhoria encontrados no teste de jogo físico (Samsung Galaxy Z

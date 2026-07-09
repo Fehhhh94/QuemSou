@@ -9,7 +9,7 @@
     <string name="home_join_badge">Fase 4</string>
     <string name="home_how_to_play">Como jogar</string>
     <string name="home_how_to_play_dialog_title">Como jogar</string>
-    <string name="home_how_to_play_dialog_body">Um jogador é o leitor da rodada e lê as dicas do card para os demais, os adivinhadores. Cada card tem 10 dicas, mas o grid de 1 a 10 é escolhido às cegas — a posição não indica se a dica é fácil ou difícil.\n\nA cada dica revelada, quem escolhe a próxima posição gira entre os adivinhadores. Quem acertar com N dicas usadas ganha 11 − N pontos: acertar logo na 1ª dica vale 10 pontos, na 10ª vale só 1. Se ninguém acertar até a 10ª dica, ou os jogadores desistirem, o card é queimado e ninguém pontua.\n\nO leitor pode ganhar os mesmos pontos do acertador, se essa regra estiver ligada na configuração. A partida pode ser individual ou em times, e o placar de time soma os pontos de cada jogador do time. No fim das rodadas, quem tiver mais pontos vence — empate é declarado, sem desempate.</string>
+    <string name="home_how_to_play_dialog_body">Um jogador é o leitor da rodada e lê as dicas do card para os demais, os adivinhadores. Cada card tem 10 dicas, mas o grid de 1 a 10 é escolhido às cegas — a posição não indica se a dica é fácil ou difícil.\n\nA cada dica revelada, quem escolhe a próxima posição gira entre os adivinhadores. Quem acertar com N dicas usadas ganha 11 − N pontos: acertar logo na 1ª dica vale 10 pontos, na 10ª vale só 1. Se o leitor pontua (regra da configuração), ele ganha 1 ponto por dica revelada sem acerto; se ninguém acertar até a 10ª dica, ou os jogadores desistirem, o card é queimado e o leitor leva 10 pontos.\n\nCada jogador pode jogar por si ou agrupado em time — dá até para misturar times e jogadores solo na mesma partida. Os pontos de quem pontua vão para o seu grupo, e o placar final soma por grupo. No fim das rodadas, o grupo com mais pontos vence — empate é declarado, sem desempate.</string>
     <string name="home_how_to_play_dialog_close">Entendi</string>
 
     <!-- Setup -->
@@ -18,15 +18,13 @@
     <string name="setup_categoria_personagem_filme">Personagem de filme</string>
     <string name="setup_categoria_mundo_musica">Mundo da música</string>
     <string name="setup_categoria_livre">Livre</string>
-    <string name="setup_modo_titulo">Modo de jogo</string>
-    <string name="setup_modo_individual">Individual</string>
-    <string name="setup_modo_times">Times</string>
+    <string name="setup_jogar_em_times_titulo">Jogar em times</string>
     <string name="setup_jogadores_titulo">Jogadores</string>
     <string name="setup_jogador_nome_placeholder">Nome do jogador %1$d</string>
     <string name="setup_jogador_remover_cd">Remover jogador</string>
     <string name="setup_adicionar_jogador">Adicionar jogador</string>
-    <string name="setup_time_a">Time A</string>
-    <string name="setup_time_b">Time B</string>
+    <string name="setup_sem_grupo">Sem grupo</string>
+    <string name="setup_grupo_n">Grupo %1$d</string>
     <string name="setup_rodadas_titulo">Rodadas</string>
     <string name="setup_rodadas_diminuir_cd">Diminuir rodadas</string>
     <string name="setup_rodadas_aumentar_cd">Aumentar rodadas</string>
@@ -34,8 +32,6 @@
     <string name="setup_comecar_partida">Começar partida</string>
     <string name="setup_bloqueio_poucos_jogadores">É preciso pelo menos 2 jogadores</string>
     <string name="setup_bloqueio_nomes_vazios">Dê um nome a todos os jogadores</string>
-    <string name="setup_bloqueio_times_incompletos">Escolha um time para todos os jogadores</string>
-    <string name="setup_bloqueio_times_insuficientes">É preciso pelo menos 2 times</string>
 
     <!-- Partida — comum -->
     <string name="partida_carregando">Carregando…</string>

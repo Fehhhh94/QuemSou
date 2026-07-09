@@ -15,12 +15,23 @@ código deve estar registrada aqui.
 - **Card queimado** (ninguém acertou): é **descartado** — não volta ao
   baralho (`RegrasPartida.descartarCardQueimado`, padrão **SIM**).
 
-## Jogadores
+## Jogadores e grupos
 
 - Mínimo **2**, máximo **4** jogadores por partida: 1 leitor + 1 a 3
   adivinhadores por rodada.
-- **Modo de jogo**: individual ou em times, configurável antes da partida
-  (os dois modos estão na v1).
+- **Grupos (especificação v4)** — não existe mais "modo de jogo"
+  (Individual/Times): todo jogador pertence a um **grupo**. Por padrão, cada
+  jogador nasce em um grupo próprio de tamanho 1 — o antigo "individual" é
+  apenas esse estado padrão, não um modo à parte. Jogar "em times" é
+  simplesmente agrupar 2+ jogadores num mesmo grupo.
+- **Grupos mistos são permitidos**, sem validação especial: uma partida pode
+  ter um grupo de 2 e dois jogadores solo, por exemplo. Não há limite de
+  quantidade de grupos — o teto natural é o número de jogadores (2–4).
+- **Nome de exibição do grupo**: o nome do jogador, se o grupo tem 1 membro;
+  os nomes concatenados (ex.: "Ana & Bruno"), se tem 2+.
+- O **rodízio de leitor e de escolhedor continua por jogador individual** —
+  o grupo não muda quem lê nem quem escolhe a dica. Companheiros de grupo do
+  leitor adivinham normalmente.
 
 ## O turno
 
@@ -51,9 +62,14 @@ código deve estar registrada aqui.
 - **Card queimado** (10 dicas sem acerto, ou desistência): o acertador não
   pontua e o leitor ganha **10 pontos** (0 se `leitorPontua` estiver
   desligado) — as 10 dicas foram todas reveladas sem ninguém acertar.
+- **Destino dos pontos (v4)**: os pontos calculados para acertador e leitor
+  são creditados ao **grupo** de cada um — o jogador é quem age no turno, o
+  grupo é quem acumula. Se acertador e leitor forem do mesmo grupo, os dois
+  créditos vão para ele.
 - **Invariante**: com o leitor pontuando, todo turno distribui **exatamente
   10 pontos** no total — acertador + leitor somam 10 num acerto; o card
-  queimado dá os 10 pontos inteiros ao leitor.
+  queimado dá os 10 pontos inteiros ao leitor. Na v4, a invariante vale
+  **somando por grupo**.
 
 ## Partida
 
@@ -70,7 +86,22 @@ código deve estar registrada aqui.
 
 - O placar é exibido em **todos os aparelhos** e sincronizado pelo anfitrião
   via Nearby Connections (multiplayer, Fase 4).
-- No modo **TIMES**, o placar do time é a **soma** dos pontos dos jogadores
-  do time.
-- **Empate**: declarado — todos os empatados na maior pontuação são
+- O placar é **agregado por grupo** e exibido com o nome de exibição do grupo
+  (nome do jogador se solo, nomes concatenados se time). O grupo acumula os
+  pontos de todos os seus jogadores.
+- **Empate**: declarado — todos os grupos empatados na maior pontuação são
   vencedores; **não há critério de desempate na v1**.
+
+### Exemplo de partida mista
+
+Partida de 3 rodadas com o grupo **"Ana & Bruno"** e os jogadores solo
+**Caio** e **Dani** (leitor pontua ligado):
+
+1. Ana lê; Caio acerta na 1ª dica → grupo de Caio **+10** (Ana ganha 0 — não
+   houve dica revelada sem acerto).
+2. Bruno lê; Ana acerta na 3ª dica → "Ana & Bruno" **+8** (acertadora) **e
+   +2** (o leitor Bruno é do mesmo grupo) — os 10 pontos do turno inteiros
+   para o grupo.
+3. Caio lê; card queimado → grupo de Caio **+10**.
+
+Placar final: **Caio 20 · Ana & Bruno 10 · Dani 0** — Caio vence.

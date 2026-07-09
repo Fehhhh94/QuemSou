@@ -94,9 +94,11 @@ sealed interface PartidaUiState {
     }
 
     /**
-     * Placar final da partida encerrada. Empate na v1 é declarado:
-     * [vencedores] traz todos os empatados (nomes de jogadores no modo
-     * individual, ids de times no modo times).
+     * Placar final da partida encerrada, agregado por grupo (especificação
+     * v4): cada linha usa o nome de exibição do grupo — o nome do jogador se
+     * o grupo tem 1 membro, os nomes concatenados (ex.: "Ana & Bruno") se tem
+     * 2+. Empate na v1 é declarado: [vencedores] traz os nomes de todos os
+     * grupos empatados.
      */
     data class PlacarFinal(
         val ranking: List<LinhaDoPlacar>,

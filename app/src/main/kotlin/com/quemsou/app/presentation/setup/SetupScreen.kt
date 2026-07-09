@@ -26,9 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -48,12 +45,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.quemsou.app.R
 import com.quemsou.app.domain.model.CardCategory
-import com.quemsou.app.domain.model.ModoDeJogo
 import com.quemsou.app.domain.model.Partida
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.presentation.ui.components.BarraDeAcaoInferior
 
-/** Tela de configuração da partida: categoria, modo, jogadores e regras. */
+/** Tela de configuração da partida: categoria, jogadores, grupos e regras. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(
@@ -109,7 +105,7 @@ fun SetupScreen(
                 )
             }
             item {
-                SecaoModo(modoDeJogo = uiState.modoDeJogo, onSelecionar = viewModel::selecionarModo)
+                SecaoJogarEmTimes(ativo = uiState.jogarEmTimes, onAlternar = viewModel::alternarJogarEmTimes)
             }
             item {
                 Text(stringResource(R.string.setup_jogadores_titulo), style = MaterialTheme.typography.titleMedium)
@@ -118,11 +114,11 @@ fun SetupScreen(
                 LinhaDeJogador(
                     indice = indice,
                     jogador = jogador,
-                    modoDeJogo = uiState.modoDeJogo,
+                    jogarEmTimes = uiState.jogarEmTimes,
                     podeRemover = uiState.jogadores.size > Partida.MINIMO_DE_JOGADORES,
                     onNomeAlterado = { viewModel.renomearJogador(indice, it) },
                     onNomeCampoPerdeuFoco = { viewModel.marcarJogadorTocado(indice) },
-                    onTimeSelecionado = { viewModel.atribuirTime(indice, it) },
+                    onCiclarGrupo = { viewModel.ciclarGrupo(indice) },
                     onRemover = { viewModel.removerJogador(indice) },
                 )
             }
@@ -176,35 +172,14 @@ private fun SecaoCategoria(
 }
 
 @Composable
-private fun SecaoModo(modoDeJogo: ModoDeJogo, onSelecionar: (ModoDeJogo) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.setup_modo_titulo), style = MaterialTheme.typography.titleMedium)
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-            listOf(
-                ModoDeJogo.INDIVIDUAL to R.string.setup_modo_individual,
-                ModoDeJogo.TIMES to R.string.setup_modo_times,
-            ).forEachIndexed { indice, (opcao, textoId) ->
-                SegmentedButton(
-                    selected = modoDeJogo == opcao,
-                    onClick = { onSelecionar(opcao) },
-                    shape = SegmentedButtonDefaults.itemShape(index = indice, count = 2),
-                ) {
-                    Text(stringResource(textoId))
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun LinhaDeJogador(
     indice: Int,
     jogador: JogadorEmEdicao,
-    modoDeJogo: ModoDeJogo,
+    jogarEmTimes: Boolean,
     podeRemover: Boolean,
     onNomeAlterado: (String) -> Unit,
     onNomeCampoPerdeuFoco: () -> Unit,
-    onTimeSelecionado: (String) -> Unit,
+    onCiclarGrupo: () -> Unit,
     onRemover: () -> Unit,
 ) {
     // `onFocusChanged` dispara uma vez na composição inicial com foco=false;
@@ -235,20 +210,30 @@ private fun LinhaDeJogador(
                 }
             }
         }
-        if (modoDeJogo == ModoDeJogo.TIMES) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(
-                    stringResource(R.string.setup_time_a),
-                    stringResource(R.string.setup_time_b),
-                ).forEach { time ->
-                    FilterChip(
-                        selected = jogador.timeId == time,
-                        onClick = { onTimeSelecionado(time) },
-                        label = { Text(time) },
+        if (jogarEmTimes) {
+            FilterChip(
+                selected = jogador.grupo != null,
+                onClick = onCiclarGrupo,
+                label = {
+                    Text(
+                        jogador.grupo?.let { stringResource(R.string.setup_grupo_n, it) }
+                            ?: stringResource(R.string.setup_sem_grupo),
                     )
-                }
-            }
+                },
+            )
         }
+    }
+}
+
+@Composable
+private fun SecaoJogarEmTimes(ativo: Boolean, onAlternar: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(stringResource(R.string.setup_jogar_em_times_titulo), style = MaterialTheme.typography.titleMedium)
+        Switch(checked = ativo, onCheckedChange = { onAlternar() })
     }
 }
 
@@ -294,7 +279,5 @@ private fun textoDoBloqueio(motivo: MotivoDoBloqueio): String = stringResource(
     when (motivo) {
         MotivoDoBloqueio.POUCOS_JOGADORES -> R.string.setup_bloqueio_poucos_jogadores
         MotivoDoBloqueio.NOMES_VAZIOS -> R.string.setup_bloqueio_nomes_vazios
-        MotivoDoBloqueio.TIMES_INCOMPLETOS -> R.string.setup_bloqueio_times_incompletos
-        MotivoDoBloqueio.TIMES_INSUFICIENTES -> R.string.setup_bloqueio_times_insuficientes
     },
 )

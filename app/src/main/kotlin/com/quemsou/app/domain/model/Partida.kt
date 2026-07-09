@@ -1,34 +1,40 @@
 package com.quemsou.app.domain.model
 
 /**
- * Uma partida do QuemSou: jogadores, regras, baralho já embaralhado e o
- * andamento (rodada atual, leitor da vez, placar).
+ * Uma partida do QuemSou: jogadores, grupos, regras, baralho já embaralhado e
+ * o andamento (rodada atual, leitor da vez, pontos por grupo).
  *
- * Imutável: [encerrarTurno] retorna uma nova partida com o placar atualizado,
- * a próxima rodada e o próximo leitor (rodízio circular). Após
+ * Imutável: [encerrarTurno] retorna uma nova partida com os pontos
+ * atualizados, a próxima rodada e o próximo leitor (rodízio circular). Após
  * [totalDeRodadas] rodadas, a partida fica [encerrada] com o placar final.
  *
- * @property jogadores de [MINIMO_DE_JOGADORES] a [MAXIMO_DE_JOGADORES] jogadores, ids únicos.
- * @property modoDeJogo individual ou times; em [ModoDeJogo.TIMES] todo jogador
- *   precisa de [Jogador.timeId] e deve haver pelo menos 2 times.
+ * ## Grupos (especificação v4)
+ * Todo jogador pertence a exatamente um [Grupo]; o padrão é cada um em seu
+ * grupo próprio de tamanho 1 ([Grupo.individuais]). Os pontos de acertador e
+ * leitor são creditados ao grupo do jogador que pontuou ([grupoDe]) — mas o
+ * rodízio de leitor e de escolhedor continua por **jogador individual**.
+ *
+ * @property jogadores de [MINIMO_DE_JOGADORES] a [MAXIMO_DE_JOGADORES] jogadores, ids únicos,
+ *   na ordem de assento — o rodízio de leitor segue essa ordem.
  * @property regras regras configuradas antes da partida.
  * @property baralho cards já embaralhados pela seed; um card por rodada.
  * @property seed seed da partida (gerada do código); também deriva o
  *   embaralhamento das dicas de cada turno.
  * @property rodadaAtual rodada em jogo, de 1 a [totalDeRodadas].
  * @property indiceDoLeitor índice em [jogadores] do leitor da vez.
- * @property placar pontos acumulados por jogador.
+ * @property grupos agrupamento dos jogadores, com os pontos acumulados; todo
+ *   jogador precisa pertencer a exatamente um grupo. Grupos de tamanho 1 e 2+
+ *   convivem na mesma partida, sem limite de quantidade de grupos.
  * @property encerrada `true` após a última rodada; nenhuma ação é permitida.
  */
 data class Partida(
     val jogadores: List<Jogador>,
-    val modoDeJogo: ModoDeJogo,
     val regras: RegrasPartida,
     val baralho: List<Card>,
     val seed: Long,
     val rodadaAtual: Int = 1,
     val indiceDoLeitor: Int = 0,
-    val placar: Placar = Placar.inicial(jogadores),
+    val grupos: List<Grupo> = Grupo.individuais(jogadores),
     val encerrada: Boolean = false,
 ) {
     /** Total de rodadas da partida, definido nas regras. */
@@ -51,19 +57,27 @@ data class Partida(
         require(indiceDoLeitor in jogadores.indices) {
             "indiceDoLeitor $indiceDoLeitor fora de ${jogadores.indices}."
         }
-        if (modoDeJogo == ModoDeJogo.TIMES) {
-            require(jogadores.all { it.timeId != null }) {
-                "No modo TIMES todo jogador precisa de timeId."
-            }
-            require(jogadores.mapNotNull { it.timeId }.toSet().size >= 2) {
-                "No modo TIMES são necessários pelo menos 2 times."
-            }
+        require(grupos.map { it.id }.toSet().size == grupos.size) {
+            "Partida com ids de grupo repetidos."
+        }
+        val idsNosGrupos = grupos.flatMap { it.jogadores }
+        require(idsNosGrupos.size == idsNosGrupos.toSet().size) {
+            "Partida com jogador em mais de um grupo."
+        }
+        require(idsNosGrupos.toSet() == jogadores.map { it.id }.toSet()) {
+            "Todo jogador precisa pertencer a exatamente um grupo."
         }
     }
 
     /** Leitor da rodada atual. */
     val leitorDaVez: Jogador
         get() = jogadores[indiceDoLeitor]
+
+    /** Grupo ao qual o jogador [jogadorId] pertence — é a ele que os pontos vão. */
+    fun grupoDe(jogadorId: String): Grupo =
+        requireNotNull(grupos.firstOrNull { jogadorId in it.jogadores }) {
+            "Jogador '$jogadorId' não pertence a nenhum grupo."
+        }
 
     /**
      * Monta o turno da rodada atual: card da vez do baralho, leitor da vez,
@@ -83,9 +97,10 @@ data class Partida(
     }
 
     /**
-     * Aplica o resultado de um turno encerrado: soma os pontos ao placar e
-     * avança para a próxima rodada com o próximo leitor (rodízio circular).
-     * Se esta era a última rodada, a partida é encerrada com o placar final.
+     * Aplica o resultado de um turno encerrado: credita os pontos ao grupo do
+     * acertador e ao grupo do leitor (que podem ser o mesmo grupo) e avança
+     * para a próxima rodada com o próximo leitor (rodízio circular). Se esta
+     * era a última rodada, a partida é encerrada com o placar final.
      *
      * @throws IllegalArgumentException se o turno não estiver encerrado ou não
      *   pertencer à rodada atual (leitor diferente do leitor da vez).
@@ -99,34 +114,39 @@ data class Partida(
         require(turno.leitor.id == leitorDaVez.id) {
             "O turno não pertence à rodada atual: leitor '${turno.leitor.id}', esperado '${leitorDaVez.id}'."
         }
-        val novoPlacar = when (fim) {
-            is EstadoDoTurno.TurnoEncerrado.Acerto -> placar
-                .adicionar(fim.acertadorId, fim.pontosAcertador)
-                .adicionar(leitorDaVez.id, fim.pontosLeitor)
+        val novosGrupos = when (fim) {
+            is EstadoDoTurno.TurnoEncerrado.Acerto -> grupos
+                .creditar(grupoDe(fim.acertadorId).id, fim.pontosAcertador)
+                .creditar(grupoDe(leitorDaVez.id).id, fim.pontosLeitor)
 
-            is EstadoDoTurno.TurnoEncerrado.Queimado -> placar
-                .adicionar(leitorDaVez.id, fim.pontosLeitor)
+            is EstadoDoTurno.TurnoEncerrado.Queimado -> grupos
+                .creditar(grupoDe(leitorDaVez.id).id, fim.pontosLeitor)
         }
         return if (rodadaAtual == totalDeRodadas) {
-            copy(placar = novoPlacar, encerrada = true)
+            copy(grupos = novosGrupos, encerrada = true)
         } else {
             copy(
-                placar = novoPlacar,
+                grupos = novosGrupos,
                 rodadaAtual = rodadaAtual + 1,
                 indiceDoLeitor = (indiceDoLeitor + 1) % jogadores.size,
             )
         }
     }
 
+    /** Ranking por grupo, do maior para o menor número de pontos. */
+    fun ranking(): List<Grupo> = grupos.sortedByDescending { it.pontos }
+
     /**
-     * Vencedor(es) segundo o modo de jogo: ids de jogadores no
-     * [ModoDeJogo.INDIVIDUAL], ids de times no [ModoDeJogo.TIMES]. Empate na
-     * v1 é declarado — a lista traz todos os empatados, sem desempate.
+     * Grupo(s) com a maior pontuação. Empate na v1 é declarado — a lista traz
+     * todos os empatados, sem desempate.
      */
-    fun vencedores(): List<String> = when (modoDeJogo) {
-        ModoDeJogo.INDIVIDUAL -> placar.vencedores()
-        ModoDeJogo.TIMES -> placar.vencedoresPorTime(jogadores)
+    fun vencedores(): List<Grupo> {
+        val maiorPontuacao = grupos.maxOf { it.pontos }
+        return ranking().filter { it.pontos == maiorPontuacao }
     }
+
+    private fun List<Grupo>.creditar(grupoId: String, pontos: Int): List<Grupo> =
+        map { grupo -> if (grupo.id == grupoId) grupo.adicionarPontos(pontos) else grupo }
 
     /**
      * Seed do grid de dicas da [rodada]: combinação polinomial (mesma base do

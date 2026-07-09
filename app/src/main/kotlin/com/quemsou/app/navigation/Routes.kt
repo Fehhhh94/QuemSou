@@ -1,7 +1,6 @@
 package com.quemsou.app.navigation
 
 import com.quemsou.app.domain.model.CardCategory
-import com.quemsou.app.domain.model.ModoDeJogo
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -15,7 +14,7 @@ import kotlinx.serialization.json.Json
 @Serializable
 object HomeRoute
 
-/** Configuração da partida (categoria, modo, jogadores, regras). */
+/** Configuração da partida (categoria, jogadores, grupos, regras). */
 @Serializable
 object SetupRoute
 
@@ -37,16 +36,14 @@ data class PartidaRoute(val configuracao: String)
  *
  * @property codigo código da partida; a seed deriva dele.
  * @property categoria filtro do baralho ([CardCategory.LIVRE] = todas).
- * @property modoDeJogo individual ou times.
  * @property numeroDeRodadas total de rodadas.
- * @property leitorPontua se o leitor ganha os mesmos pontos do acertador.
- * @property jogadores nomes (e times) na ordem de assento.
+ * @property leitorPontua se o leitor ganha 1 ponto por dica revelada sem acerto.
+ * @property jogadores nomes (e agrupamento) na ordem de assento.
  */
 @Serializable
 data class ConfiguracaoDaPartida(
     val codigo: String,
     val categoria: CardCategory,
-    val modoDeJogo: ModoDeJogo,
     val numeroDeRodadas: Int,
     val leitorPontua: Boolean,
     val jogadores: List<JogadorConfigurado>,
@@ -63,9 +60,15 @@ data class ConfiguracaoDaPartida(
     }
 }
 
-/** Um jogador como configurado no Setup: nome e, no modo times, o time. */
+/**
+ * Um jogador como configurado no Setup.
+ *
+ * @property grupoId chave de agrupamento (especificação v4): jogadores com o
+ *   mesmo `grupoId` jogam no mesmo grupo; `null` = grupo próprio de tamanho 1
+ *   (o estado padrão — o antigo "individual").
+ */
 @Serializable
 data class JogadorConfigurado(
     val nome: String,
-    val timeId: String? = null,
+    val grupoId: String? = null,
 )

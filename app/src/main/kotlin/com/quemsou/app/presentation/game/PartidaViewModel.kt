@@ -5,10 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.EstadoDoTurno
+import com.quemsou.app.domain.model.Grupo
 import com.quemsou.app.domain.model.Jogador
-import com.quemsou.app.domain.model.ModoDeJogo
 import com.quemsou.app.domain.model.Partida
-import com.quemsou.app.domain.model.Placar
 import com.quemsou.app.domain.model.RegrasPartida
 import com.quemsou.app.domain.model.Turno
 import com.quemsou.app.domain.repository.RepositorioDeCards
@@ -25,7 +24,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Um único ViewModel para a partida inteira (decisão da 3.2): traduz
- * [EstadoDoTurno]/[Placar] do domínio em [PartidaUiState] e repassa eventos —
+ * [EstadoDoTurno]/[Grupo] do domínio em [PartidaUiState] e repassa eventos —
  * **nunca duplica regra do domínio**.
  *
  * ## Eventos fora de fase
@@ -35,8 +34,8 @@ import kotlinx.coroutines.launch
  * que só chamadas válidas cheguem ao domínio.
  *
  * ## Morte de processo (SavedStateHandle)
- * Persiste apenas o **mínimo não derivável**: rodada atual, placar acumulado,
- * fase da UI, posições reveladas na ordem e o acertador do anúncio. Todo o
+ * Persiste apenas o **mínimo não derivável**: rodada atual, pontos acumulados
+ * por grupo, fase da UI, posições reveladas na ordem e o acertador do anúncio. Todo o
  * resto é reconstruído por determinismo: o baralho e o grid de cada turno
  * derivam da seed do código ([ConfiguracaoDaPartida], que chega pelo argumento
  * da rota e já sobrevive no `SavedStateHandle`), e o rodízio de leitor e de
@@ -66,6 +65,7 @@ class PartidaViewModel @Inject constructor(
     private lateinit var partida: Partida
     private lateinit var configuracao: ConfiguracaoDaPartida
     private lateinit var jogadoresBase: List<Jogador>
+    private lateinit var gruposBase: List<Grupo>
     private lateinit var cardsDisponiveis: List<Card>
     private var turno: Turno? = null
 
@@ -158,8 +158,7 @@ class PartidaViewModel @Inject constructor(
         partida = partida.encerrarTurno(turnoAtual)
         turno = null
         savedStateHandle[CHAVE_RODADA] = partida.rodadaAtual
-        savedStateHandle[CHAVE_PLACAR] =
-            partida.jogadores.map { partida.placar.pontosDe(it.id) }.toIntArray()
+        savedStateHandle[CHAVE_PLACAR] = partida.grupos.map { it.pontos }.toIntArray()
         savedStateHandle[CHAVE_POSICOES] = intArrayOf()
         savedStateHandle[CHAVE_ACERTADOR] = null
         if (partida.encerrada) {
@@ -181,7 +180,7 @@ class PartidaViewModel @Inject constructor(
 
     /**
      * Botão "Jogar de novo" do placar final: reinicia com a **mesma
-     * configuração** (jogadores, modo, regras, categoria) mas um **código
+     * configuração** (jogadores, grupos, regras, categoria) mas um **código
      * novo sorteado** — logo, uma seed nova e um baralho reembaralhado do
      * zero. Só age na fase [PartidaUiState.PlacarFinal].
      */
@@ -190,12 +189,12 @@ class PartidaViewModel @Inject constructor(
         partida = CriarPartida.executar(
             codigo = gerarCodigo(),
             jogadores = jogadoresBase,
-            modoDeJogo = configuracao.modoDeJogo,
             regras = RegrasPartida(
                 leitorPontua = configuracao.leitorPontua,
                 numeroDeRodadas = configuracao.numeroDeRodadas,
             ),
             cardsDisponiveis = cardsDisponiveis,
+            grupos = gruposBase,
         )
         turno = null
         savedStateHandle[CHAVE_RODADA] = 1
@@ -218,26 +217,46 @@ class PartidaViewModel @Inject constructor(
         // Ids determinísticos por índice: a restauração pós-morte de processo
         // reconstrói os mesmos ids a partir da mesma configuração.
         jogadoresBase = configuracao.jogadores.mapIndexed { indice, jogador ->
-            Jogador(id = "j${indice + 1}", nome = jogador.nome, timeId = jogador.timeId)
+            Jogador(id = "j${indice + 1}", nome = jogador.nome)
         }
+        gruposBase = montarGrupos()
         cardsDisponiveis = repositorioDeCards.buscarPorCategoria(configuracao.categoria)
         val base = CriarPartida.executar(
             codigo = configuracao.codigo,
             jogadores = jogadoresBase,
-            modoDeJogo = configuracao.modoDeJogo,
             regras = RegrasPartida(
                 leitorPontua = configuracao.leitorPontua,
                 numeroDeRodadas = configuracao.numeroDeRodadas,
             ),
             cardsDisponiveis = cardsDisponiveis,
+            grupos = gruposBase,
         )
         restaurar(base)
     }
 
     /**
-     * Recoloca a partida no ponto salvo: aplica rodada/placar à partida base
-     * e, se havia turno em andamento, o reconstrói pela seed reexecutando as
-     * revelações na ordem salva (mesmo grid, mesmo escolhedor, mesma fase).
+     * Monta os grupos da partida a partir do agrupamento escolhido no Setup:
+     * jogadores com o mesmo [com.quemsou.app.navigation.JogadorConfigurado.grupoId]
+     * caem no mesmo grupo (na ordem de assento do primeiro membro); sem
+     * `grupoId`, o jogador fica em grupo próprio de tamanho 1 — o estado
+     * padrão do modelo v4. Determinístico: a mesma configuração reconstrói os
+     * mesmos grupos na mesma ordem após morte de processo.
+     */
+    private fun montarGrupos(): List<Grupo> {
+        val membrosPorChave = LinkedHashMap<String, MutableList<Jogador>>()
+        configuracao.jogadores.forEachIndexed { indice, configurado ->
+            val jogador = jogadoresBase[indice]
+            val chave = configurado.grupoId ?: jogador.id
+            membrosPorChave.getOrPut(chave) { mutableListOf() }.add(jogador)
+        }
+        return membrosPorChave.map { (chave, membros) -> Grupo.criar(id = chave, membros = membros) }
+    }
+
+    /**
+     * Recoloca a partida no ponto salvo: aplica rodada/pontos por grupo à
+     * partida base e, se havia turno em andamento, o reconstrói pela seed
+     * reexecutando as revelações na ordem salva (mesmo grid, mesmo
+     * escolhedor, mesma fase).
      */
     private fun restaurar(base: Partida) {
         val fase = savedStateHandle.get<String>(CHAVE_FASE) ?: FASE_VEZ_DE_JOGAR
@@ -249,11 +268,11 @@ class PartidaViewModel @Inject constructor(
         partida = base.copy(
             rodadaAtual = rodada,
             indiceDoLeitor = (rodada - 1) % base.jogadores.size,
-            placar = pontos
+            grupos = pontos
                 ?.let { salvo ->
-                    Placar(base.jogadores.mapIndexed { i, j -> j.id to salvo[i] }.toMap())
+                    base.grupos.mapIndexed { indice, grupo -> grupo.copy(pontos = salvo[indice]) }
                 }
-                ?: base.placar,
+                ?: base.grupos,
             encerrada = fase == FASE_PLACAR_FINAL,
         )
 
@@ -380,13 +399,10 @@ class PartidaViewModel @Inject constructor(
     private fun estadoPlacarFinal(): PartidaUiState.PlacarFinal {
         val vencedores = partida.vencedores()
         return PartidaUiState.PlacarFinal(
-            ranking = partida.placar.ranking().map { (id, pontos) ->
-                LinhaDoPlacar(nome = nomeDe(id), pontos = pontos)
+            ranking = partida.ranking().map { grupo ->
+                LinhaDoPlacar(nome = grupo.nome, pontos = grupo.pontos)
             },
-            vencedores = when (partida.modoDeJogo) {
-                ModoDeJogo.INDIVIDUAL -> vencedores.map(::nomeDe)
-                ModoDeJogo.TIMES -> vencedores
-            },
+            vencedores = vencedores.map { it.nome },
             empate = vencedores.size > 1,
         )
     }
