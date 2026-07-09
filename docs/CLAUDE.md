@@ -58,6 +58,18 @@
   grupo no lugar do segmentado; placar final agregado por grupo. 110 testes
   verdes. **Validação final no Z Fold físico (2 solos + 1 grupo de 2):
   PENDENTE.**
+- **v13** (2026-07-09) — **Fase 3 encerrada**: validação física no Z Fold
+  concluída por Felipe, cobrindo as três entregas pós-v9 (correções de UI
+  `2273342`, pontuação v3 "cabo de guerra" `62342af` e modelo unificado de
+  Grupos v4 `88735fd`). 110 testes verdes, tudo pushado. Decisão registrada
+  como deliberada: **colega de grupo do leitor pode adivinhar na mesma
+  rodada** (mantido de propósito, por simplicidade). Novo item no fluxo de
+  trabalho: conferir `git remote -v` no início de todo prompt (incidente de
+  repositório errado nesta data). Única decisão de produto em aberto: nome
+  definitivo do app. Próxima: **Fase 4 — Nearby Connections**, começando
+  pelo desenho da arquitetura da camada Nearby (anúncio de sala, descoberta,
+  sincronização de estado) antes de qualquer código; validação passa a
+  exigir 2+ aparelhos físicos (emulador não testa Nearby).
 
 ## Visão geral
 
@@ -82,7 +94,8 @@
   nesta atualização: `cards.json` **version 2** com 60 cards reais
   (30 `PERSONAGEM_FILME` + 30 `MUNDO_DA_MUSICA`), validado pelo
   `BaralhoDeAssetsTest`.
-- **Fase 3 — código completo, fechamento pendente de validação física**:
+- **Fase 3 — CONCLUÍDA** (validação de jogo completo no Z Fold físico em
+  2026-07-09):
   **3.1** (commit `a3d815b`) — modelos e regras da partida no domínio puro
   (`domain/model` + `CriarPartida` em `domain/usecase`). **3.2**
   (commit `67f4f56`) — navegação tipada (Home, Setup, Partida), `SetupViewModel`
@@ -100,12 +113,17 @@
   (`ChipTipoDeCard`, `AvatarInicial`, `ChipDeJogador`, `RodapeDePontos`,
   `ConfirmDialog`). Tema Material 3 agora suporta claro/escuro
   (`isSystemInDarkTheme()`).
-  **93 testes verdes, push feito.** **PENDENTE: validação de jogo completo no
-  Z Fold físico** — não marcar a Fase 3 como encerrada enquanto essa validação
-  não constar como concluída.
-- **Fase 4 — planejada**: multiplayer via Nearby Connections (é quando a
-  biblioteca `play-services-nearby` é instalada); validação exige 2 aparelhos
-  físicos.
+  Ainda dentro da Fase 3, após a 3.3: pontuação v3 "cabo de guerra" (v10,
+  commit `62342af`), correções de UI pós-teste físico (v11, commit
+  `2273342`) e modelo unificado de Grupos — especificação v4 (v12, commit
+  `88735fd`). **110 testes verdes, push feito, validação física concluída —
+  Fase 3 encerrada em 2026-07-09.**
+- **Fase 4 — próxima**: multiplayer local via Nearby Connections (é quando a
+  biblioteca `play-services-nearby` é instalada), modelo estrela com o
+  anfitrião como fonte da verdade. Começa pelo **desenho da arquitetura da
+  camada Nearby** (anúncio de sala, descoberta, sincronização de estado)
+  antes de qualquer prompt de código. Validação exige 2+ aparelhos físicos —
+  o emulador não serve para testar Nearby.
 - **Fase 5 — planejada**: fábrica de cards com Gemini — gera → valida (mesma
   régua do importador) → tela de revisão → Room. A partida em si segue 100%
   offline; só a geração de cards usa rede.
@@ -185,7 +203,10 @@
   acertador/leitor vão para o grupo do jogador que pontuou
   (`Partida.grupoDe`); a fórmula v3 e a invariante dos 10 pontos por turno
   continuam, somando por grupo. O rodízio de leitor/escolhedor **continua
-  por jogador individual**. Nome de exibição do grupo: nome do jogador se
+  por jogador individual**, e **colega de grupo do leitor pode adivinhar na
+  mesma rodada** — decisão deliberada (2026-07-09), mantida por
+  simplicidade: se acertar, os pontos de acertador e leitor vão para o mesmo
+  grupo. Nome de exibição do grupo: nome do jogador se
   solo, nomes concatenados ("Ana & Bruno") se 2+. No Setup, o agrupamento é
   opcional via toggle "Jogar em times" + chip cíclico por jogador (Sem grupo
   → Grupo 1–3 → Sem grupo; ciclo só de exibição).
@@ -233,6 +254,10 @@
 
 ## Fluxo de trabalho
 
+- **Início de todo prompt**: conferir `git remote -v` e só seguir se o
+  repositório for `Fehhhh94/QuemSou` — um prompt já rodou por engano em
+  outro repositório (incidente de 2026-07-09); o ritual `cd` +
+  `git remote -v` existe exatamente para pegar isso.
 - Domínio (`domain/`) é Kotlin puro: sem Android, Room ou Compose — testável na JVM.
 - KDoc e commits em português, formato `tipo: descrição`.
 - Rodar `./gradlew test` antes de commitar. O JDK do build (JBR do Android

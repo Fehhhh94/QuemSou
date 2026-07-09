@@ -2,6 +2,29 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fechamento da Fase 3 — validação física concluída (2026-07-09)
+
+Sem mudança de código — apenas documentação (`docs/CLAUDE.md` v13).
+
+- **Validação de jogo completo no Z Fold físico: CONCLUÍDA** por Felipe,
+  cobrindo as três entregas que estavam pendentes: correções de UI
+  pós-teste (commit `2273342`), pontuação v3 "cabo de guerra" (commit
+  `62342af`) e modelo unificado de Grupos v4 (commit `88735fd`). **Fase 3
+  encerrada** — 110 testes verdes, tudo pushado.
+- Decisão de design registrada como **deliberada**: colega de grupo do
+  leitor **pode** adivinhar na mesma rodada — mantido de propósito, por
+  simplicidade (a regra já constava em `docs/GAME_RULES.md`; a intenção
+  agora está registrada em `docs/CLAUDE.md`).
+- Novo item no fluxo de trabalho, após incidente de sessão (prompt executado
+  por engano em outro repositório): todo prompt começa conferindo
+  `git remote -v` — só seguir se for `Fehhhh94/QuemSou`.
+- Decisão de produto em aberto: nome definitivo do app.
+- Próximo passo: **Fase 4 — multiplayer local via Nearby Connections**
+  (modelo estrela, anfitrião como fonte da verdade), começando pelo desenho
+  da arquitetura da camada Nearby (anúncio de sala, descoberta,
+  sincronização de estado) antes de qualquer prompt de código; a validação
+  passa a exigir 2+ aparelhos físicos.
+
 ## Especificação v4: modelo unificado de Grupos (fim da distinção Individual/Times) (2026-07-09)
 
 Mudança de especificação: os modos "Individual" e "Times" deixam de existir
