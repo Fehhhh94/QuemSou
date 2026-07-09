@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-07-09 — CLAUDE.md v16
+- Guia refatorado: passa a conter apenas o estado atual, em voz imperativa.
+- Histórico de versões (v1–v15) e decisões substituídas movidos para a seção
+  "Histórico do guia CLAUDE.md" deste arquivo.
+- Nova regra de manutenção: decisão substituída é apagada do guia e registrada
+  aqui como antes/depois.
+
 ## Sub-fase 5.1 — régua editorial extraída para o domínio (2026-07-09)
 
 Refatoração sem mudança de comportamento, preparando a Fase 5: as regras
@@ -411,3 +418,109 @@ Sem mudança de código — apenas documentação (`docs/CLAUDE.md`,
 - `QuemSouApp` (`@HiltAndroidApp`) e módulo `AppModule` do Hilt preparado, ainda vazio.
 - Infra do repositório: `.gitignore`, `docs/BUGS.md`, `docs/IMPROVEMENTS.md`,
   `docs/GAME_RULES.md`, `docs/CARDS_GUIDE.md` e `README.md`.
+
+## Histórico do guia CLAUDE.md (v1–v15)
+
+Bloco de histórico de versões movido verbatim do `docs/CLAUDE.md` na
+refatoração para a v16 (2026-07-09).
+
+- **v1** — esqueleto do documento (Fase 0).
+- **v2** (2026-07-04) — URL do GitHub, Fase 0 registrada como concluída, decisão
+  "leitor pontua" resolvida, estado da Fase 1.
+- **v3** (2026-07-04) — revisão de arquitetura: multiplayer via Nearby
+  Connections + decisões de produto fechadas (jogadores 2–4, individual/times,
+  placar em todos, card queimado descartado).
+- **v4** (2026-07-04) — Fase 2 (parte técnica) concluída: Room + importador de
+  cards versionado + campo `descartarCardQueimado` + `org.gradle.java.home`.
+  Cards definitivos (trabalho editorial) pendentes; decisão "Livre" em aberto.
+- **v5** (2026-07-04) — baralho editorial v2 (60 cards, 30+30); dicas sem
+  curva de dificuldade (grid 1–10 às cegas, posições embaralhadas por
+  partida); "Livre" resolvida como filtro; Fase 5 (fábrica de cards com
+  Gemini) entra no plano.
+- **v6** (2026-07-04) — sub-etapa 3.1 concluída: modelos
+  Jogador/Partida/Turno/Placar, máquina de estados do turno, rodízios de
+  leitor e escolhedor, grid de dicas embaralhado por seed, empate declarado.
+  Erros do domínio: exceções (decisão documentada).
+- **v7** (2026-07-04) — sub-etapa 3.2 concluída: navegação tipada com 3 rotas,
+  SetupViewModel com validação viva, PartidaViewModel único por partida
+  (fases do jogo = estados, não rotas), restauração pós-morte de processo por
+  determinismo de seed. Telas reais ficam para a 3.3.
+- **v8** (2026-07-04) — sub-etapa 3.3 concluída: telas reais da partida
+  seguindo os mockups aprovados (placeholders removidos), componentes
+  reutilizáveis em `ui/components`, tema claro/escuro, evento
+  `reiniciarPartida`. Validação visual no aparelho ainda pendente (Felipe).
+- **v9** (2026-07-04) — fechamento documental da Fase 3: código completo
+  (3.1, 3.2, 3.3), 93 testes verdes, push feito. Precisões nas decisões (seed
+  do grid = seed da partida × 31 + rodada, rodízio do escolhedor, empate
+  declarado no placar, "Livre" via `buscarTodas()`) e novo item em aberto
+  (nome do app). **Validação de jogo completo no Z Fold físico: PENDENTE** —
+  a Fase 3 só fecha depois dela.
+- **v10** (2026-07-08) — especificação v3 de pontuação ("cabo de guerra"),
+  motivada pelo teste no Z Fold físico: o leitor deixa de ganhar os mesmos
+  pontos do acertador e passa a ganhar 1 ponto por dica revelada sem acerto
+  (acerto na dica N → leitor N − 1 pontos); card queimado passa a dar 10
+  pontos ao leitor (antes: ninguém pontuava). `CalculadoraDePontos`, `Turno`,
+  `Partida` e `PartidaUiState.Anuncio` atualizados; 97 testes verdes.
+  **Validação final no Z Fold físico (acerto tardio + card queimado):
+  PENDENTE.**
+- **v11** (2026-07-08) — correções de UI do mesmo teste físico (Z Fold,
+  Android 16), detalhadas em `docs/BUGS.md`/`docs/IMPROVEMENTS.md`: validação
+  prematura no Setup (novo `motivoDoBloqueioVisivel`), chip "Livre" cortado
+  por `Row` sem quebra de linha (trocado por `FlowRow`), botão do Setup sob
+  a barra de navegação (`bottomBar` não recebia inset de sistema — novo
+  `ui/components/BarraDeAcaoInferior`), e texto "Próxima jogada" no anúncio.
+  Só `presentation/ui`, nenhuma mudança de domínio; 103 testes verdes.
+  **Validação final no Z Fold físico: PENDENTE.**
+- **v12** (2026-07-09) — especificação v4: modelo unificado de **Grupos**,
+  fim da distinção Individual/Times. Novo `domain/model/Grupo` (id, nome de
+  exibição, jogadores, pontos); `ModoDeJogo`, `Jogador.timeId` e `Placar`
+  removidos; `Partida` carrega `List<Grupo>` (padrão: cada jogador em grupo
+  próprio de 1) e credita os pontos ao grupo de quem pontuou; fórmula v3 e
+  rodízios inalterados. Setup: toggle "Jogar em times" + chip cíclico de
+  grupo no lugar do segmentado; placar final agregado por grupo. 110 testes
+  verdes. **Validação final no Z Fold físico (2 solos + 1 grupo de 2):
+  PENDENTE.**
+- **v13** (2026-07-09) — **Fase 3 encerrada**: validação física no Z Fold
+  concluída por Felipe, cobrindo as três entregas pós-v9 (correções de UI
+  `2273342`, pontuação v3 "cabo de guerra" `62342af` e modelo unificado de
+  Grupos v4 `88735fd`). 110 testes verdes, tudo pushado. Decisão registrada
+  como deliberada: **colega de grupo do leitor pode adivinhar na mesma
+  rodada** (mantido de propósito, por simplicidade). Novo item no fluxo de
+  trabalho: conferir `git remote -v` no início de todo prompt (incidente de
+  repositório errado nesta data). Única decisão de produto em aberto: nome
+  definitivo do app. Próxima: **Fase 4 — Nearby Connections**, começando
+  pelo desenho da arquitetura da camada Nearby (anúncio de sala, descoberta,
+  sincronização de estado) antes de qualquer código; validação passa a
+  exigir 2+ aparelhos físicos (emulador não testa Nearby).
+- **v14** (2026-07-09) — reprioritização do roadmap (decisão do Felipe):
+  **Fase 4 (Nearby Connections) adiada para o backlog**, sem previsão de
+  retomada por agora; **Fase 5 (Fábrica de Cards com Gemini) passa a ser o
+  próximo passo**, sem depender da Fase 4. Numeração original das fases
+  mantida (sem renumeração). Nenhuma mudança de código.
+- **v15** (2026-07-09) — sub-fase 5.1 concluída: régua editorial mecânica
+  extraída do `BaralhoDeAssetsTest` para o domínio puro
+  (`domain/validacao/`: `ValidadorEditorial`, `ResultadoValidacao`,
+  `ViolacaoEditorial`/`RegraEditorial`), refatoração sem mudança de
+  comportamento — o teste do baralho real delega ao validador e os 60 cards
+  continuam passando. Especificação do **Modo Shot** registrada em
+  `docs/IMPROVEMENTS.md` como backlog (após a 5.1). 115 testes verdes.
+
+### Decisões substituídas (antes/depois)
+
+- **Arquitetura de multiplayer** (revisada na v3 do guia): antes, baralho
+  sincronizado por seed em cada aparelho; depois, rede local real via Nearby
+  Connections (modelo estrela, anfitrião como fonte única da verdade).
+- **Dicas do card** (v5 do guia): antes, dicas com curva de dificuldade;
+  depois, grid 1–10 às cegas com posições embaralhadas por seed.
+- **Pontuação do leitor** (especificação v3 "cabo de guerra", v10 do guia):
+  antes, leitor ganhava os mesmos pontos do acertador e card queimado não
+  pontuava; depois, leitor ganha 1 ponto por dica revelada sem acerto
+  (acerto na dica N → N − 1 pontos) e card queimado dá 10 pontos ao leitor.
+- **Modo de jogo → Grupos** (especificação v4, v12 do guia): antes,
+  bifurcação Individual/Times (`ModoDeJogo`, `Jogador.timeId`, `Placar` por
+  jogador); depois, modelo unificado de `Grupo` — todo jogador nasce em
+  grupo próprio de 1 e "times" é apenas mesclar 2+ jogadores.
+
+Commits de referência das fases iniciais, que constavam no guia antigo:
+Fase 0 `f544a09` · Fase 1 `5227dd8` (os commits das sub-etapas da Fase 3 já
+constam nas entradas deste changelog).

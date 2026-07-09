@@ -1,289 +1,171 @@
 # QuemSou — Guia do projeto para o Claude
 
-## Histórico de versões
+> **v16 (2026-07-09).** Este arquivo descreve apenas o **estado atual** do
+> projeto. Histórico de versões, decisões substituídas e o "porquê" das
+> mudanças vivem em `docs/CHANGELOG.md` — não aqui.
 
-- **v1** — esqueleto do documento (Fase 0).
-- **v2** (2026-07-04) — URL do GitHub, Fase 0 registrada como concluída, decisão
-  "leitor pontua" resolvida, estado da Fase 1.
-- **v3** (2026-07-04) — revisão de arquitetura: multiplayer via Nearby
-  Connections + decisões de produto fechadas (jogadores 2–4, individual/times,
-  placar em todos, card queimado descartado).
-- **v4** (2026-07-04) — Fase 2 (parte técnica) concluída: Room + importador de
-  cards versionado + campo `descartarCardQueimado` + `org.gradle.java.home`.
-  Cards definitivos (trabalho editorial) pendentes; decisão "Livre" em aberto.
-- **v5** (2026-07-04) — baralho editorial v2 (60 cards, 30+30); dicas sem
-  curva de dificuldade (grid 1–10 às cegas, posições embaralhadas por
-  partida); "Livre" resolvida como filtro; Fase 5 (fábrica de cards com
-  Gemini) entra no plano.
-- **v6** (2026-07-04) — sub-etapa 3.1 concluída: modelos
-  Jogador/Partida/Turno/Placar, máquina de estados do turno, rodízios de
-  leitor e escolhedor, grid de dicas embaralhado por seed, empate declarado.
-  Erros do domínio: exceções (decisão documentada).
-- **v7** (2026-07-04) — sub-etapa 3.2 concluída: navegação tipada com 3 rotas,
-  SetupViewModel com validação viva, PartidaViewModel único por partida
-  (fases do jogo = estados, não rotas), restauração pós-morte de processo por
-  determinismo de seed. Telas reais ficam para a 3.3.
-- **v8** (2026-07-04) — sub-etapa 3.3 concluída: telas reais da partida
-  seguindo os mockups aprovados (placeholders removidos), componentes
-  reutilizáveis em `ui/components`, tema claro/escuro, evento
-  `reiniciarPartida`. Validação visual no aparelho ainda pendente (Felipe).
-- **v9** (2026-07-04) — fechamento documental da Fase 3: código completo
-  (3.1, 3.2, 3.3), 93 testes verdes, push feito. Precisões nas decisões (seed
-  do grid = seed da partida × 31 + rodada, rodízio do escolhedor, empate
-  declarado no placar, "Livre" via `buscarTodas()`) e novo item em aberto
-  (nome do app). **Validação de jogo completo no Z Fold físico: PENDENTE** —
-  a Fase 3 só fecha depois dela.
-- **v10** (2026-07-08) — especificação v3 de pontuação ("cabo de guerra"),
-  motivada pelo teste no Z Fold físico: o leitor deixa de ganhar os mesmos
-  pontos do acertador e passa a ganhar 1 ponto por dica revelada sem acerto
-  (acerto na dica N → leitor N − 1 pontos); card queimado passa a dar 10
-  pontos ao leitor (antes: ninguém pontuava). `CalculadoraDePontos`, `Turno`,
-  `Partida` e `PartidaUiState.Anuncio` atualizados; 97 testes verdes.
-  **Validação final no Z Fold físico (acerto tardio + card queimado):
-  PENDENTE.**
-- **v11** (2026-07-08) — correções de UI do mesmo teste físico (Z Fold,
-  Android 16), detalhadas em `docs/BUGS.md`/`docs/IMPROVEMENTS.md`: validação
-  prematura no Setup (novo `motivoDoBloqueioVisivel`), chip "Livre" cortado
-  por `Row` sem quebra de linha (trocado por `FlowRow`), botão do Setup sob
-  a barra de navegação (`bottomBar` não recebia inset de sistema — novo
-  `ui/components/BarraDeAcaoInferior`), e texto "Próxima jogada" no anúncio.
-  Só `presentation/ui`, nenhuma mudança de domínio; 103 testes verdes.
-  **Validação final no Z Fold físico: PENDENTE.**
-- **v12** (2026-07-09) — especificação v4: modelo unificado de **Grupos**,
-  fim da distinção Individual/Times. Novo `domain/model/Grupo` (id, nome de
-  exibição, jogadores, pontos); `ModoDeJogo`, `Jogador.timeId` e `Placar`
-  removidos; `Partida` carrega `List<Grupo>` (padrão: cada jogador em grupo
-  próprio de 1) e credita os pontos ao grupo de quem pontuou; fórmula v3 e
-  rodízios inalterados. Setup: toggle "Jogar em times" + chip cíclico de
-  grupo no lugar do segmentado; placar final agregado por grupo. 110 testes
-  verdes. **Validação final no Z Fold físico (2 solos + 1 grupo de 2):
-  PENDENTE.**
-- **v13** (2026-07-09) — **Fase 3 encerrada**: validação física no Z Fold
-  concluída por Felipe, cobrindo as três entregas pós-v9 (correções de UI
-  `2273342`, pontuação v3 "cabo de guerra" `62342af` e modelo unificado de
-  Grupos v4 `88735fd`). 110 testes verdes, tudo pushado. Decisão registrada
-  como deliberada: **colega de grupo do leitor pode adivinhar na mesma
-  rodada** (mantido de propósito, por simplicidade). Novo item no fluxo de
-  trabalho: conferir `git remote -v` no início de todo prompt (incidente de
-  repositório errado nesta data). Única decisão de produto em aberto: nome
-  definitivo do app. Próxima: **Fase 4 — Nearby Connections**, começando
-  pelo desenho da arquitetura da camada Nearby (anúncio de sala, descoberta,
-  sincronização de estado) antes de qualquer código; validação passa a
-  exigir 2+ aparelhos físicos (emulador não testa Nearby).
-- **v14** (2026-07-09) — reprioritização do roadmap (decisão do Felipe):
-  **Fase 4 (Nearby Connections) adiada para o backlog**, sem previsão de
-  retomada por agora; **Fase 5 (Fábrica de Cards com Gemini) passa a ser o
-  próximo passo**, sem depender da Fase 4. Numeração original das fases
-  mantida (sem renumeração). Nenhuma mudança de código.
-- **v15** (2026-07-09) — sub-fase 5.1 concluída: régua editorial mecânica
-  extraída do `BaralhoDeAssetsTest` para o domínio puro
-  (`domain/validacao/`: `ValidadorEditorial`, `ResultadoValidacao`,
-  `ViolacaoEditorial`/`RegraEditorial`), refatoração sem mudança de
-  comportamento — o teste do baralho real delega ao validador e os 60 cards
-  continuam passando. Especificação do **Modo Shot** registrada em
-  `docs/IMPROVEMENTS.md` como backlog (após a 5.1). 115 testes verdes.
+## Regras inegociáveis (ler antes de qualquer coisa)
+
+- **Nunca fazer `git push`.** Push é sempre manual do Felipe.
+- **Início de todo prompt**: `cd C:\Dev\QuemSou` + `git remote -v`. Só seguir
+  se o remoto for `Fehhhh94/QuemSou`.
+- **Determinismo é sagrado**: seed e embaralhamento nunca usam `hashCode()`
+  da plataforma, `kotlin.random.Random` nem `java.util.Random`. Usar as
+  implementações próprias de `domain/rules/` (hash polinomial + xorshift64).
+  A mesma seed gera o mesmo baralho, para sempre.
+- **Domínio é Kotlin puro**: `domain/` sem Android, Room ou Compose —
+  testável na JVM.
+- Rodar `./gradlew test` antes de commitar. O JDK do build (JBR, JVM 21) está
+  fixado em `gradle.properties` via `org.gradle.java.home`.
+- Editar cards = alterar `app/src/main/assets/cards.json` **e incrementar
+  `version`**, senão a mudança não chega ao banco Room (espelho recarregado
+  pelo `CardsImporter`).
 
 ## Visão geral
 
-- Party game Android offline: um leitor lê até 10 dicas de um card e os demais
-  jogadores tentam adivinhar a resposta; quanto menos dicas, mais pontos.
-- Repositório: https://github.com/Fehhhh94/QuemSou
+- Party game Android offline: um leitor lê até 10 dicas de um card e os
+  demais tentam adivinhar a resposta; quanto menos dicas, mais pontos.
+- Repositório: https://github.com/Fehhhh94/QuemSou · local: `C:\Dev\QuemSou`
 - Stack: Kotlin 2.1.0, Jetpack Compose (Material 3), Hilt (KSP), Room,
-  Navigation Compose com rotas tipadas (`@Serializable`), Clean Architecture + MVVM.
-- Pacote raiz `com.quemsou.app`. Código Kotlin em `app/src/main/kotlin/`
+  DataStore, Navigation Compose com rotas tipadas (`@Serializable`),
+  Clean Architecture + MVVM.
+- Pacote raiz `com.quemsou.app`. Código em `app/src/main/kotlin/`
   (não `src/main/java/`); testes JVM em `app/src/test/kotlin/`.
 
-## Estado do projeto
+## Estado atual
 
-- **Fase 0 — esqueleto** (Gradle, Hilt, navegação, 4 telas placeholder):
-  concluída — commit `f544a09`.
-- **Fase 1 — domínio puro** (modelos, seed/embaralhamento determinísticos,
-  pontuação, testes JVM): concluída — commit `5227dd8`.
-- **Fase 2 — parte técnica concluída** nesta atualização: banco de cards Room
-  (`data/local/`), importador de `assets/cards.json` com versionamento via
-  DataStore (`data/importer/`), campo `RegrasPartida.descartarCardQueimado` e
-  `org.gradle.java.home` no `gradle.properties`. Baralho editorial entregue
-  nesta atualização: `cards.json` **version 2** com 60 cards reais
+- **Fases 0–3 concluídas** e validadas em jogo completo no Z Fold físico
+  (Android 16). Baralho editorial: `cards.json` version 2, 60 cards
   (30 `PERSONAGEM_FILME` + 30 `MUNDO_DA_MUSICA`), validado pelo
-  `BaralhoDeAssetsTest`.
-- **Fase 3 — CONCLUÍDA** (validação de jogo completo no Z Fold físico em
-  2026-07-09):
-  **3.1** (commit `a3d815b`) — modelos e regras da partida no domínio puro
-  (`domain/model` + `CriarPartida` em `domain/usecase`). **3.2**
-  (commit `67f4f56`) — navegação tipada (Home, Setup, Partida), `SetupViewModel`
-  (validação viva com `podeComecar` + motivo), `PartidaViewModel` (um por
-  partida, `StateFlow<PartidaUiState>`, eventos, SavedStateHandle com
-  restauração por seed) e `RepositorioDeCards` (interface no domínio,
-  implementação Room). **3.3** (commit `2874326`) — telas reais seguindo os
-  mockups aprovados, substituindo os placeholders da 3.2: Home (com diálogo
-  "Como jogar" e badge "Fase 4" no entrar com código), Setup (chips de
-  categoria, segmentado individual/times, jogadores com times, stepper de
-  rodadas, toggle leitor pontua) e a tela única da Partida com
-  `AnimatedContent` trocando as fases (grid às cegas com revelação por
-  pressionar-e-segurar, `ModalBottomSheet` do QuemAcertou, anúncio, placar
-  final). Componentes reutilizáveis em `presentation/ui/components/`
-  (`ChipTipoDeCard`, `AvatarInicial`, `ChipDeJogador`, `RodapeDePontos`,
-  `ConfirmDialog`). Tema Material 3 agora suporta claro/escuro
-  (`isSystemInDarkTheme()`).
-  Ainda dentro da Fase 3, após a 3.3: pontuação v3 "cabo de guerra" (v10,
-  commit `62342af`), correções de UI pós-teste físico (v11, commit
-  `2273342`) e modelo unificado de Grupos — especificação v4 (v12, commit
-  `88735fd`). **110 testes verdes, push feito, validação física concluída —
-  Fase 3 encerrada em 2026-07-09.**
-- **Fase 4 — adiada (ver backlog)**: multiplayer local via Nearby Connections
-  (é quando a biblioteca `play-services-nearby` é instalada), modelo estrela
-  com o anfitrião como fonte da verdade. Adiada na reprioritização de
-  2026-07-09 (v14), sem previsão de retomada. Quando retomada, começa pelo
-  **desenho da arquitetura da camada Nearby** (anúncio de sala, descoberta,
-  sincronização de estado) antes de qualquer prompt de código; validação
-  exige 2+ aparelhos físicos — o emulador não serve para testar Nearby.
-- **Fase 5 — em andamento**: fábrica de cards com Gemini — gera → valida
-  (mesma régua do importador) → tela de revisão → Room. Não depende da
-  Fase 4. A partida em si segue 100% offline; só a geração de cards usa
-  rede. **Sub-fase 5.1 concluída** (2026-07-09): régua editorial mecânica no
-  domínio puro (`domain/validacao/ValidadorEditorial` + `ResultadoValidacao`
-  + `ViolacaoEditorial`), a mesma para o teste do baralho real e para a
-  futura validação de cards gerados por IA; violações acumuladas com
-  mensagem em português para a tela de revisão.
-- **Backlog**: Fase 4 — multiplayer local via Nearby Connections (adiada em
-  2026-07-09) · salas online à distância (Firebase).
+  `BaralhoDeAssetsTest`. **115 testes verdes.**
+- **Fase 5 — EM ANDAMENTO** (Fábrica de Cards com Gemini): sub-fase 5.1
+  concluída (commit `775d866`). **Próximo passo: Modo Shot** (spec em
+  `docs/IMPROVEMENTS.md`), depois a 5.2.
+- **Fase 4 (Nearby Connections): no backlog**, sem previsão — ver "Backlog".
+- Única decisão de produto em aberto: **nome definitivo do app** ("QuemSou"
+  é provisório em código, pacote e strings).
 
-## Arquitetura de multiplayer
+## Regras do jogo vigentes
 
-- **Revisada** (v3): o multiplayer deixa de ser "baralho sincronizado por seed
-  em cada aparelho" e passa a ser rede local real via **Nearby Connections API**
-  (`play-services-nearby`), sem depender de internet (Bluetooth/Wi-Fi direto).
-- **Modelo estrela**: o anfitrião é a fonte única da verdade. Ele anuncia a
-  sala, distribui os cards, e sincroniza turno, dica atual e placar em todos os
-  aparelhos conectados.
-- A biblioteca só é instalada na Fase 4 — nada de rede nas Fases 2 e 3.
-- `SeedDeCodigo` e `EmbaralhadorDeCards` (Fase 1) continuam válidos, mas mudam
-  de papel: viram embaralhamento **interno do anfitrião**, não mais mecanismo
-  de sincronização de baralho entre aparelhos.
+- **Jogadores**: mínimo 2, máximo 4 (1 leitor + 1 a 3 adivinhadores por rodada).
+- **Grid às cegas**: posições 1–10 são escolha cega; `Turno.criar` embaralha
+  as dicas com seed = **seed da partida × 31 + rodada**
+  (`Partida.seedDasDicas`) — grid diferente por turno, sempre reproduzível.
+- **Rodízio do escolhedor**: gira a cada dica revelada, circular entre os
+  adivinhadores (`Turno.indiceDoEscolhedor`); o leitor nunca escolhe.
+- **Pontuação v3 "cabo de guerra"** (`CalculadoraDePontos`; fórmula completa
+  em `docs/GAME_RULES.md`): acertador na dica N ganha **11 − N**; leitor
+  (se `RegrasPartida.leitorPontua`, padrão SIM) ganha **1 ponto por dica
+  revelada sem acerto** (acerto na dica N → N − 1 pontos); **card queimado →
+  10 pontos ao leitor**. Todo turno distribui exatamente 10 pontos.
+- **Card queimado é descartado**, não volta ao baralho
+  (`RegrasPartida.descartarCardQueimado`, padrão SIM).
+- **Fim de turno sempre revela a resposta**: `TurnoEncerrado.Acerto` e
+  `TurnoEncerrado.Queimado` carregam a resposta; a tela `Anuncio` sempre a exibe.
+- **Grupos**: todo jogador pertence a um `Grupo` (id, nome de exibição,
+  jogadores, pontos); por padrão cada um nasce em grupo próprio de 1
+  (`Grupo.individuais`) — "times" é apenas mesclar 2+ jogadores. Grupos
+  mistos são permitidos; não há máximo de grupos (teto natural = nº de
+  jogadores). Pontos de acertador/leitor vão para o grupo de quem pontuou
+  (`Partida.grupoDe`). Rodízios de leitor/escolhedor continuam **por jogador
+  individual**. **Colega de grupo do leitor pode adivinhar na mesma rodada**
+  — decisão deliberada, por simplicidade. Nome de exibição: nome do jogador
+  se solo, concatenado ("Ana & Bruno") se 2+.
+- **Placar agregado por grupo** (`Partida.ranking()`, pontos em
+  `Grupo.pontos`). **Empate final é declarado, sem desempate**
+  (`Partida.vencedores()` retorna todos os empatados na maior pontuação).
+- **Categoria "Livre"** é um filtro: união de todas as categorias, sem cards
+  exclusivos. `RepositorioDeCardsLocal.buscarPorCategoria` chama
+  `CardDao.buscarTodas()` para `LIVRE`.
+- **`reiniciarPartida`** (no `PlacarFinal`): gera seed nova para os mesmos
+  jogadores/regras/categoria e reembaralha do zero — botão "Jogar de novo".
 
-## Decisões de design
+## Arquitetura da UI
 
-- **Leitor pontua** — RESOLVIDA, especificação v3 ("cabo de guerra",
-  2026-07-08): configurável em `RegrasPartida.leitorPontua`, padrão SIM;
-  quando ativo, o leitor ganha **1 ponto por dica revelada sem acerto**
-  (acerto na dica N → leitor N − 1 pontos; card queimado → leitor 10 pontos).
-  Todo turno distribui exatamente 10 pontos no total. Ver
-  `docs/GAME_RULES.md` para a fórmula completa e `CalculadoraDePontos` no
-  domínio.
-- **Destino do card queimado** — RESOLVIDA: descartado (não volta ao baralho).
-  Campo `RegrasPartida.descartarCardQueimado`, padrão SIM (criado na Fase 2).
-- **Categoria "Livre"** — RESOLVIDA: é um **filtro** de baralho, a união de
-  todas as categorias — não existem cards exclusivos de `LIVRE`. Implementado
-  em `RepositorioDeCardsLocal.buscarPorCategoria`: para `LIVRE` chama
-  `CardDao.buscarTodas()`; para as demais, `buscarPorCategoria(categoria.name)`.
-- **Dicas às cegas** — RESOLVIDA e implementada (3.1): o grid 1–10 é escolha
-  às cegas; `Turno.criar` embaralha as posições das dicas com o PRNG por seed
-  da Fase 1 (`EmbaralhadorDeCards`, agora genérico). Seed do grid = **seed da
-  partida × 31 + rodada** (`Partida.seedDasDicas`) — grid diferente a cada
-  turno, sempre reproduzível. Pontuação inalterada: 11 − quantidade de dicas
-  usadas, nunca o número da posição tocada.
-- **Rodízio do escolhedor** — RESOLVIDO e implementado (3.1): quem escolhe a
-  posição no grid gira **a cada dica revelada**, circular entre os
-  adivinhadores (`Turno.indiceDoEscolhedor`, funciona com 1, 2 ou 3); o leitor
-  nunca escolhe.
-- **Fim de turno sempre revela a resposta** — RESOLVIDO e implementado (3.1):
-  tanto `TurnoEncerrado.Acerto` quanto `TurnoEncerrado.Queimado` carregam a
-  resposta do card; a UI (`Anuncio`, 3.3) sempre a exibe, independente do
-  desfecho.
-- **Erros no domínio** — RESOLVIDA: transições e argumentos inválidos lançam
-  **exceção** (`IllegalStateException` para estado errado,
-  `IllegalArgumentException` para argumento inválido, via `check`/`require`) —
-  abordagem única em todo o domínio; não usamos erro tipado de retorno.
-  Na camada de UI, o `PartidaViewModel` **ignora eventos fora de fase**
-  (toques duplicados não derrubam o app); os guards garantem que só chamadas
-  válidas cheguem ao domínio, e as exceções ficam como rede de proteção.
-- **Fases do jogo são estados, não rotas** — RESOLVIDA e validada (3.2/3.3):
-  o app tem só 3 rotas tipadas (Home, Setup, Partida); VezDeJogar, Grid,
-  DicaRevelada, QuemAcertou, Anuncio e PlacarFinal são estados do
-  `StateFlow<PartidaUiState>` da rota Partida, trocados com `AnimatedContent`.
-  Voltar em qualquer fase (`BackHandler`) abre diálogo de confirmação de
-  abandono (`abandonoSolicitado`/`continuarPartida`); confirmar sai para Home.
-- **Um ViewModel por partida** — RESOLVIDA (3.2): `PartidaViewModel` único,
-  escopado à rota Partida, dirige a partida inteira; nunca duplica regra do
-  domínio — só traduz `EstadoDoTurno`/`Placar` em `PartidaUiState` e repassa
-  eventos. A rota Partida carrega a `ConfiguracaoDaPartida` em JSON (um único
-  argumento serializável; nunca objetos de domínio), e a restauração
-  pós-morte de processo reexecuta as revelações salvas sobre a partida
-  recriada por seed.
-- **Jogadores por partida** — RESOLVIDA: mínimo 2, máximo 4 (1 leitor + 1 a 3
-  adivinhadores por rodada).
-- **Grupos (especificação v4)** — RESOLVIDA (2026-07-09), substitui a antiga
-  decisão "Modo de jogo": não existe mais bifurcação Individual/Times. Todo
-  jogador pertence a um `Grupo`; por padrão cada um nasce em grupo próprio de
-  tamanho 1 (`Grupo.individuais`) — o "individual" é o estado padrão, e
-  "times" é só mesclar 2+ jogadores num grupo. Grupos mistos (1 e 2+) na
-  mesma partida são permitidos sem validação especial e **não há constante
-  de máximo de grupos** (teto natural = número de jogadores). Os pontos de
-  acertador/leitor vão para o grupo do jogador que pontuou
-  (`Partida.grupoDe`); a fórmula v3 e a invariante dos 10 pontos por turno
-  continuam, somando por grupo. O rodízio de leitor/escolhedor **continua
-  por jogador individual**, e **colega de grupo do leitor pode adivinhar na
-  mesma rodada** — decisão deliberada (2026-07-09), mantida por
-  simplicidade: se acertar, os pontos de acertador e leitor vão para o mesmo
-  grupo. Nome de exibição do grupo: nome do jogador se
-  solo, nomes concatenados ("Ana & Bruno") se 2+. No Setup, o agrupamento é
-  opcional via toggle "Jogar em times" + chip cíclico por jogador (Sem grupo
-  → Grupo 1–3 → Sem grupo; ciclo só de exibição).
-- **Placar** — RESOLVIDA: exibido em todos os aparelhos, sincronizado pelo
-  anfitrião via Nearby (ver "Arquitetura de multiplayer" acima). Desde a v4 o
-  placar é **agregado por grupo** (`Partida.ranking()`, pontos vivem em
-  `Grupo.pontos`). **Empate final é declarado, sem desempate**:
-  `Partida.vencedores()` retorna todos os grupos empatados na maior
-  pontuação (v1).
-- **Evento `reiniciarPartida`** (3.3) — único evento novo autorizado no
-  `PartidaViewModel`: no `PlacarFinal`, gera um código novo (seed nova) para os
-  mesmos jogadores/modo/regras/categoria e reembaralha o baralho do zero —
-  botão "Jogar de novo".
-- **Campos aditivos em `PartidaUiState`** (3.3) — nenhum evento ou assinatura
-  do `PartidaViewModel` mudou; `Grid` (`rodada`, `nomeDoLeitor`, `tipo`),
-  `DicaRevelada` (`tipo`), `QuemAcertou` (`nomeDoLeitor`, `pontosEmJogo`,
-  `pontosDoLeitor`, e a lista de adivinhadores agora vem com o escolhedor da
-  vez primeiro) e `Anuncio` (`nomeDoLeitor`, `ultimaRodada`) ganharam campos
-  que os mockups aprovados exigem e que não eram deriváveis na UI sem duplicar
-  regra do domínio — só a tradução ficou mais completa.
-- **Nome do app** — EM ABERTO: código, pacote (`com.quemsou.app`) e strings
-  usam "QuemSou" provisoriamente; é a única decisão de produto ainda sem
-  fechamento.
-- **Insets em telas edge-to-edge** — RESOLVIDA (v11, 2026-07-08): o app usa
-  `enableEdgeToEdge()` na `MainActivity`, então o `content` do `Scaffold`
-  recebe `WindowInsets.systemBars` automaticamente via `innerPadding`, mas um
-  `bottomBar` customizado (um `Column` comum, não um componente M3 dedicado
-  como `NavigationBar`) **não** recebe esse inset sozinho. Toda barra de ação
-  fora do `content` do `Scaffold` deve usar
-  `presentation/ui/components/BarraDeAcaoInferior` (aplica
-  `Modifier.navigationBarsPadding()`), como no `bottomBar` do Setup.
-- **Determinismo é sagrado**: seed e embaralhamento não podem usar `hashCode()`
-  da plataforma, `kotlin.random.Random` nem `java.util.Random`. As
-  implementações próprias vivem em `domain/rules/` (hash polinomial +
-  xorshift64). A mesma seed precisa gerar o mesmo baralho, para sempre — hoje é
-  a base do embaralhamento interno do anfitrião (ver "Arquitetura de
-  multiplayer").
+- **3 rotas tipadas** (Home, Setup, Partida). Fases do jogo (VezDeJogar,
+  Grid, DicaRevelada, QuemAcertou, Anuncio, PlacarFinal) são **estados** do
+  `StateFlow<PartidaUiState>` — nunca rotas — trocados com `AnimatedContent`.
+- **Um `PartidaViewModel` por partida**, escopado à rota Partida. Nunca
+  duplica regra do domínio: só traduz `EstadoDoTurno`/`Placar` em
+  `PartidaUiState` e repassa eventos. A rota recebe `ConfiguracaoDaPartida`
+  em JSON (um único argumento serializável; nunca objetos de domínio).
+- **Restauração pós-morte de processo**: `SavedStateHandle` mínimo +
+  recriação determinística por seed, reexecutando as revelações salvas.
+- **Erros**: domínio lança exceção (`check`/`require` →
+  `IllegalStateException`/`IllegalArgumentException`); o ViewModel **ignora
+  eventos fora de fase** (toques duplicados não derrubam o app) — exceções
+  são rede de proteção, não fluxo.
+- **Edge-to-edge**: o app usa `enableEdgeToEdge()`. Toda barra de ação fora
+  do `content` do `Scaffold` deve usar
+  `presentation/ui/components/BarraDeAcaoInferior`
+  (aplica `navigationBarsPadding()`), como no `bottomBar` do Setup.
+- Componentes reutilizáveis em `presentation/ui/components/` (`ChipTipoDeCard`,
+  `AvatarInicial`, `ChipDeJogador`, `RodapeDePontos`, `ConfirmDialog`,
+  `BarraDeAcaoInferior`). Tema Material 3 claro/escuro.
+- Voltar em qualquer fase (`BackHandler`) abre confirmação de abandono;
+  confirmar sai para Home.
+- Setup: agrupamento opcional via toggle "Jogar em times" + chip cíclico por
+  jogador (Sem grupo → Grupo 1–3 → Sem grupo; ciclo só de exibição);
+  validação viva com `podeComecar` + `motivoDoBloqueioVisivel`.
+
+## Fase 5 — arquitetura
+
+- **Gemini via REST direto** (`generativelanguage.googleapis.com`), cliente
+  HTTP leve; **chave do próprio usuário** no header `x-goog-api-key`, vinda
+  do DataStore. Sem Firebase (App Check obrigatório e chave atrelada ao
+  desenvolvedor o descartaram). A partida segue 100% offline — só a geração
+  de cards usa rede.
+- **`ValidadorEditorial`** (`domain/validacao`, feito na 5.1): regras por
+  card (resposta não vazia, dica não vazia, dica não contém a resposta
+  ignoreCase), retorno `Aprovado` | `Reprovado` com violações acumuladas
+  (regra + índice base 0 + mensagem em português numerada 1–10). Regra
+  estrutural (10 dicas) fica no construtor de `Card`; regras por baralho no
+  `BaralhoDeAssetsTest`; regras de julgamento (autossuficiência, força da
+  dica) ficam com o humano na tela de revisão.
+- **Lacuna registrada para a 5.2**: o JSON cru do Gemini precisa de validação
+  estrutural ANTES de construir `Card` (8 dicas deve virar violação legível
+  na tela de revisão, não exceção do construtor).
+- **Sub-fases**: 5.2 camada Gemini (interface `GeradorDeCards` no domínio +
+  implementação REST na data + tela de configuração da chave) · 5.3 tela de
+  revisão (gerados → validados → fila de pendentes → aprovar/rejeitar →
+  aprovados entram no Room por categoria) · 5.4 validação ponta a ponta no
+  Z Fold.
+- **Modo Shot (implementar antes da 5.2; spec em `docs/IMPROVEMENTS.md`)**:
+  shot é pedágio, não armadilha — quem escolheu o número bebe, toca "Bebi!"
+  e a dica aparece; pontuação intocada. `modoShot: Boolean = false` +
+  `quantidadeDeShots: Int = 2` (1–3) em `RegrasPartida`; posições sorteadas
+  por seed derivada da fórmula existente com fator próprio; grid não marca a
+  posição antes do toque; overlay "🥃 UM SHOT!" com nome de quem bebe, insets
+  via `BarraDeAcaoInferior`. Nota: álcool afeta a classificação etária na
+  Play Store.
+
+## Backlog
+
+- **Fase 4 — multiplayer local via Nearby Connections** (adiada em
+  2026-07-09): modelo estrela, anfitrião como fonte única da verdade
+  (anuncia a sala, distribui cards, sincroniza turno/dica/placar);
+  `play-services-nearby` só é instalada nessa fase; seed e
+  `EmbaralhadorDeCards` viram embaralhamento interno do anfitrião. Retomada
+  começa pelo **desenho da arquitetura da camada Nearby** antes de qualquer
+  código; validação exige **2+ aparelhos físicos** (emulador não testa Nearby).
+- Salas online à distância (Firebase).
 
 ## Documentação — quem é dono do quê
 
-- `docs/GAME_RULES.md` — dono das regras do jogo.
-- `docs/CHANGELOG.md` — mudanças notáveis por fase.
-- `docs/BUGS.md` / `docs/IMPROVEMENTS.md` — bugs conhecidos e melhorias futuras.
+- `docs/GAME_RULES.md` — regras do jogo (fórmulas completas).
+- `docs/CHANGELOG.md` — histórico: mudanças por fase, decisões substituídas
+  e versões deste guia.
+- `docs/BUGS.md` / `docs/IMPROVEMENTS.md` — bugs conhecidos e melhorias.
 - `docs/CARDS_GUIDE.md` — guia de criação de cards.
+- **Regra de manutenção deste arquivo**: só estado atual, em voz imperativa.
+  Ao substituir uma decisão, a antiga é **apagada daqui** e o "antes/depois"
+  vai para o `CHANGELOG.md`. Nada de "RESOLVIDA (substitui X)" — a regra
+  vigente é escrita como se sempre tivesse sido assim.
 
 ## Fluxo de trabalho
 
-- **Início de todo prompt**: conferir `git remote -v` e só seguir se o
-  repositório for `Fehhhh94/QuemSou` — um prompt já rodou por engano em
-  outro repositório (incidente de 2026-07-09); o ritual `cd` +
-  `git remote -v` existe exatamente para pegar isso.
-- Domínio (`domain/`) é Kotlin puro: sem Android, Room ou Compose — testável na JVM.
+- Planejar/decidir no Claude.ai → gerar prompt → executar no Claude Code →
+  validar no aparelho → voltar ao Claude.ai para o veredito.
+- Mockups visuais (HTML/SVG) aprovados **antes** de qualquer código de tela.
 - KDoc e commits em português, formato `tipo: descrição`.
-- Rodar `./gradlew test` antes de commitar. O JDK do build (JBR do Android
-  Studio, JVM 21) está fixado em `gradle.properties` via `org.gradle.java.home`
-  — não é preciso configurar `JAVA_HOME`.
-- Cards vivem em `app/src/main/assets/cards.json` (fonte da verdade, com campo
-  `version`); o banco Room é só um espelho recarregado pelo `CardsImporter`
-  quando a versão do asset avança. Para editar cards: alterar o JSON **e
-  incrementar `version`**, senão a mudança não chega ao banco.
-- **Push é sempre manual do Felipe** — nunca fazer `git push`.
+- Antes de sugerir push manual: conferir `git log origin/main..HEAD`.
