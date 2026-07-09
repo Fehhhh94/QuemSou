@@ -29,6 +29,10 @@
     <string name="setup_rodadas_diminuir_cd">Diminuir rodadas</string>
     <string name="setup_rodadas_aumentar_cd">Aumentar rodadas</string>
     <string name="setup_leitor_pontua_titulo">Leitor também pontua</string>
+    <string name="setup_modo_shot_titulo">Modo Shot 🥃</string>
+    <string name="setup_modo_shot_descricao">Algumas posições do grid pedem um shot antes de revelar a dica</string>
+    <string name="setup_modo_shot_quantidade_titulo">Shots no grid</string>
+    <string name="setup_modo_shot_nota">🔞 Modo para maiores de idade. Beba com responsabilidade — vale combinar shot sem álcool.</string>
     <string name="setup_comecar_partida">Começar partida</string>
     <string name="setup_bloqueio_poucos_jogadores">É preciso pelo menos 2 jogadores</string>
     <string name="setup_bloqueio_nomes_vazios">Dê um nome a todos os jogadores</string>
@@ -58,6 +62,13 @@
     <string name="partida_grid_segure_para_ver">Segure para ver a resposta</string>
     <string name="partida_grid_vez_de_escolher">Vez de %1$s escolher a dica</string>
     <string name="partida_grid_rodape">%1$d dicas usadas · vale %2$d pts</string>
+
+    <!-- Partida — Modo Shot -->
+    <string name="partida_shot_emoji">🥃</string>
+    <string name="partida_shot_titulo">UM SHOT!</string>
+    <string name="partida_shot_corpo">%1$s escolheu a posição %2$d — bebe antes de ver a dica</string>
+    <string name="partida_shot_subtitulo">A dica é revelada normalmente depois. Pontuação não muda.</string>
+    <string name="partida_shot_bebi">Bebi! 🍋</string>
 
     <!-- Partida — DicaRevelada -->
     <string name="partida_dica_titulo">Dica %1$d · vale %2$d pts</string>

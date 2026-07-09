@@ -35,12 +35,15 @@ import kotlinx.coroutines.launch
  *
  * ## Morte de processo (SavedStateHandle)
  * Persiste apenas o **mínimo não derivável**: rodada atual, pontos acumulados
- * por grupo, fase da UI, posições reveladas na ordem e o acertador do anúncio. Todo o
- * resto é reconstruído por determinismo: o baralho e o grid de cada turno
- * derivam da seed do código ([ConfiguracaoDaPartida], que chega pelo argumento
- * da rota e já sobrevive no `SavedStateHandle`), e o rodízio de leitor e de
- * escolhedor deriva da rodada e das posições reveladas — reexecutar as
- * revelações na ordem salva devolve o turno exatamente ao mesmo estado.
+ * por grupo, fase da UI, posições reveladas na ordem, o acertador do anúncio e
+ * a posição de shot pendente (Modo Shot — a posição tocada ainda não foi
+ * revelada, então não é derivável das revelações salvas). Todo o
+ * resto é reconstruído por determinismo: o baralho, o grid e as posições com
+ * shot de cada turno derivam da seed do código ([ConfiguracaoDaPartida], que
+ * chega pelo argumento da rota e já sobrevive no `SavedStateHandle`), e o
+ * rodízio de leitor e de escolhedor deriva da rodada e das posições reveladas
+ * — reexecutar as revelações na ordem salva devolve o turno exatamente ao
+ * mesmo estado, inclusive com o overlay do shot reaberto.
  */
 @HiltViewModel
 class PartidaViewModel @Inject constructor(
@@ -83,16 +86,35 @@ class PartidaViewModel @Inject constructor(
         mudarFase(FASE_GRID, estadoGrid())
     }
 
-    /** O escolhedor da vez toca a [posicao] do grid (fase Grid → DicaRevelada). */
+    /**
+     * O escolhedor da vez toca a [posicao] do grid (fase Grid → DicaRevelada —
+     * ou Grid → Shot, se a posição tem shot: a revelação fica pendente até o
+     * [confirmarShot]).
+     */
     fun revelarDica(posicao: Int) {
         val turnoAtual = turno ?: return
         if (_uiState.value !is PartidaUiState.Grid) return
         if (posicao !in 1..Card.QUANTIDADE_DE_DICAS) return
         if (posicao in turnoAtual.posicoesReveladas) return
-        val avancado = turnoAtual.revelarDica(posicao)
-        turno = avancado
-        savedStateHandle[CHAVE_POSICOES] = avancado.posicoesReveladas.toIntArray()
-        mudarFase(FASE_DICA_REVELADA, estadoDicaRevelada())
+        if (turnoAtual.temShot(posicao)) {
+            savedStateHandle[CHAVE_SHOT_PENDENTE] = posicao
+            mudarFase(FASE_SHOT, estadoShot(posicao))
+        } else {
+            revelarDicaInterna(turnoAtual, posicao)
+        }
+    }
+
+    /**
+     * O shot foi pago — quem escolheu bebeu e tocou "Bebi!": revela a dica da
+     * posição pendente normalmente (fase Shot → DicaRevelada). A pontuação é a
+     * mesma de uma revelação sem shot.
+     */
+    fun confirmarShot() {
+        val fase = _uiState.value
+        if (fase !is PartidaUiState.Shot) return
+        val turnoAtual = turno ?: return
+        savedStateHandle[CHAVE_SHOT_PENDENTE] = null
+        revelarDicaInterna(turnoAtual, fase.posicao)
     }
 
     /**
@@ -192,6 +214,8 @@ class PartidaViewModel @Inject constructor(
             regras = RegrasPartida(
                 leitorPontua = configuracao.leitorPontua,
                 numeroDeRodadas = configuracao.numeroDeRodadas,
+                modoShot = configuracao.modoShot,
+                quantidadeDeShots = configuracao.quantidadeDeShots,
             ),
             cardsDisponiveis = cardsDisponiveis,
             grupos = gruposBase,
@@ -227,6 +251,8 @@ class PartidaViewModel @Inject constructor(
             regras = RegrasPartida(
                 leitorPontua = configuracao.leitorPontua,
                 numeroDeRodadas = configuracao.numeroDeRodadas,
+                modoShot = configuracao.modoShot,
+                quantidadeDeShots = configuracao.quantidadeDeShots,
             ),
             cardsDisponiveis = cardsDisponiveis,
             grupos = gruposBase,
@@ -286,7 +312,9 @@ class PartidaViewModel @Inject constructor(
                     if (indice != posicoes.lastIndex) restaurado = restaurado.outraDica()
                 }
                 turno = when (fase) {
-                    FASE_GRID -> if (posicoes.isEmpty()) restaurado else restaurado.outraDica()
+                    // No SHOT a posição tocada ainda não foi revelada: o turno
+                    // volta a escolher dica, como no GRID.
+                    FASE_GRID, FASE_SHOT -> if (posicoes.isEmpty()) restaurado else restaurado.outraDica()
                     FASE_ANUNCIO ->
                         if (acertadorId != null) restaurado.registrarAcerto(acertadorId)
                         else restaurado.queimarCard()
@@ -295,6 +323,13 @@ class PartidaViewModel @Inject constructor(
                 }
                 _uiState.value = when (fase) {
                     FASE_GRID -> estadoGrid()
+                    // Reabre o overlay do shot pendente; sem a posição salva
+                    // (estado inconsistente), cai no grid — tocar a posição de
+                    // novo reabre o overlay, então o pedágio não se perde.
+                    FASE_SHOT -> savedStateHandle.get<Int>(CHAVE_SHOT_PENDENTE)
+                        ?.let { estadoShot(it) }
+                        ?: estadoGrid()
+
                     FASE_DICA_REVELADA -> estadoDicaRevelada()
                     FASE_QUEM_ACERTOU -> estadoQuemAcertou()
                     else -> estadoAnuncio()
@@ -313,6 +348,14 @@ class PartidaViewModel @Inject constructor(
         turno = turnoAtual.registrarAcerto(jogadorId)
         savedStateHandle[CHAVE_ACERTADOR] = jogadorId
         mudarFase(FASE_ANUNCIO, estadoAnuncio())
+    }
+
+    /** Revelação de fato da dica — comum ao toque sem shot e ao pós-"Bebi!". */
+    private fun revelarDicaInterna(turnoAtual: Turno, posicao: Int) {
+        val avancado = turnoAtual.revelarDica(posicao)
+        turno = avancado
+        savedStateHandle[CHAVE_POSICOES] = avancado.posicoesReveladas.toIntArray()
+        mudarFase(FASE_DICA_REVELADA, estadoDicaRevelada())
     }
 
     private fun mudarFase(fase: String, estado: PartidaUiState) {
@@ -339,6 +382,15 @@ class PartidaViewModel @Inject constructor(
             respostaParaOLeitor = turnoAtual.card.answer,
             pontosEmJogo = Card.QUANTIDADE_DE_DICAS - turnoAtual.dicasUsadas,
             tipo = turnoAtual.card.type,
+        )
+    }
+
+    private fun estadoShot(posicao: Int): PartidaUiState.Shot {
+        val turnoAtual = checkNotNull(turno)
+        return PartidaUiState.Shot(
+            posicao = posicao,
+            nomeDoBebedor = turnoAtual.escolhedorDaVez.nome,
+            grid = estadoGrid(),
         )
     }
 
@@ -421,9 +473,11 @@ class PartidaViewModel @Inject constructor(
         const val CHAVE_PLACAR = "estado_placar"
         const val CHAVE_POSICOES = "estado_posicoes"
         const val CHAVE_ACERTADOR = "estado_acertador"
+        const val CHAVE_SHOT_PENDENTE = "estado_shot_pendente"
 
         const val FASE_VEZ_DE_JOGAR = "VEZ_DE_JOGAR"
         const val FASE_GRID = "GRID"
+        const val FASE_SHOT = "SHOT"
         const val FASE_DICA_REVELADA = "DICA_REVELADA"
         const val FASE_QUEM_ACERTOU = "QUEM_ACERTOU"
         const val FASE_ANUNCIO = "ANUNCIO"

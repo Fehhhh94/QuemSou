@@ -36,6 +36,21 @@ sealed interface PartidaUiState {
         val tipo: CardType,
     ) : PartidaUiState
 
+    /**
+     * Modo Shot: o escolhedor da vez tocou uma posição com shot — bebe, toca
+     * "Bebi!" e só então a dica é revelada, normalmente. A pontuação não muda
+     * em nada; o overlay não é dispensável por toque no scrim.
+     *
+     * @property posicao posição tocada, pendente de revelação.
+     * @property nomeDoBebedor quem escolheu o número — é sempre quem bebe.
+     * @property grid o grid da fase anterior, como pano de fundo sob o overlay.
+     */
+    data class Shot(
+        val posicao: Int,
+        val nomeDoBebedor: String,
+        val grid: Grid,
+    ) : PartidaUiState
+
     /** Dica revelada, lida em voz alta; vale [valor] pontos se alguém acertar agora. */
     data class DicaRevelada(
         val posicao: Int,

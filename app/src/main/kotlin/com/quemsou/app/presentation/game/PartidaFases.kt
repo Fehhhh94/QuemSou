@@ -1,6 +1,8 @@
 package com.quemsou.app.presentation.game
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,9 +43,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quemsou.app.R
 import com.quemsou.app.presentation.ui.components.AvatarInicial
+import com.quemsou.app.presentation.ui.components.BarraDeAcaoInferior
 import com.quemsou.app.presentation.ui.components.ChipDeJogador
 import com.quemsou.app.presentation.ui.components.ChipTipoDeCard
 import com.quemsou.app.presentation.ui.components.RodapeDePontos
+import com.quemsou.app.presentation.ui.theme.ShotAmbar
+import com.quemsou.app.presentation.ui.theme.ShotAmbarEscuro
+import com.quemsou.app.presentation.ui.theme.ShotOnAmbar
 
 @Composable
 internal fun CarregandoContent() {
@@ -205,6 +212,82 @@ private fun GradeDeNumeros(posicoesReveladas: List<Int>, onTocar: (Int) -> Unit)
                                 )
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Overlay do Modo Shot: folha inferior sobre scrim escuro, por cima do grid da
+ * fase anterior. Não é dispensável por toque no scrim — só o "Bebi!" avança;
+ * o botão voltar segue o padrão da partida (confirmação de abandono pelo
+ * `BackHandler` da tela). A paleta âmbar é exclusiva do modo — nada de âmbar
+ * no grid ao fundo.
+ */
+@Composable
+internal fun ShotContent(
+    estado: PartidaUiState.Shot,
+    onBebi: () -> Unit,
+) {
+    val ambar = if (isSystemInDarkTheme()) ShotAmbar else ShotAmbarEscuro
+    Box(Modifier.fillMaxSize()) {
+        GridContent(estado = estado.grid, onRevelarDica = {})
+        // Scrim escuro que consome qualquer toque sem ação: o grid fica
+        // inalcançável e o overlay não é dispensável.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.6f))
+                .pointerInput(Unit) { detectTapGestures { } },
+        )
+        Surface(
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 24.dp, start = 24.dp, end = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(text = stringResource(R.string.partida_shot_emoji), fontSize = 56.sp)
+                    Text(
+                        text = stringResource(R.string.partida_shot_titulo),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = ambar,
+                    )
+                    Text(
+                        text = stringResource(R.string.partida_shot_corpo, estado.nomeDoBebedor, estado.posicao),
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        text = stringResource(R.string.partida_shot_subtitulo),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                BarraDeAcaoInferior(modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = onBebi,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ShotAmbar,
+                            contentColor = ShotOnAmbar,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                    ) {
+                        Text(stringResource(R.string.partida_shot_bebi))
                     }
                 }
             }

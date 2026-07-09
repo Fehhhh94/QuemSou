@@ -1,6 +1,7 @@
 package com.quemsou.app.navigation
 
 import com.quemsou.app.domain.model.CardCategory
+import com.quemsou.app.domain.model.RegrasPartida
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -38,6 +39,10 @@ data class PartidaRoute(val configuracao: String)
  * @property categoria filtro do baralho ([CardCategory.LIVRE] = todas).
  * @property numeroDeRodadas total de rodadas.
  * @property leitorPontua se o leitor ganha 1 ponto por dica revelada sem acerto.
+ * @property modoShot se algumas posições do grid pedem um shot antes de
+ *   revelar a dica (Modo Shot). Default `false` mantém JSONs antigos decodificáveis.
+ * @property quantidadeDeShots posições com shot por turno (1–3), usado só com
+ *   [modoShot] ligado.
  * @property jogadores nomes (e agrupamento) na ordem de assento.
  */
 @Serializable
@@ -47,6 +52,8 @@ data class ConfiguracaoDaPartida(
     val numeroDeRodadas: Int,
     val leitorPontua: Boolean,
     val jogadores: List<JogadorConfigurado>,
+    val modoShot: Boolean = false,
+    val quantidadeDeShots: Int = RegrasPartida.QUANTIDADE_PADRAO_DE_SHOTS,
 ) {
     /** Serializa para o argumento JSON da [PartidaRoute]. */
     fun paraJson(): String = json.encodeToString(serializer(), this)

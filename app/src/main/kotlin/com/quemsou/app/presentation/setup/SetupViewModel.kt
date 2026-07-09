@@ -3,6 +3,7 @@ package com.quemsou.app.presentation.setup
 import androidx.lifecycle.ViewModel
 import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.Partida
+import com.quemsou.app.domain.model.RegrasPartida
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.navigation.JogadorConfigurado
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +28,8 @@ data class SetupUiState(
     val jogadores: List<JogadorEmEdicao> = List(Partida.MINIMO_DE_JOGADORES) { JogadorEmEdicao() },
     val numeroDeRodadas: Int = 5,
     val leitorPontua: Boolean = true,
+    val modoShot: Boolean = false,
+    val quantidadeDeShots: Int = RegrasPartida.QUANTIDADE_PADRAO_DE_SHOTS,
     val jogadoresTocados: Set<Int> = emptySet(),
     val tentouComecar: Boolean = false,
 ) {
@@ -168,6 +171,16 @@ class SetupViewModel @Inject constructor() : ViewModel() {
         _uiState.update { it.copy(leitorPontua = !it.leitorPontua) }
     }
 
+    fun alternarModoShot() {
+        _uiState.update { it.copy(modoShot = !it.modoShot) }
+    }
+
+    /** Define quantas posições do grid têm shot; ignorado fora da faixa 1–3 da regra. */
+    fun definirQuantidadeDeShots(quantidade: Int) {
+        if (quantidade !in RegrasPartida.MINIMO_DE_SHOTS..RegrasPartida.MAXIMO_DE_SHOTS) return
+        _uiState.update { it.copy(quantidadeDeShots = quantidade) }
+    }
+
     /**
      * Monta a configuração e a publica em [configuracaoPronta]; ignorado
      * enquanto [SetupUiState.podeComecar] for `false` — nesse caso, marca
@@ -192,6 +205,8 @@ class SetupViewModel @Inject constructor() : ViewModel() {
             categoria = estado.categoria,
             numeroDeRodadas = estado.numeroDeRodadas,
             leitorPontua = estado.leitorPontua,
+            modoShot = estado.modoShot,
+            quantidadeDeShots = estado.quantidadeDeShots,
             jogadores = estado.jogadores.map { jogador ->
                 JogadorConfigurado(
                     nome = jogador.nome.trim(),

@@ -175,6 +175,33 @@ class SetupViewModelTest {
     }
 
     @Test
+    fun `modo shot desligado por padrao e quantidade fora da faixa e ignorada`() {
+        val viewModel = viewModelComNomes()
+        assertFalse(viewModel.uiState.value.modoShot)
+        assertEquals(2, viewModel.uiState.value.quantidadeDeShots)
+
+        viewModel.definirQuantidadeDeShots(0)
+        viewModel.definirQuantidadeDeShots(4)
+        assertEquals(2, viewModel.uiState.value.quantidadeDeShots)
+
+        viewModel.definirQuantidadeDeShots(3)
+        assertEquals(3, viewModel.uiState.value.quantidadeDeShots)
+    }
+
+    @Test
+    fun `confirmar leva o modo shot e a quantidade escolhida`() {
+        val viewModel = viewModelComNomes()
+        viewModel.alternarModoShot()
+        viewModel.definirQuantidadeDeShots(1)
+
+        viewModel.confirmar()
+
+        val configuracao = viewModel.configuracaoPronta.value!!
+        assertTrue(configuracao.modoShot)
+        assertEquals(1, configuracao.quantidadeDeShots)
+    }
+
+    @Test
     fun `confirmar monta a configuracao e ignora quando bloqueado`() {
         val bloqueado = SetupViewModel()
         bloqueado.confirmar()

@@ -38,11 +38,15 @@ class PartidaViewModelTest {
         rodadas: Int = 2,
         leitorPontua: Boolean = true,
         grupos: List<String?> = nomes.map { null },
+        modoShot: Boolean = false,
+        quantidadeDeShots: Int = 2,
     ) = ConfiguracaoDaPartida(
         codigo = "LOBO",
         categoria = CardCategory.LIVRE,
         numeroDeRodadas = rodadas,
         leitorPontua = leitorPontua,
+        modoShot = modoShot,
+        quantidadeDeShots = quantidadeDeShots,
         jogadores = nomes.mapIndexed { indice, nome ->
             JogadorConfigurado(nome = nome, grupoId = grupos[indice])
         },
@@ -244,6 +248,88 @@ class PartidaViewModelTest {
         )
         assertEquals(listOf("Ana & Bia"), placarFinal.vencedores)
         assertFalse(placarFinal.empate)
+    }
+
+    /**
+     * Toca o grid às cegas até cair numa posição com shot (determinístico pela
+     * seed do código "LOBO"), retornando o overlay aberto. Falha se nenhuma
+     * das 10 posições tiver shot.
+     */
+    private fun PartidaViewModel.tocarAteAbrirUmShot(): PartidaUiState.Shot {
+        for (posicao in 1..10) {
+            if (uiState.value !is PartidaUiState.Grid) break
+            revelarDica(posicao)
+            when (val estado = uiState.value) {
+                is PartidaUiState.Shot -> return estado
+                is PartidaUiState.DicaRevelada -> outraDica()
+                else -> error("Fase inesperada ao tocar o grid: $estado")
+            }
+        }
+        error("Nenhuma posição com shot encontrada no grid.")
+    }
+
+    @Test
+    fun `posicao com shot abre o overlay e o bebi revela a dica normalmente`() {
+        val viewModel = viewModel(configuracao(modoShot = true, quantidadeDeShots = 3))
+        viewModel.iniciarTurno()
+
+        val overlay = viewModel.tocarAteAbrirUmShot()
+
+        // Quem bebe é sempre quem escolheu o número — o escolhedor da vez.
+        assertEquals(overlay.grid.nomeDoEscolhedor, overlay.nomeDoBebedor)
+
+        // Durante o overlay, eventos de outras fases são ignorados.
+        viewModel.revelarDica((overlay.posicao % 10) + 1)
+        viewModel.outraDica()
+        assertEquals(overlay, viewModel.uiState.value)
+
+        // "Bebi!": a dica da posição pendente é revelada, valendo os mesmos
+        // pontos que o grid anunciava antes do toque — pontuação intocada.
+        viewModel.confirmarShot()
+        val dica = viewModel.uiState.value as PartidaUiState.DicaRevelada
+        assertEquals(overlay.posicao, dica.posicao)
+        assertEquals(overlay.grid.pontosEmJogo, dica.valor)
+    }
+
+    @Test
+    fun `confirmar shot fora da fase shot e ignorado`() {
+        val viewModel = viewModel(configuracao(modoShot = true))
+        viewModel.iniciarTurno()
+        val grid = viewModel.uiState.value
+
+        viewModel.confirmarShot()
+
+        assertEquals(grid, viewModel.uiState.value)
+    }
+
+    @Test
+    fun `modo shot desligado nunca abre o overlay`() {
+        val viewModel = viewModel()
+        viewModel.iniciarTurno()
+
+        for (posicao in 1..10) {
+            viewModel.revelarDica(posicao)
+            assertTrue(viewModel.uiState.value is PartidaUiState.DicaRevelada)
+            if (posicao < 10) viewModel.outraDica()
+        }
+    }
+
+    @Test
+    fun `morte de processo com o overlay do shot aberto restaura o overlay`() {
+        val handle = handleDe(configuracao(modoShot = true, quantidadeDeShots = 3))
+        val antes = PartidaViewModel(handle, RepositorioFake(cards()))
+        antes.iniciarTurno()
+        val overlayAntes = antes.tocarAteAbrirUmShot()
+
+        // "Morte de processo": novo ViewModel com o mesmo SavedStateHandle
+        // volta EXATAMENTE ao overlay — posição pendente e bebedor incluídos.
+        val depois = PartidaViewModel(handle, RepositorioFake(cards()))
+        assertEquals(overlayAntes, depois.uiState.value)
+
+        // E o fluxo segue dali: o "Bebi!" revela a mesma posição pendente.
+        depois.confirmarShot()
+        val dica = depois.uiState.value as PartidaUiState.DicaRevelada
+        assertEquals(overlayAntes.posicao, dica.posicao)
     }
 
     @Test

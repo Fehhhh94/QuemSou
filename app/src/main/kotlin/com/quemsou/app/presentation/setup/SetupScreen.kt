@@ -1,5 +1,6 @@
 package com.quemsou.app.presentation.setup
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -26,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -46,8 +49,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.quemsou.app.R
 import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.Partida
+import com.quemsou.app.domain.model.RegrasPartida
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.presentation.ui.components.BarraDeAcaoInferior
+import com.quemsou.app.presentation.ui.theme.ShotAmbar
 
 /** Tela de configuração da partida: categoria, jogadores, grupos e regras. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -138,6 +143,14 @@ fun SetupScreen(
             }
             item {
                 SecaoLeitorPontua(ativo = uiState.leitorPontua, onAlternar = viewModel::alternarLeitorPontua)
+            }
+            item {
+                SecaoModoShot(
+                    ativo = uiState.modoShot,
+                    quantidade = uiState.quantidadeDeShots,
+                    onAlternar = viewModel::alternarModoShot,
+                    onDefinirQuantidade = viewModel::definirQuantidadeDeShots,
+                )
             }
         }
     }
@@ -271,6 +284,74 @@ private fun SecaoLeitorPontua(ativo: Boolean, onAlternar: () -> Unit) {
     ) {
         Text(stringResource(R.string.setup_leitor_pontua_titulo), style = MaterialTheme.typography.titleMedium)
         Switch(checked = ativo, onCheckedChange = { onAlternar() })
+    }
+}
+
+/**
+ * Card do Modo Shot — a única regra 18+ da configuração, marcada pela borda
+ * âmbar sutil (paleta exclusiva do modo; nada de âmbar no resto do Setup).
+ * O stepper de quantidade (1–3) só aparece com o toggle ligado.
+ */
+@Composable
+private fun SecaoModoShot(
+    ativo: Boolean,
+    quantidade: Int,
+    onAlternar: () -> Unit,
+    onDefinirQuantidade: (Int) -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, ShotAmbar.copy(alpha = 0.5f)),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(stringResource(R.string.setup_modo_shot_titulo), style = MaterialTheme.typography.titleMedium)
+                Switch(checked = ativo, onCheckedChange = { onAlternar() })
+            }
+            Text(
+                text = stringResource(R.string.setup_modo_shot_descricao),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            if (ativo) {
+                Text(
+                    text = stringResource(R.string.setup_modo_shot_quantidade_titulo),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    FilledIconButton(
+                        onClick = { onDefinirQuantidade(quantidade - 1) },
+                        enabled = quantidade > RegrasPartida.MINIMO_DE_SHOTS,
+                        modifier = Modifier.size(48.dp),
+                    ) {
+                        Text("−")
+                    }
+                    Text(
+                        text = "$quantidade",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.width(32.dp),
+                        textAlign = TextAlign.Center,
+                    )
+                    FilledIconButton(
+                        onClick = { onDefinirQuantidade(quantidade + 1) },
+                        enabled = quantidade < RegrasPartida.MAXIMO_DE_SHOTS,
+                        modifier = Modifier.size(48.dp),
+                    ) {
+                        Text("+")
+                    }
+                }
+            }
+            Text(
+                text = stringResource(R.string.setup_modo_shot_nota),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

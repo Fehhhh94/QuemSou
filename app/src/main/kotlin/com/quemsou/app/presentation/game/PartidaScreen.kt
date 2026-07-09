@@ -58,6 +58,11 @@ fun PartidaScreen(
                         onRevelarDica = viewModel::revelarDica,
                     )
 
+                    is PartidaUiState.Shot -> ShotContent(
+                        estado = estado,
+                        onBebi = viewModel::confirmarShot,
+                    )
+
                     is PartidaUiState.DicaRevelada -> DicaReveladaContent(
                         estado = estado,
                         onAlguemAcertou = viewModel::abrirQuemAcertou,

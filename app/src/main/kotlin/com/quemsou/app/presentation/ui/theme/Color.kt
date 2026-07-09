@@ -18,3 +18,9 @@ val QuemSouBackgroundLight = Color(0xFFFFFBFE)
 val QuemSouSurfaceLight = Color(0xFFF3EDF7)
 val QuemSouOnBackgroundLight = Color(0xFF1C1B1F)
 val QuemSouOnSurfaceLight = Color(0xFF1C1B1F)
+
+// Paleta âmbar/dourada EXCLUSIVA do Modo Shot (overlay e card do Setup) —
+// nunca usar no grid nem em outras telas: o âmbar é a marca visual do modo.
+val ShotAmbar = Color(0xFFFFB300)
+val ShotAmbarEscuro = Color(0xFF8F6400) // variante do tema claro (contraste sobre fundo claro)
+val ShotOnAmbar = Color(0xFF261A00) // texto sobre o botão âmbar, em ambos os temas
