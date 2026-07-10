@@ -18,27 +18,35 @@ import org.junit.Test
 
 class CardsImporterTest {
 
-    /** DAOs em memória — sem Room nem Robolectric. */
+    /** DAOs em memória — sem Room nem Robolectric; inserir REPLACE = upsert por id. */
     private class FakeBaralhoDao : BaralhoDao {
         val baralhos = mutableListOf<BaralhoEntity>()
 
         override suspend fun inserirTodos(baralhos: List<BaralhoEntity>) {
-            this.baralhos += baralhos
+            baralhos.forEach { novo ->
+                this.baralhos.removeAll { it.id == novo.id }
+                this.baralhos += novo
+            }
         }
 
-        override suspend fun limparTabela() = baralhos.clear()
-
         override suspend fun buscarPorIds(ids: List<String>) = baralhos.filter { it.id in ids }
+
+        override suspend fun buscarTodos() = baralhos.toList()
     }
 
     private class FakeCardDao : CardDao {
         val cards = mutableListOf<CardEntity>()
 
         override suspend fun inserirTodos(cards: List<CardEntity>) {
-            this.cards += cards
+            cards.forEach { novo ->
+                this.cards.removeAll { it.id == novo.id }
+                this.cards += novo
+            }
         }
 
-        override suspend fun limparTabela() = cards.clear()
+        override suspend fun removerPorBaralho(baralhoId: String) {
+            cards.removeAll { it.baralhoId == baralhoId }
+        }
 
         override suspend fun buscarPorBaralhos(baralhoIds: List<String>) =
             cards.filter { it.baralhoId in baralhoIds }
@@ -117,26 +125,35 @@ class CardsImporterTest {
     }
 
     @Test
-    fun `reimportacao limpa as tabelas antes de inserir o conteudo novo`() = runTest {
+    fun `reimportacao substitui o baralho embarcado e preserva os baixados do catalogo`() = runTest {
+        // "baixado-1" veio do catálogo; "b1" é embarcado e será substituído.
         val baralhoDao = FakeBaralhoDao()
         baralhoDao.baralhos += BaralhoEntity(
-            id = "antigo-1",
-            nome = "Antigo",
-            categoria = "PERSONAGEM_FILME",
-            versao = 1,
-            estado = "FINALIZADO",
-            colecaoId = "antiga",
-            colecaoNome = "Antiga",
-            colecaoIcone = "🗃️",
+            id = "baixado-1",
+            nome = "Baixado do Catálogo",
+            categoria = "MUNDO_DA_MUSICA",
+            versao = 2,
+            estado = "EM_DESENVOLVIMENTO",
+            colecaoId = "baixada",
+            colecaoNome = "Baixada",
+            colecaoIcone = "⬇️",
         )
         val cardDao = FakeCardDao()
         cardDao.cards += CardEntity(
-            id = "antigo-01",
+            id = "baixado-01",
+            type = "COISA",
+            category = "MUNDO_DA_MUSICA",
+            answer = "BAIXADO",
+            clues = List(10) { "dica ${it + 1}" },
+            baralhoId = "baixado-1",
+        )
+        cardDao.cards += CardEntity(
+            id = "b1-card-velho",
             type = "COISA",
             category = "PERSONAGEM_FILME",
-            answer = "ANTIGO",
+            answer = "VELHO",
             clues = List(10) { "dica ${it + 1}" },
-            baralhoId = "antigo-1",
+            baralhoId = "b1",
         )
         val store = FakeCardsVersionStore(versao = 1)
         val json = jsonCom(versao = 2, baralhos = listOf(baralhoJson("b1", quantidadeDeCards = 3)))
@@ -144,8 +161,12 @@ class CardsImporterTest {
         val resultado = importer(json, baralhoDao, cardDao, store).importarSeNecessario()
 
         assertEquals(ResultadoImportacao.Importado(quantidade = 3, versao = 2), resultado)
-        assertEquals(listOf("b1"), baralhoDao.baralhos.map { it.id })
-        assertEquals(listOf("b1-card-1", "b1-card-2", "b1-card-3"), cardDao.cards.map { it.id })
+        // O baixado ficou intacto; o embarcado foi substituído por inteiro.
+        assertEquals(setOf("baixado-1", "b1"), baralhoDao.baralhos.map { it.id }.toSet())
+        assertEquals(
+            listOf("baixado-01", "b1-card-1", "b1-card-2", "b1-card-3"),
+            cardDao.cards.map { it.id },
+        )
         assertEquals(2, store.versaoSalva)
     }
 

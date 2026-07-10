@@ -16,9 +16,9 @@ interface CardDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserirTodos(cards: List<CardEntity>)
 
-    /** Remove todos os cards da tabela. */
-    @Query("DELETE FROM cards")
-    suspend fun limparTabela()
+    /** Remove os cards do baralho [baralhoId] — e só os dele. */
+    @Query("DELETE FROM cards WHERE baralhoId = :baralhoId")
+    suspend fun removerPorBaralho(baralhoId: String)
 
     /** Busca os cards dos baralhos com os [baralhoIds] informados. */
     @Query("SELECT * FROM cards WHERE baralhoId IN (:baralhoIds)")

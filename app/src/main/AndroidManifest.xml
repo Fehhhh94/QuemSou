@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Rede existe SOMENTE na tela de catálogo (baixar/atualizar baralhos);
+         a partida segue 100% offline. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".QuemSouApp"
         android:allowBackup="true"

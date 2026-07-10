@@ -12,6 +12,10 @@ import javax.inject.Inject
  * com versionamento: só recarrega quando a versão do asset é maior que a
  * última importada.
  *
+ * A importação é **cirúrgica**: substitui cada baralho embarcado (linha +
+ * cards dele), sem tocar nos baralhos baixados do catálogo — um update do
+ * app nunca apaga downloads do usuário.
+ *
  * Cada baralho passa pela validação do [ParserDoCatalogo] (estrutura +
  * `ValidadorDeBaralho`); um baralho inválido interrompe a importação com
  * [IllegalArgumentException] carregando as violações legíveis — falha
@@ -47,10 +51,9 @@ class CardsImporter @Inject constructor(
             }
         }
 
-        cardDao.limparTabela()
-        baralhoDao.limparTabela()
-        baralhoDao.inserirTodos(baralhos.map { it.paraEntidade() })
         baralhos.forEach { baralho ->
+            baralhoDao.inserirTodos(listOf(baralho.paraEntidade()))
+            cardDao.removerPorBaralho(baralho.id)
             cardDao.inserirTodos(baralho.cards.map { it.paraEntidade(baralho.id) })
         }
         versionStore.salvarVersaoImportada(cardsJson.version)

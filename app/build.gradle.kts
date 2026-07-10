@@ -83,6 +83,10 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
 
+    // Cliente HTTP leve, usado exclusivamente pela tela de catálogo (5A):
+    // a partida segue 100% offline.
+    implementation(libs.okhttp)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))

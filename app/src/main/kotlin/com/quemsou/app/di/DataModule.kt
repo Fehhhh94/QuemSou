@@ -7,6 +7,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.quemsou.app.data.RepositorioDeCardsLocal
+import com.quemsou.app.data.catalogo.ArquivoCacheDoIndice
+import com.quemsou.app.data.catalogo.CacheDoIndice
+import com.quemsou.app.data.catalogo.FonteDoCatalogo
+import com.quemsou.app.data.catalogo.HttpFonteDoCatalogo
 import com.quemsou.app.data.importer.AssetsFonteDeCardsJson
 import com.quemsou.app.data.importer.CardsVersionStore
 import com.quemsou.app.data.importer.DataStoreCardsVersionStore
@@ -41,6 +45,12 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindRepositorioDeCards(impl: RepositorioDeCardsLocal): RepositorioDeCards
+
+    @Binds
+    abstract fun bindFonteDoCatalogo(impl: HttpFonteDoCatalogo): FonteDoCatalogo
+
+    @Binds
+    abstract fun bindCacheDoIndice(impl: ArquivoCacheDoIndice): CacheDoIndice
 
     companion object {
 
