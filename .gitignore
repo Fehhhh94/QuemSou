@@ -19,3 +19,6 @@ app/.cxx/
 # Keystore (nunca versionar chaves de assinatura)
 *.jks
 *.keystore
+
+# Arquivos-semente do catálogo (pertencem ao repositório QuemSou-Baralhos)
+/catalogo-seed/
