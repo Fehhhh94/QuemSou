@@ -24,6 +24,8 @@ class PartidaViewModelTest {
 
     private class RepositorioFake(private val baralhos: List<Baralho>) : RepositorioDeCards {
         override suspend fun buscarPorIds(ids: List<String>) = baralhos.filter { it.id in ids }
+
+        override suspend fun buscarTodos() = baralhos
     }
 
     private fun cards(quantidade: Int = 10) = List(quantidade) { indice ->

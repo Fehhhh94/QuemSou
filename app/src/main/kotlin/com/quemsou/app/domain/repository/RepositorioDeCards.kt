@@ -16,4 +16,10 @@ interface RepositorioDeCards {
      * estável.
      */
     suspend fun buscarPorIds(ids: List<String>): List<Baralho>
+
+    /**
+     * Todos os baralhos do aparelho (embarcados + baixados do catálogo), com
+     * os seus cards — a lista que o Setup oferece para a seleção da partida.
+     */
+    suspend fun buscarTodos(): List<Baralho>
 }

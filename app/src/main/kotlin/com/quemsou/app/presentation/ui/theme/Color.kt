@@ -19,8 +19,17 @@ val QuemSouSurfaceLight = Color(0xFFF3EDF7)
 val QuemSouOnBackgroundLight = Color(0xFF1C1B1F)
 val QuemSouOnSurfaceLight = Color(0xFF1C1B1F)
 
-// Paleta âmbar/dourada EXCLUSIVA do Modo Shot (overlay e card do Setup) —
-// nunca usar no grid nem em outras telas: o âmbar é a marca visual do modo.
+// Paleta âmbar/dourada do Modo Shot (overlay e card do Setup) — dentro da
+// PARTIDA é exclusiva do modo: nada de âmbar no grid nem nas demais fases.
 val ShotAmbar = Color(0xFFFFB300)
 val ShotAmbarEscuro = Color(0xFF8F6400) // variante do tema claro (contraste sobre fundo claro)
 val ShotOnAmbar = Color(0xFF261A00) // texto sobre o botão âmbar, em ambos os temas
+
+// Catálogo (mockup v2 da 5A): âmbar sinaliza NOVIDADE (pontinho e botão
+// Atualizar); verde/ciano são os selos do ciclo de vida do baralho.
+val NovidadeAmbar = Color(0xFFFFB300)
+val NovidadeAmbarEscuro = Color(0xFF8F6400) // variante do tema claro
+val SeloVerde = Color(0xFF2E7D32)
+val SeloVerdeClaro = Color(0xFF81C784) // variante do tema escuro
+val SeloCiano = Color(0xFF00838F)
+val SeloCianoClaro = Color(0xFF4DD0E1) // variante do tema escuro

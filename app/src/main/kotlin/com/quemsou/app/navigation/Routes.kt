@@ -5,18 +5,26 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 /**
- * As 3 rotas do app. As fases internas do jogo (grid, dica revelada, anúncio…)
+ * As 5 rotas do app. As fases internas do jogo (grid, dica revelada, anúncio…)
  * **não são rotas** — são estados da rota [PartidaRoute], dirigidos pelo
  * `PartidaViewModel`.
  */
 
-/** Tela inicial: criar partida ou entrar com código. */
+/** Tela inicial: criar partida, abrir o catálogo ou entrar com código. */
 @Serializable
 object HomeRoute
 
-/** Configuração da partida (categoria, jogadores, grupos, regras). */
+/** Configuração da partida (baralhos, jogadores, grupos, regras). */
 @Serializable
 object SetupRoute
+
+/** Catálogo de baralhos, nível 1: as coleções. */
+@Serializable
+object CatalogoRoute
+
+/** Catálogo de baralhos, nível 2: os baralhos da coleção [colecaoId]. */
+@Serializable
+data class ColecaoRoute(val colecaoId: String)
 
 /**
  * A partida inteira, do primeiro turno ao placar final.

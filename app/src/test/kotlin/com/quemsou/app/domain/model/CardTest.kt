@@ -9,7 +9,7 @@ class CardTest {
     private fun cardComDicas(quantidade: Int) = Card(
         id = "card-teste",
         type = CardType.COISA,
-        category = CardCategory.LIVRE,
+        category = CardCategory.PERSONAGEM_FILME,
         answer = "Violão",
         clues = List(quantidade) { "Dica ${it + 1}" },
     )

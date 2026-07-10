@@ -16,7 +16,7 @@ class TurnoTest {
     private fun card() = Card(
         id = "card-1",
         type = CardType.PESSOA,
-        category = CardCategory.LIVRE,
+        category = CardCategory.PERSONAGEM_FILME,
         answer = "Resposta Secreta",
         clues = List(Card.QUANTIDADE_DE_DICAS) { "Dica ${it + 1}" },
     )

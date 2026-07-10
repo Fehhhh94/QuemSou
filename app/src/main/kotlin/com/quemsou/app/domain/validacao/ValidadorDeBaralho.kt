@@ -16,9 +16,8 @@ class ValidadorDeBaralho {
 
     /**
      * Valida o [baralho] contra todas as regras de [RegraDeBaralho]:
-     * não vazio, teto de [Baralho.MAXIMO_DE_CARDS] cards, ids de card únicos,
-     * categoria real (nunca `LIVRE` — "Livre" é seleção de todos os baralhos,
-     * não categoria de conteúdo) e todo card com a categoria do baralho.
+     * não vazio, teto de [Baralho.MAXIMO_DE_CARDS] cards, ids de card únicos
+     * e todo card com a categoria do baralho (herdada).
      */
     fun validar(baralho: Baralho): ResultadoValidacaoDeBaralho {
         val violacoes = buildList {
@@ -46,15 +45,6 @@ class ValidadorDeBaralho {
                         regra = RegraDeBaralho.IDS_DE_CARDS_REPETIDOS,
                         mensagem = "O baralho '${baralho.id}' tem ids de card repetidos: " +
                             "${idsRepetidos.sorted().joinToString(", ")}.",
-                    ),
-                )
-            }
-            if (baralho.categoria == CardCategory.LIVRE) {
-                add(
-                    ViolacaoDeBaralho(
-                        regra = RegraDeBaralho.CATEGORIA_LIVRE,
-                        mensagem = "O baralho '${baralho.id}' usa a categoria LIVRE; " +
-                            "\"Livre\" é a seleção de todos os baralhos, não uma categoria de conteúdo.",
                     ),
                 )
             }
@@ -89,9 +79,6 @@ enum class RegraDeBaralho {
 
     /** Os ids de card precisam ser únicos dentro do baralho (chave da união determinística). */
     IDS_DE_CARDS_REPETIDOS,
-
-    /** A categoria do baralho precisa ser real — `LIVRE` é seleção, não conteúdo. */
-    CATEGORIA_LIVRE,
 
     /** Todo card do baralho precisa ter a categoria do baralho (herdada). */
     CARD_DE_CATEGORIA_DIVERGENTE,

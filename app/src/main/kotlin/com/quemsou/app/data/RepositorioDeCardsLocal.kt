@@ -23,4 +23,12 @@ class RepositorioDeCardsLocal @Inject constructor(
             entidade.paraDominio(cards = cardsPorBaralho[entidade.id].orEmpty().map { it.paraDominio() })
         }
     }
+
+    override suspend fun buscarTodos(): List<Baralho> {
+        val entidades = baralhoDao.buscarTodos()
+        val cardsPorBaralho = cardDao.buscarPorBaralhos(entidades.map { it.id }).groupBy { it.baralhoId }
+        return entidades.map { entidade ->
+            entidade.paraDominio(cards = cardsPorBaralho[entidade.id].orEmpty().map { it.paraDominio() })
+        }
+    }
 }

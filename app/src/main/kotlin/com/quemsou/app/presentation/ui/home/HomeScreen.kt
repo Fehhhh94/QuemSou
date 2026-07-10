@@ -29,12 +29,14 @@ import com.quemsou.app.R
 import com.quemsou.app.presentation.ui.theme.QuemSouTheme
 
 /**
- * Tela inicial do app: começar uma partida nova, ou (fase 4) entrar em uma
- * existente por código via Nearby Connections — por ora desabilitado.
+ * Tela inicial do app: começar uma partida nova, abrir o catálogo de
+ * baralhos, ou (fase 4) entrar em uma partida por código via Nearby
+ * Connections — por ora desabilitado.
  */
 @Composable
 fun HomeScreen(
     onCreateMatch: () -> Unit,
+    onAbrirCatalogo: () -> Unit,
     onJoinWithCode: () -> Unit,
 ) {
     var mostrarComoJogar by remember { mutableStateOf(false) }
@@ -63,6 +65,14 @@ fun HomeScreen(
                     .height(52.dp),
             ) {
                 Text(text = stringResource(id = R.string.home_create_match))
+            }
+            OutlinedButton(
+                onClick = onAbrirCatalogo,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+            ) {
+                Text(text = stringResource(id = R.string.home_baralhos))
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -108,6 +118,6 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenPreview() {
     QuemSouTheme {
-        HomeScreen(onCreateMatch = {}, onJoinWithCode = {})
+        HomeScreen(onCreateMatch = {}, onAbrirCatalogo = {}, onJoinWithCode = {})
     }
 }

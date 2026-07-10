@@ -6,5 +6,4 @@ package com.quemsou.app.domain.model
 enum class CardCategory {
     PERSONAGEM_FILME,
     MUNDO_DA_MUSICA,
-    LIVRE,
 }

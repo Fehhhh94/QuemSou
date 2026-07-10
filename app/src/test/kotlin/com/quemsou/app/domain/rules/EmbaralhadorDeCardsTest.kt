@@ -13,7 +13,7 @@ class EmbaralhadorDeCardsTest {
     private fun card(id: String) = Card(
         id = id,
         type = CardType.PESSOA,
-        category = CardCategory.LIVRE,
+        category = CardCategory.PERSONAGEM_FILME,
         answer = "Resposta $id",
         clues = List(Card.QUANTIDADE_DE_DICAS) { "Dica ${it + 1} de $id" },
     )

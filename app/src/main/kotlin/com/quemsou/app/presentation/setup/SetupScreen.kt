@@ -3,8 +3,6 @@ package com.quemsou.app.presentation.setup
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilterChip
@@ -31,8 +30,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,19 +47,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.quemsou.app.R
-import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.Partida
 import com.quemsou.app.domain.model.RegrasPartida
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.presentation.ui.components.BarraDeAcaoInferior
+import com.quemsou.app.presentation.ui.components.SeloDeEstado
 import com.quemsou.app.presentation.ui.theme.ShotAmbar
 
-/** Tela de configuração da partida: categoria, jogadores, grupos e regras. */
+/** Tela de configuração da partida: baralhos, jogadores, grupos e regras. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(
     onComecarPartida: (ConfiguracaoDaPartida) -> Unit,
+    onAbrirCatalogo: () -> Unit,
     viewModel: SetupViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -69,6 +74,16 @@ fun SetupScreen(
             onComecarPartida(configuracao)
             viewModel.consumirConfiguracaoPronta()
         }
+    }
+
+    // Ao voltar do catálogo (ON_RESUME), a lista de baralhos pode ter mudado.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observador = LifecycleEventObserver { _, evento ->
+            if (evento == Lifecycle.Event.ON_RESUME) viewModel.recarregarBaralhos()
+        }
+        lifecycleOwner.lifecycle.addObserver(observador)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observador) }
     }
 
     Scaffold(
@@ -103,9 +118,11 @@ fun SetupScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             item {
-                SecaoCategoria(
-                    categoria = uiState.categoria,
-                    onSelecionar = viewModel::selecionarCategoria,
+                SecaoBaralhos(
+                    uiState = uiState,
+                    onAlternarBaralho = viewModel::alternarBaralho,
+                    onSelecionarTodos = viewModel::selecionarTodosBaralhos,
+                    onAbrirCatalogo = onAbrirCatalogo,
                     modifier = Modifier.padding(top = 24.dp),
                 )
             }
@@ -156,31 +173,73 @@ fun SetupScreen(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/**
+ * Seleção de baralhos da partida: lista dos baralhos BAIXADOS agrupada por
+ * coleção, checkbox e mini-selo por baralho, atalhos "Selecionar todos" e
+ * "Catálogo →", e o contador vivo da união.
+ */
 @Composable
-private fun SecaoCategoria(
-    categoria: CardCategory,
-    onSelecionar: (CardCategory) -> Unit,
+private fun SecaoBaralhos(
+    uiState: SetupUiState,
+    onAlternarBaralho: (String) -> Unit,
+    onSelecionarTodos: () -> Unit,
+    onAbrirCatalogo: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.setup_categoria_titulo), style = MaterialTheme.typography.titleMedium)
-        // FlowRow (não Row): os 3 chips não cabem numa única linha em telas
-        // estreitas (ex.: tela externa do Z Fold) — sem quebra de linha, o
-        // chip "Livre" ficava fora da área visível.
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(
-                CardCategory.PERSONAGEM_FILME to R.string.setup_categoria_personagem_filme,
-                CardCategory.MUNDO_DA_MUSICA to R.string.setup_categoria_mundo_musica,
-                CardCategory.LIVRE to R.string.setup_categoria_livre,
-            ).forEach { (opcao, textoId) ->
-                FilterChip(
-                    selected = categoria == opcao,
-                    onClick = { onSelecionar(opcao) },
-                    label = { Text(stringResource(textoId)) },
-                )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(stringResource(R.string.setup_baralhos_titulo), style = MaterialTheme.typography.titleMedium)
+            Row {
+                TextButton(onClick = onSelecionarTodos) {
+                    Text(stringResource(R.string.setup_baralhos_selecionar_todos))
+                }
+                TextButton(onClick = onAbrirCatalogo) {
+                    Text(stringResource(R.string.setup_baralhos_abrir_catalogo))
+                }
             }
         }
+        uiState.baralhosDisponiveis
+            .groupBy { it.colecaoId }
+            .forEach { (_, baralhosDaColecao) ->
+                Text(
+                    text = "${baralhosDaColecao.first().colecaoIcone} ${baralhosDaColecao.first().colecaoNome}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                baralhosDaColecao.forEach { baralho ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Checkbox(
+                            checked = baralho.id in uiState.baralhosSelecionados,
+                            onCheckedChange = { onAlternarBaralho(baralho.id) },
+                        )
+                        Column(Modifier.weight(1f)) {
+                            Text(baralho.nome, style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                text = stringResource(R.string.setup_baralho_cards, baralho.quantidadeDeCards),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        SeloDeEstado(estado = baralho.estado, compacto = true)
+                    }
+                }
+            }
+        Text(
+            text = stringResource(
+                R.string.setup_baralhos_contador,
+                uiState.baralhosSelecionados.size,
+                uiState.cardsNoMonte,
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }
 
@@ -360,5 +419,7 @@ private fun textoDoBloqueio(motivo: MotivoDoBloqueio): String = stringResource(
     when (motivo) {
         MotivoDoBloqueio.POUCOS_JOGADORES -> R.string.setup_bloqueio_poucos_jogadores
         MotivoDoBloqueio.NOMES_VAZIOS -> R.string.setup_bloqueio_nomes_vazios
+        MotivoDoBloqueio.NENHUM_BARALHO -> R.string.setup_bloqueio_nenhum_baralho
+        MotivoDoBloqueio.CARDS_INSUFICIENTES -> R.string.setup_bloqueio_cards_insuficientes
     },
 )

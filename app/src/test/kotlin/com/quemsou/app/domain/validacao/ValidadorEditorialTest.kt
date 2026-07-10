@@ -16,7 +16,7 @@ class ValidadorEditorialTest {
     ) = Card(
         id = "sintetico-01",
         type = CardType.LUGAR,
-        category = CardCategory.LIVRE,
+        category = CardCategory.PERSONAGEM_FILME,
         answer = answer,
         clues = clues,
     )

@@ -5,6 +5,7 @@
     <string name="home_title">QuemSou</string>
     <string name="home_subtitle">O jogo de adivinhação por dicas</string>
     <string name="home_create_match">Nova partida</string>
+    <string name="home_baralhos">Baralhos</string>
     <string name="home_join_with_code">Entrar em partida</string>
     <string name="home_join_badge">Fase 4</string>
     <string name="home_how_to_play">Como jogar</string>
@@ -12,12 +13,47 @@
     <string name="home_how_to_play_dialog_body">Um jogador é o leitor da rodada e lê as dicas do card para os demais, os adivinhadores. Cada card tem 10 dicas, mas o grid de 1 a 10 é escolhido às cegas — a posição não indica se a dica é fácil ou difícil.\n\nA cada dica revelada, quem escolhe a próxima posição gira entre os adivinhadores. Quem acertar com N dicas usadas ganha 11 − N pontos: acertar logo na 1ª dica vale 10 pontos, na 10ª vale só 1. Se o leitor pontua (regra da configuração), ele ganha 1 ponto por dica revelada sem acerto; se ninguém acertar até a 10ª dica, ou os jogadores desistirem, o card é queimado e o leitor leva 10 pontos.\n\nCada jogador pode jogar por si ou agrupado em time — dá até para misturar times e jogadores solo na mesma partida. Os pontos de quem pontua vão para o seu grupo, e o placar final soma por grupo. No fim das rodadas, o grupo com mais pontos vence — empate é declarado, sem desempate.</string>
     <string name="home_how_to_play_dialog_close">Entendi</string>
 
+    <!-- Catálogo -->
+    <string name="catalogo_titulo">Baralhos</string>
+    <string name="catalogo_voltar_cd">Voltar</string>
+    <string name="catalogo_filtro_todas">Todas</string>
+    <string name="catalogo_filtro_personagem_filme">Personagem de filme</string>
+    <string name="catalogo_filtro_mundo_musica">Mundo da música</string>
+    <string name="catalogo_banner_offline">Sem conexão. Seus baralhos baixados continuam prontos para jogar; novidades aparecem quando a internet voltar.</string>
+    <string name="catalogo_indisponivel">Não deu para carregar o catálogo. Confira a conexão e tente de novo.</string>
+    <string name="catalogo_tentar_de_novo">Tentar de novo</string>
+    <string name="catalogo_colecao_meta">%1$d baralhos · %2$d cards</string>
+    <string name="catalogo_colecao_no_aparelho">%1$d de %2$d no aparelho</string>
+    <string name="catalogo_requer_conexao">Requer conexão</string>
+    <string name="catalogo_selo_edicao_final">✓ EDIÇÃO FINAL</string>
+    <string name="catalogo_selo_em_evolucao">🧪 EM EVOLUÇÃO</string>
+    <string name="catalogo_baralho_meta">%1$d cards · v%2$d</string>
+    <string name="catalogo_baralho_meta_tamanho">%1$d cards · v%2$d · ~%3$s</string>
+    <string name="catalogo_baixar">Baixar</string>
+    <string name="catalogo_atualizar">Atualizar</string>
+    <string name="catalogo_baixado">Baixado</string>
+    <string name="catalogo_cancelar">Cancelar</string>
+    <string name="catalogo_erro_titulo">Não deu certo</string>
+    <string name="catalogo_erro_ok">Entendi</string>
+
+    <!-- Pedir um baralho -->
+    <string name="pedir_baralho_card">💡 Não achou o tema? Peça um baralho</string>
+    <string name="pedir_baralho_titulo">Pedir um baralho</string>
+    <string name="pedir_baralho_tema">Tema desejado</string>
+    <string name="pedir_baralho_colecao">Coleção sugerida (opcional)</string>
+    <string name="pedir_baralho_observacoes">Observações (opcional)</string>
+    <string name="pedir_baralho_enviar">Enviar pedido</string>
+    <string name="pedir_baralho_texto">Pedido de baralho — %1$s\n\nTema desejado: %2$s\nColeção sugerida: %3$s\nObservações: %4$s\n\nCatálogo conhecido: %5$s</string>
+
     <!-- Setup -->
     <string name="setup_title">Configuração da partida</string>
-    <string name="setup_categoria_titulo">Categoria</string>
-    <string name="setup_categoria_personagem_filme">Personagem de filme</string>
-    <string name="setup_categoria_mundo_musica">Mundo da música</string>
-    <string name="setup_categoria_livre">Livre</string>
+    <string name="setup_baralhos_titulo">Baralhos da partida</string>
+    <string name="setup_baralhos_selecionar_todos">Selecionar todos</string>
+    <string name="setup_baralhos_abrir_catalogo">Catálogo →</string>
+    <string name="setup_baralho_cards">%1$d cards</string>
+    <string name="setup_baralhos_contador">%1$d baralhos · %2$d cards no monte, embaralhados juntos</string>
+    <string name="setup_bloqueio_nenhum_baralho">Selecione pelo menos um baralho</string>
+    <string name="setup_bloqueio_cards_insuficientes">Os baralhos selecionados não têm cards para todas as rodadas</string>
     <string name="setup_jogar_em_times_titulo">Jogar em times</string>
     <string name="setup_jogadores_titulo">Jogadores</string>
     <string name="setup_jogador_nome_placeholder">Nome do jogador %1$d</string>

@@ -17,7 +17,7 @@ class PartidaTest {
         Card(
             id = "card-${indice + 1}",
             type = CardType.COISA,
-            category = CardCategory.LIVRE,
+            category = CardCategory.PERSONAGEM_FILME,
             answer = "Resposta ${indice + 1}",
             clues = List(Card.QUANTIDADE_DE_DICAS) { "Dica ${it + 1} do card ${indice + 1}" },
         )

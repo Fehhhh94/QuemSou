@@ -8,7 +8,6 @@ import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
 import com.quemsou.app.domain.validacao.ResultadoValidacao
 import com.quemsou.app.domain.validacao.ValidadorEditorial
-import com.quemsou.app.presentation.setup.BaralhosEmbarcados
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -71,14 +70,14 @@ class BaralhoDeAssetsTest {
     fun `os dois baralhos embarcados sao os esperados, finalizados e com 30 cards cada`() {
         val porId = baralhos.associateBy { it.id }
 
-        val cinema = requireNotNull(porId[BaralhosEmbarcados.CINEMA_CLASSICO_1])
+        val cinema = requireNotNull(porId["cinema-classico-1"])
         assertEquals("Cinema Clássico — Edição 1", cinema.nome)
         assertEquals(CardCategory.PERSONAGEM_FILME, cinema.categoria)
         assertEquals(EstadoDoBaralho.FINALIZADO, cinema.estado)
         assertEquals(30, cinema.quantidadeDeCards)
         assertEquals(Colecao(id = "cinema-classico", nome = "Cinema Clássico", icone = "🎬"), cinema.colecao)
 
-        val musica = requireNotNull(porId[BaralhosEmbarcados.MUNDO_DA_MUSICA_1])
+        val musica = requireNotNull(porId["mundo-da-musica-1"])
         assertEquals("Mundo da Música — Edição 1", musica.nome)
         assertEquals(CardCategory.MUNDO_DA_MUSICA, musica.categoria)
         assertEquals(EstadoDoBaralho.FINALIZADO, musica.estado)

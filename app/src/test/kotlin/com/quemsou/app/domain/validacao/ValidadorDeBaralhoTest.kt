@@ -74,15 +74,6 @@ class ValidadorDeBaralhoTest {
     }
 
     @Test
-    fun `categoria LIVRE reprova - livre e selecao, nao conteudo`() {
-        val resultado = validador.validar(
-            baralho(listOf(card("c1", CardCategory.LIVRE)), categoria = CardCategory.LIVRE),
-        )
-
-        assertEquals(listOf(RegraDeBaralho.CATEGORIA_LIVRE), violacoesDe(resultado))
-    }
-
-    @Test
     fun `card de categoria divergente reprova - pertencimento herda a categoria do baralho`() {
         val resultado = validador.validar(
             baralho(listOf(card("c1"), card("c2", CardCategory.MUNDO_DA_MUSICA))),

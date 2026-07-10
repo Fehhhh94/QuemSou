@@ -1,9 +1,11 @@
 package com.quemsou.app.presentation.setup
 
 import androidx.lifecycle.ViewModel
-import com.quemsou.app.domain.model.CardCategory
+import androidx.lifecycle.viewModelScope
+import com.quemsou.app.domain.model.EstadoDoBaralho
 import com.quemsou.app.domain.model.Partida
 import com.quemsou.app.domain.model.RegrasPartida
+import com.quemsou.app.domain.repository.RepositorioDeCards
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.navigation.JogadorConfigurado
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,18 +14,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * Estado da tela de configuração da partida, com validação viva:
  * [podeComecar] e [motivoDoBloqueio] são recalculados a cada mudança.
  *
- * Não existe mais "modo de jogo" (especificação v4): [jogarEmTimes] só liga a
- * UI de agrupamento — desligado, todo jogador joga em grupo próprio de 1.
- * Nenhum agrupamento é inválido (grupos mistos são permitidos), então o
- * toggle não cria motivo de bloqueio.
+ * A partida é montada por **baralhos** (5A parte 2): a seleção começa com
+ * todos os baralhos do aparelho marcados (equivalente ao antigo "Livre") e o
+ * contador de união mostra o monte vivo. Não existe mais "modo de jogo"
+ * (especificação v4): [jogarEmTimes] só liga a UI de agrupamento.
  */
 data class SetupUiState(
-    val categoria: CardCategory = CardCategory.LIVRE,
+    val baralhosDisponiveis: List<BaralhoParaSelecao> = emptyList(),
+    val baralhosSelecionados: Set<String> = emptySet(),
+    val baralhosCarregados: Boolean = false,
     val jogarEmTimes: Boolean = false,
     val jogadores: List<JogadorEmEdicao> = List(Partida.MINIMO_DE_JOGADORES) { JogadorEmEdicao() },
     val numeroDeRodadas: Int = 5,
@@ -33,17 +38,25 @@ data class SetupUiState(
     val jogadoresTocados: Set<Int> = emptySet(),
     val tentouComecar: Boolean = false,
 ) {
+    /** Total de cards do monte da união dos baralhos selecionados. */
+    val cardsNoMonte: Int
+        get() = baralhosDisponiveis
+            .filter { it.id in baralhosSelecionados }
+            .sumOf { it.quantidadeDeCards }
+
     /** Primeiro motivo que impede a partida de começar; `null` se está tudo certo. */
     val motivoDoBloqueio: MotivoDoBloqueio?
         get() = when {
             jogadores.size < Partida.MINIMO_DE_JOGADORES -> MotivoDoBloqueio.POUCOS_JOGADORES
             jogadores.any { it.nome.isBlank() } -> MotivoDoBloqueio.NOMES_VAZIOS
+            baralhosCarregados && baralhosSelecionados.isEmpty() -> MotivoDoBloqueio.NENHUM_BARALHO
+            baralhosCarregados && cardsNoMonte < numeroDeRodadas -> MotivoDoBloqueio.CARDS_INSUFICIENTES
             else -> null
         }
 
     /** `true` quando a configuração é válida e a partida pode começar. */
     val podeComecar: Boolean
-        get() = motivoDoBloqueio == null
+        get() = motivoDoBloqueio == null && baralhosCarregados
 
     /**
      * [motivoDoBloqueio] pronto para exibição. [MotivoDoBloqueio.NOMES_VAZIOS]
@@ -51,9 +64,10 @@ data class SetupUiState(
      * estado inicial já disparariam essa mensagem assim que a tela abre, sem
      * nenhuma ação do usuário. Ela só aparece quando um campo de nome vazio
      * já foi tocado ([jogadoresTocados]) ou quando o usuário tentou começar a
-     * partida ([tentouComecar]) com a configuração inválida. O outro motivo
-     * (poucos jogadores) só surge como consequência direta de uma interação
-     * real (remover jogador) e continua aparecendo imediatamente.
+     * partida ([tentouComecar]) com a configuração inválida. Os demais
+     * motivos só surgem como consequência direta de uma interação real
+     * (remover jogador, desmarcar baralhos, subir rodadas) e continuam
+     * aparecendo imediatamente.
      */
     val motivoDoBloqueioVisivel: MotivoDoBloqueio?
         get() {
@@ -66,6 +80,17 @@ data class SetupUiState(
             return motivo.takeIf { campoTocadoEVazio }
         }
 }
+
+/** Um baralho do aparelho como oferecido na seleção do Setup. */
+data class BaralhoParaSelecao(
+    val id: String,
+    val nome: String,
+    val estado: EstadoDoBaralho,
+    val colecaoId: String,
+    val colecaoNome: String,
+    val colecaoIcone: String,
+    val quantidadeDeCards: Int,
+)
 
 /**
  * Um jogador em edição no Setup.
@@ -82,16 +107,21 @@ data class JogadorEmEdicao(
 enum class MotivoDoBloqueio {
     POUCOS_JOGADORES,
     NOMES_VAZIOS,
+    NENHUM_BARALHO,
+    CARDS_INSUFICIENTES,
 }
 
 /**
- * ViewModel da tela de configuração. Edita a lista de jogadores (2–4, com
- * clamp nos eventos de adicionar/remover), o agrupamento em times, a
- * categoria e as regras; ao [confirmar], monta a [ConfiguracaoDaPartida] e a
- * expõe em [configuracaoPronta] para a UI navegar até a rota Partida.
+ * ViewModel da tela de configuração. Edita a seleção de baralhos (carregada
+ * do aparelho e recarregável ao voltar do catálogo), a lista de jogadores
+ * (2–4, com clamp nos eventos de adicionar/remover), o agrupamento em times
+ * e as regras; ao [confirmar], monta a [ConfiguracaoDaPartida] e a expõe em
+ * [configuracaoPronta] para a UI navegar até a rota Partida.
  */
 @HiltViewModel
-class SetupViewModel @Inject constructor() : ViewModel() {
+class SetupViewModel @Inject constructor(
+    private val repositorioDeCards: RepositorioDeCards,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SetupUiState())
     val uiState: StateFlow<SetupUiState> = _uiState.asStateFlow()
@@ -101,8 +131,65 @@ class SetupViewModel @Inject constructor() : ViewModel() {
     /** Configuração montada ao confirmar; a UI navega e chama [consumirConfiguracaoPronta]. */
     val configuracaoPronta: StateFlow<ConfiguracaoDaPartida?> = _configuracaoPronta.asStateFlow()
 
-    fun selecionarCategoria(categoria: CardCategory) {
-        _uiState.update { it.copy(categoria = categoria) }
+    init {
+        recarregarBaralhos()
+    }
+
+    /**
+     * (Re)carrega os baralhos do aparelho — chamada no início e ao voltar da
+     * tela de catálogo (pode ter baralho novo). Na primeira carga, todos
+     * nascem selecionados (equivalente ao antigo "Livre"); nas seguintes, a
+     * seleção do usuário é preservada e baralhos novos entram desmarcados.
+     */
+    fun recarregarBaralhos() {
+        viewModelScope.launch {
+            val baralhos = repositorioDeCards.buscarTodos()
+                .map { baralho ->
+                    BaralhoParaSelecao(
+                        id = baralho.id,
+                        nome = baralho.nome,
+                        estado = baralho.estado,
+                        colecaoId = baralho.colecao.id,
+                        colecaoNome = baralho.colecao.nome,
+                        colecaoIcone = baralho.colecao.icone,
+                        quantidadeDeCards = baralho.quantidadeDeCards,
+                    )
+                }
+                .sortedWith(compareBy({ it.colecaoNome }, { it.nome }))
+            _uiState.update { estado ->
+                val idsDisponiveis = baralhos.map { it.id }.toSet()
+                estado.copy(
+                    baralhosDisponiveis = baralhos,
+                    baralhosSelecionados = if (estado.baralhosCarregados) {
+                        estado.baralhosSelecionados intersect idsDisponiveis
+                    } else {
+                        idsDisponiveis
+                    },
+                    baralhosCarregados = true,
+                )
+            }
+        }
+    }
+
+    /** Marca/desmarca o baralho [id] na seleção da partida. */
+    fun alternarBaralho(id: String) {
+        _uiState.update { estado ->
+            if (estado.baralhosDisponiveis.none { it.id == id }) return@update estado
+            estado.copy(
+                baralhosSelecionados = if (id in estado.baralhosSelecionados) {
+                    estado.baralhosSelecionados - id
+                } else {
+                    estado.baralhosSelecionados + id
+                },
+            )
+        }
+    }
+
+    /** Atalho "Selecionar todos" da seção de baralhos. */
+    fun selecionarTodosBaralhos() {
+        _uiState.update { estado ->
+            estado.copy(baralhosSelecionados = estado.baralhosDisponiveis.map { it.id }.toSet())
+        }
     }
 
     /**
@@ -186,8 +273,10 @@ class SetupViewModel @Inject constructor() : ViewModel() {
      * enquanto [SetupUiState.podeComecar] for `false` — nesse caso, marca
      * [SetupUiState.tentouComecar] para revelar o motivo do bloqueio.
      *
-     * O agrupamento vira [JogadorConfigurado.grupoId] ("g1", "g2"…) apenas
-     * com [SetupUiState.jogarEmTimes] ligado; caso contrário todo jogador sai
+     * Os baralhos selecionados saem em ordem estável (por id) — a ordem da
+     * seleção não muda o monte (união determinística). O agrupamento vira
+     * [JogadorConfigurado.grupoId] ("g1", "g2"…) apenas com
+     * [SetupUiState.jogarEmTimes] ligado; caso contrário todo jogador sai
      * sem grupo — grupo próprio de 1, o estado padrão do modelo v4.
      *
      * O código da partida é sorteado aqui (4 letras): aleatoriedade de verdade
@@ -202,9 +291,7 @@ class SetupViewModel @Inject constructor() : ViewModel() {
         }
         _configuracaoPronta.value = ConfiguracaoDaPartida(
             codigo = gerarCodigo(),
-            // Transitório (5A parte 1): a categoria dos chips vira a lista de
-            // baralhos embarcados equivalente; a parte 2 troca por seleção real.
-            baralhos = BaralhosEmbarcados.idsPara(estado.categoria),
+            baralhos = estado.baralhosSelecionados.sorted(),
             numeroDeRodadas = estado.numeroDeRodadas,
             leitorPontua = estado.leitorPontua,
             modoShot = estado.modoShot,

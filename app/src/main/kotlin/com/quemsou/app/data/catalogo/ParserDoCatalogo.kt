@@ -229,7 +229,7 @@ class ParserDoCatalogo @Inject constructor() {
             violacoes += ViolacaoDeFormato(
                 caminho,
                 "O baralho '$id' tem categoria desconhecida \"$valor\"; " +
-                    "as categorias válidas são ${CardCategory.entries.filter { it != CardCategory.LIVRE }.joinToString(", ")}.",
+                    "as categorias válidas são ${CardCategory.entries.joinToString(", ")}.",
             )
         }
         return categoria
