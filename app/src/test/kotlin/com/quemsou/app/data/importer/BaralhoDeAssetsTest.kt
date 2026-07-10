@@ -4,6 +4,7 @@ import com.quemsou.app.data.catalogo.ParserDoCatalogo
 import com.quemsou.app.data.catalogo.ResultadoDoParse
 import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.CardCategory
+import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
 import com.quemsou.app.domain.validacao.ResultadoValidacao
 import com.quemsou.app.domain.validacao.ValidadorEditorial
@@ -75,12 +76,14 @@ class BaralhoDeAssetsTest {
         assertEquals(CardCategory.PERSONAGEM_FILME, cinema.categoria)
         assertEquals(EstadoDoBaralho.FINALIZADO, cinema.estado)
         assertEquals(30, cinema.quantidadeDeCards)
+        assertEquals(Colecao(id = "cinema-classico", nome = "Cinema Clássico", icone = "🎬"), cinema.colecao)
 
         val musica = requireNotNull(porId[BaralhosEmbarcados.MUNDO_DA_MUSICA_1])
         assertEquals("Mundo da Música — Edição 1", musica.nome)
         assertEquals(CardCategory.MUNDO_DA_MUSICA, musica.categoria)
         assertEquals(EstadoDoBaralho.FINALIZADO, musica.estado)
         assertEquals(30, musica.quantidadeDeCards)
+        assertEquals(Colecao(id = "mundo-da-musica", nome = "Mundo da Música", icone = "🎸"), musica.colecao)
     }
 
     @Test

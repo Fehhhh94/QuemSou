@@ -13,7 +13,7 @@ import androidx.room.TypeConverters
  * — por isso o schema pode evoluir com migrações simples sem perda de dados
  * do jogador.
  */
-@Database(entities = [BaralhoEntity::class, CardEntity::class], version = 2, exportSchema = true)
+@Database(entities = [BaralhoEntity::class, CardEntity::class], version = 3, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 

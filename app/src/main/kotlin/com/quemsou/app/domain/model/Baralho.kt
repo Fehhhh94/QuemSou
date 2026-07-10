@@ -15,6 +15,8 @@ package com.quemsou.app.domain.model
  *   "cinema-classico-1"); participa da chave de ordenação da união.
  * @property nome nome de exibição (ex.: "Cinema Clássico — Edição 1").
  * @property categoria categoria temática do baralho inteiro.
+ * @property colecao coleção a que o baralho pertence (metadado de
+ *   agrupamento do catálogo).
  * @property versao versão inteira crescente do conteúdo; dirige a
  *   atualização por download no catálogo.
  * @property estado ciclo de vida ([EstadoDoBaralho]).
@@ -25,6 +27,7 @@ data class Baralho(
     val id: String,
     val nome: String,
     val categoria: CardCategory,
+    val colecao: Colecao,
     val versao: Int,
     val estado: EstadoDoBaralho,
     val cards: List<Card>,

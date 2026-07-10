@@ -22,6 +22,7 @@ class CardsJsonTest {
                   "id": "cinema-1",
                   "nome": "Cinema — Edição 1",
                   "categoria": "PERSONAGEM_FILME",
+                  "colecao": { "id": "cinema", "nome": "Cinema", "icone": "🎬" },
                   "versao": 1,
                   "estado": "FINALIZADO",
                   "cards": [

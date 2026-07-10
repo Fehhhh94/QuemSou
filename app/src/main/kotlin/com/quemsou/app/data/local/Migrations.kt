@@ -44,3 +44,32 @@ val MIGRACAO_1_2 = object : Migration(1, 2) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_cards_baralhoId` ON `cards` (`baralhoId`)")
     }
 }
+
+/**
+ * Migração 2 → 3 (5A parte 2): a coleção (metadado de agrupamento) entra em
+ * `baralhos` como três colunas achatadas. A tabela é recriada (em vez de
+ * `ALTER TABLE ... ADD COLUMN`) para o schema final ficar idêntico ao que o
+ * Room valida; os dois baralhos embarcados da v2 ganham as coleções próprias
+ * pela categoria. Logo após, o `CardsImporter` reimporta o asset (version 4).
+ */
+val MIGRACAO_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `baralhos_novo` (" +
+                "`id` TEXT NOT NULL, `nome` TEXT NOT NULL, `categoria` TEXT NOT NULL, " +
+                "`versao` INTEGER NOT NULL, `estado` TEXT NOT NULL, " +
+                "`colecaoId` TEXT NOT NULL, `colecaoNome` TEXT NOT NULL, `colecaoIcone` TEXT NOT NULL, " +
+                "PRIMARY KEY(`id`))",
+        )
+        db.execSQL(
+            "INSERT INTO `baralhos_novo` " +
+                "SELECT `id`, `nome`, `categoria`, `versao`, `estado`, " +
+                "CASE `categoria` WHEN 'PERSONAGEM_FILME' THEN 'cinema-classico' ELSE 'mundo-da-musica' END, " +
+                "CASE `categoria` WHEN 'PERSONAGEM_FILME' THEN 'Cinema Clássico' ELSE 'Mundo da Música' END, " +
+                "CASE `categoria` WHEN 'PERSONAGEM_FILME' THEN '🎬' ELSE '🎸' END " +
+                "FROM `baralhos`",
+        )
+        db.execSQL("DROP TABLE `baralhos`")
+        db.execSQL("ALTER TABLE `baralhos_novo` RENAME TO `baralhos`")
+    }
+}

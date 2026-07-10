@@ -4,6 +4,7 @@ import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.CardType
+import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -22,6 +23,7 @@ class CardEntityMapperTest {
         id = "musica-1",
         nome = "Mundo da Música — Edição 1",
         categoria = CardCategory.MUNDO_DA_MUSICA,
+        colecao = Colecao(id = "mundo-da-musica", nome = "Mundo da Música", icone = "🎸"),
         versao = 2,
         estado = EstadoDoBaralho.EM_DESENVOLVIMENTO,
         cards = listOf(card),

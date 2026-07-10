@@ -9,7 +9,8 @@ import androidx.room.PrimaryKey
  * (via [com.quemsou.app.domain.model.Baralho.quantidadeDeCards] no domínio).
  *
  * [categoria] e [estado] guardam o `name` dos enums de domínio, como
- * [CardEntity] já faz. A conversão vive em `BaralhoEntityMapper`.
+ * [CardEntity] já faz. A coleção (metadado de agrupamento) é achatada em
+ * três colunas. A conversão vive em `BaralhoEntityMapper`.
  */
 @Entity(tableName = "baralhos")
 data class BaralhoEntity(
@@ -18,4 +19,7 @@ data class BaralhoEntity(
     val categoria: String,
     val versao: Int,
     val estado: String,
+    val colecaoId: String,
+    val colecaoNome: String,
+    val colecaoIcone: String,
 )

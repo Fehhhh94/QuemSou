@@ -4,6 +4,7 @@ import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.CardType
+import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -28,6 +29,7 @@ class ValidadorDeBaralhoTest {
         id = "b1",
         nome = "Baralho 1",
         categoria = categoria,
+        colecao = Colecao(id = "colecao-teste", nome = "Coleção de Teste", icone = "🧪"),
         versao = 1,
         estado = EstadoDoBaralho.EM_DESENVOLVIMENTO,
         cards = cards,

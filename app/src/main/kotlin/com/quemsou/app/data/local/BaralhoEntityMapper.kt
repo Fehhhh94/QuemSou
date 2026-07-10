@@ -3,6 +3,7 @@ package com.quemsou.app.data.local
 import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.CardCategory
+import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
 
 /**
@@ -14,6 +15,7 @@ fun BaralhoEntity.paraDominio(cards: List<Card>): Baralho = Baralho(
     id = id,
     nome = nome,
     categoria = CardCategory.valueOf(categoria),
+    colecao = Colecao(id = colecaoId, nome = colecaoNome, icone = colecaoIcone),
     versao = versao,
     estado = EstadoDoBaralho.valueOf(estado),
     cards = cards,
@@ -26,4 +28,7 @@ fun Baralho.paraEntidade(): BaralhoEntity = BaralhoEntity(
     categoria = categoria.name,
     versao = versao,
     estado = estado.name,
+    colecaoId = colecao.id,
+    colecaoNome = colecao.nome,
+    colecaoIcone = colecao.icone,
 )

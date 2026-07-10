@@ -23,6 +23,7 @@ class BaralhoTest {
         id = id,
         nome = "Baralho $id",
         categoria = categoria,
+        colecao = Colecao(id = "colecao-teste", nome = "Coleção de Teste", icone = "🧪"),
         versao = 1,
         estado = estado,
         cards = cards,

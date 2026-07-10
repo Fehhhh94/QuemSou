@@ -3,6 +3,7 @@ package com.quemsou.app.data.catalogo
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.CardType
+import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -25,11 +26,13 @@ class ParserDoCatalogoTest {
         categoria: String = "PERSONAGEM_FILME",
         estado: String = "FINALIZADO",
         cards: String = jsonDeCard(),
+        colecao: String = """{ "id": "cinema", "nome": "Cinema", "icone": "🎬" }""",
     ) = """
         {
           "id": "cinema-1",
           "nome": "Cinema — Edição 1",
           "categoria": "$categoria",
+          "colecao": $colecao,
           "versao": 1,
           "estado": "$estado",
           "cards": [$cards]
@@ -112,6 +115,21 @@ class ParserDoCatalogoTest {
         assertTrue(violacoesDe(resultado).single().mensagem.contains("LIVRE"))
     }
 
+    @Test
+    fun `colecao valida vira dominio e campos vazios viram violacoes legiveis`() {
+        val valido = parser.parseBaralho(jsonDeBaralho())
+        assertEquals(
+            Colecao(id = "cinema", nome = "Cinema", icone = "🎬"),
+            (valido as ResultadoDoParse.Sucesso).valor.colecao,
+        )
+
+        val semIconeESemId = parser.parseBaralho(
+            jsonDeBaralho(colecao = """{ "id": "", "nome": "Cinema", "icone": " " }"""),
+        )
+        val caminhos = violacoesDe(semIconeESemId).map { it.caminho }
+        assertEquals(listOf("colecao.id", "colecao.icone"), caminhos)
+    }
+
     // endregion
 
     // region Índice
@@ -125,6 +143,7 @@ class ParserDoCatalogoTest {
                   "id": "cinema-1",
                   "nome": "Cinema — Edição 1",
                   "categoria": "PERSONAGEM_FILME",
+                  "colecao": { "id": "cinema", "nome": "Cinema", "icone": "🎬" },
                   "versao": 2,
                   "estado": "EM_DESENVOLVIMENTO",
                   "quantidadeDeCards": 30,
@@ -154,6 +173,7 @@ class ParserDoCatalogoTest {
                   "id": "cinema-1",
                   "nome": "Cinema — Edição 1",
                   "categoria": "PERSONAGEM_FILME",
+                  "colecao": { "id": "cinema", "nome": "Cinema", "icone": "🎬" },
                   "versao": 1,
                   "estado": "FINALIZADO",
                   "quantidadeDeCards": 30,
@@ -164,6 +184,7 @@ class ParserDoCatalogoTest {
                   "id": "quebrado-1",
                   "nome": "",
                   "categoria": "XADREZ",
+                  "colecao": { "id": "", "nome": "Quebrada", "icone": "🧨" },
                   "versao": 0,
                   "estado": "FINALIZADO",
                   "quantidadeDeCards": 10,

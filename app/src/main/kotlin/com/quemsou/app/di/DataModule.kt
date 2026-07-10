@@ -15,6 +15,7 @@ import com.quemsou.app.data.local.AppDatabase
 import com.quemsou.app.data.local.BaralhoDao
 import com.quemsou.app.data.local.CardDao
 import com.quemsou.app.data.local.MIGRACAO_1_2
+import com.quemsou.app.data.local.MIGRACAO_2_3
 import com.quemsou.app.domain.repository.RepositorioDeCards
 import dagger.Binds
 import dagger.Module
@@ -47,7 +48,7 @@ abstract class DataModule {
         @Singleton
         fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "quemsou.db")
-                .addMigrations(MIGRACAO_1_2)
+                .addMigrations(MIGRACAO_1_2, MIGRACAO_2_3)
                 .build()
 
         @Provides

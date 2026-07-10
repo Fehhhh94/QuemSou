@@ -1,6 +1,7 @@
 package com.quemsou.app.data.catalogo
 
 import com.quemsou.app.domain.model.CardCategory
+import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
 import kotlinx.serialization.Serializable
 
@@ -21,17 +22,33 @@ data class IndiceDoCatalogoJson(
 /**
  * Uma entrada do índice do catálogo: os metadados que a tela de catálogo
  * lista sem precisar baixar o baralho inteiro.
+ *
+ * @property tamanhoEmBytes tamanho do JSON do baralho, para o meta do card
+ *   da tela de catálogo; opcional — ausente/0, a UI não exibe tamanho.
  */
 @Serializable
 data class EntradaDoIndiceJson(
     val id: String,
     val nome: String,
     val categoria: String,
+    val colecao: ColecaoJson,
     val versao: Int,
     val estado: String,
     val quantidadeDeCards: Int,
     val url: String,
     val descricao: String,
+    val tamanhoEmBytes: Long = 0L,
+)
+
+/**
+ * Coleção como declarada nos JSONs do catálogo — metadado de agrupamento
+ * (aparece igual no índice e no baralho).
+ */
+@Serializable
+data class ColecaoJson(
+    val id: String,
+    val nome: String,
+    val icone: String,
 )
 
 /**
@@ -44,6 +61,7 @@ data class BaralhoJson(
     val id: String,
     val nome: String,
     val categoria: String,
+    val colecao: ColecaoJson,
     val versao: Int,
     val estado: String,
     val cards: List<CardDoBaralhoJson>,
@@ -60,15 +78,17 @@ data class CardDoBaralhoJson(
 
 /**
  * Uma entrada do índice já validada pelo [ParserDoCatalogo] — enums reais,
- * pronta para a tela de catálogo (parte 2 da 5A).
+ * pronta para a tela de catálogo.
  */
 data class EntradaDoCatalogo(
     val id: String,
     val nome: String,
     val categoria: CardCategory,
+    val colecao: Colecao,
     val versao: Int,
     val estado: EstadoDoBaralho,
     val quantidadeDeCards: Int,
     val url: String,
     val descricao: String,
+    val tamanhoEmBytes: Long = 0L,
 )

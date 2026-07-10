@@ -1,10 +1,15 @@
 {
-  "version": 3,
+  "version": 4,
   "baralhos": [
     {
       "id": "cinema-classico-1",
       "nome": "Cinema Clássico — Edição 1",
       "categoria": "PERSONAGEM_FILME",
+      "colecao": {
+        "id": "cinema-classico",
+        "nome": "Cinema Clássico",
+        "icone": "🎬"
+      },
       "versao": 1,
       "estado": "FINALIZADO",
       "cards": [
@@ -524,6 +529,11 @@
       "id": "mundo-da-musica-1",
       "nome": "Mundo da Música — Edição 1",
       "categoria": "MUNDO_DA_MUSICA",
+      "colecao": {
+        "id": "mundo-da-musica",
+        "nome": "Mundo da Música",
+        "icone": "🎸"
+      },
       "versao": 1,
       "estado": "FINALIZADO",
       "cards": [

@@ -2,6 +2,7 @@ package com.quemsou.app.data.importer
 
 import com.quemsou.app.data.catalogo.BaralhoJson
 import com.quemsou.app.data.catalogo.CardDoBaralhoJson
+import com.quemsou.app.data.catalogo.ColecaoJson
 import com.quemsou.app.data.catalogo.ParserDoCatalogo
 import com.quemsou.app.data.local.BaralhoDao
 import com.quemsou.app.data.local.BaralhoEntity
@@ -59,6 +60,7 @@ class CardsImporterTest {
         id = id,
         nome = "Baralho $id",
         categoria = "PERSONAGEM_FILME",
+        colecao = ColecaoJson(id = "colecao-teste", nome = "Coleção de Teste", icone = "🧪"),
         versao = 1,
         estado = "FINALIZADO",
         cards = List(quantidadeDeCards) { indice ->
@@ -123,6 +125,9 @@ class CardsImporterTest {
             categoria = "PERSONAGEM_FILME",
             versao = 1,
             estado = "FINALIZADO",
+            colecaoId = "antiga",
+            colecaoNome = "Antiga",
+            colecaoIcone = "🗃️",
         )
         val cardDao = FakeCardDao()
         cardDao.cards += CardEntity(

@@ -5,6 +5,7 @@ import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.CardType
+import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
 import com.quemsou.app.domain.repository.RepositorioDeCards
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
@@ -40,6 +41,7 @@ class PartidaViewModelTest {
             id = "b1",
             nome = "Baralho de Teste",
             categoria = CardCategory.PERSONAGEM_FILME,
+            colecao = Colecao(id = "colecao-teste", nome = "Coleção de Teste", icone = "🧪"),
             versao = 1,
             estado = EstadoDoBaralho.FINALIZADO,
             cards = cards(),
