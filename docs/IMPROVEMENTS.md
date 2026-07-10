@@ -63,6 +63,18 @@
 - **⚠️ Alerta de trademark**: também os baralhos **gratuitos** com nome de
   marca são risco a avaliar antes do lançamento na Play Store.
 
+## 🟣 Editor manual de baralhos no app (fase futura, pós-5B)
+
+- **Status**: registrado em 2026-07-09 — **não implementar agora**; reavaliar
+  depois que a experiência da fábrica interna (5B) ensinar o fluxo real de
+  criação de cards.
+- **Caso de uso**: baralhos pessoais tipo "da nossa turma" — o usuário cria
+  cards sobre os próprios amigos/família, sem passar pelo catálogo.
+- Puxa a questão de **compartilhamento** entre aparelhos: exportação de
+  arquivo ou envio via Nearby (sinergia com a Fase 4) — decidir junto.
+- A régua editorial mecânica já existe (`ValidadorEditorial`); o editor a
+  reusaria na digitação, com as violações legíveis existentes.
+
 ## 🟣 Fábrica interna — Decisões da camada Gemini (registradas em 2026-07-09)
 
 Decisões fechadas a partir das lições de uma integração Gemini já validada em

@@ -27,28 +27,44 @@ Lista as entradas que a tela de catálogo exibe sem baixar os baralhos.
       "id": "cinema-classico-1",
       "nome": "Cinema Clássico — Edição 1",
       "categoria": "PERSONAGEM_FILME",
+      "colecao": { "id": "cinema-classico", "nome": "Cinema Clássico", "icone": "🎬" },
       "versao": 1,
       "estado": "FINALIZADO",
       "quantidadeDeCards": 30,
       "url": "https://raw.githubusercontent.com/<org>/<repo>/main/baralhos/cinema-classico-1.json",
-      "descricao": "Personagens clássicos do cinema, do bruxo ao vilão de respiração pesada."
+      "descricao": "Personagens clássicos do cinema, do bruxo ao vilão de respiração pesada.",
+      "tamanhoEmBytes": 21500
     }
   ]
 }
 ```
 
-Campos da entrada (todos obrigatórios):
+Campos da entrada (todos obrigatórios, exceto `tamanhoEmBytes`):
 
 | Campo | Tipo | Regra |
 | --- | --- | --- |
 | `id` | string | Identificador **estável e imutável** do baralho (slug); participa da chave de ordenação da união determinística. |
 | `nome` | string | Nome de exibição. |
-| `categoria` | string | `PERSONAGEM_FILME` ou `MUNDO_DA_MUSICA` — nunca `LIVRE` ("Livre" é a seleção de todos os baralhos, não categoria de conteúdo). |
+| `categoria` | string | `PERSONAGEM_FILME` ou `MUNDO_DA_MUSICA` (a categoria é metadado do baralho; não existe categoria "LIVRE"). |
+| `colecao` | objeto | Coleção do baralho — ver "Coleção" abaixo. |
 | `versao` | int ≥ 1 | Cresce a cada publicação de conteúdo novo do MESMO baralho; dirige a atualização por download. |
 | `estado` | string | `EM_DESENVOLVIMENTO` (pode mudar entre versões; selo "em evolução") ou `FINALIZADO` (imutável para sempre; selo "edição final"). |
 | `quantidadeDeCards` | int ≥ 1 | Contagem declarada, para a tela listar sem baixar. |
 | `url` | string | URL do JSON completo do baralho. |
 | `descricao` | string | Uma frase curta para o card da tela de catálogo (pode ser vazia). |
+| `tamanhoEmBytes` | long, opcional | Tamanho do JSON do baralho; a UI exibe "~12 KB" no meta. Ausente/0 = não exibido. |
+
+## Coleção
+
+Metadado de **agrupamento** — o nível 1 da tela de catálogo lista coleções
+(ex.: "Cinema Clássico" 🎬 reúne "Edição 1", "Edição 2"…). Não é entidade
+com regras próprias; aparece idêntica no índice e no JSON do baralho.
+
+| Campo | Tipo | Regra |
+| --- | --- | --- |
+| `id` | string | Identificador estável da coleção (slug); agrupa os baralhos na UI. |
+| `nome` | string | Nome de exibição da coleção. |
+| `icone` | string | Um emoji (ex.: "🎬"). |
 
 ## JSON do baralho
 
@@ -61,6 +77,7 @@ os cards. **O card herda a categoria do baralho** — não existe campo
   "id": "cinema-classico-1",
   "nome": "Cinema Clássico — Edição 1",
   "categoria": "PERSONAGEM_FILME",
+  "colecao": { "id": "cinema-classico", "nome": "Cinema Clássico", "icone": "🎬" },
   "versao": 1,
   "estado": "FINALIZADO",
   "cards": [

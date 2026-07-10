@@ -35,19 +35,23 @@
 ## Estado atual
 
 - **Fases 0–3 concluídas** e validadas em jogo completo no Z Fold físico
-  (Android 16). Conteúdo editorial: `cards.json` version 3 com **dois
+  (Android 16). Conteúdo editorial: `cards.json` version 4 com **dois
   baralhos embarcados FINALIZADOS** — "Cinema Clássico — Edição 1" (30
-  `PERSONAGEM_FILME`) e "Mundo da Música — Edição 1" (30 `MUNDO_DA_MUSICA`)
-  —, validados pelo `BaralhoDeAssetsTest`. **156 testes verdes.**
+  `PERSONAGEM_FILME`, coleção 🎬) e "Mundo da Música — Edição 1" (30
+  `MUNDO_DA_MUSICA`, coleção 🎸) —, validados pelo `BaralhoDeAssetsTest`.
+  **164 testes verdes.**
 - **Modo Shot entregue** (2026-07-09); validação física no Z Fold pendente
   — incluir na próxima sessão de jogo.
 - **Fase 5 — EM ANDAMENTO** (Catálogo de Baralhos): 5.1 concluída
-  (`ValidadorEditorial`, régua da fábrica interna); **5A parte 1 concluída**
-  (2026-07-09: entidade Baralho + Room v2 + formato do catálogo + seleção
-  por baralhos, com o Setup traduzindo os chips de categoria nos baralhos
-  embarcados — ponte transitória `BaralhosEmbarcados`). **Próximo passo:
-  5A parte 2 (UI do catálogo)** — tela de listar/baixar/atualizar com selos
-  de estado e seleção múltipla real no Setup.
+  (`ValidadorEditorial`, régua da fábrica interna); **5A concluída**
+  (2026-07-09 — parte 1: entidade Baralho + Room + formato; parte 2: UI do
+  catálogo em dois níveis, download com cache do índice, "Pedir um baralho"
+  e Setup por baralhos). **Pendente da 5A: validação física no Z Fold**
+  (checklist em `docs/BUGS.md`) e **trocar o `TODO_URL_CATALOGO`**
+  (`HttpFonteDoCatalogo.URL_DO_INDICE`) pela URL real após criar o
+  repositório `Fehhhh94/QuemSou-Baralhos` e publicar o conteúdo de
+  `catalogo-seed/`. **Próximo passo: 5B — fábrica interna** (formato
+  script/CLI vs app-side oculto é decisão em aberto).
 - **Fase 4 (Nearby Connections): no backlog**, sem previsão — ver "Backlog".
 - Única decisão de produto em aberto: **nome definitivo do app** ("QuemSou"
   é provisório em código, pacote e strings).
@@ -88,28 +92,50 @@
   dicas com fator próprio (`Partida.seedDosShots` = seed das dicas × 31 + 7).
   O grid nunca marca a posição antes do toque; o overlay não é dispensável
   por toque no scrim — só o "Bebi!" avança. A posição pendente sobrevive à
-  morte de processo (`SavedStateHandle`). Paleta âmbar/dourada é EXCLUSIVA
-  do modo (overlay e card do Setup — nada de âmbar no grid). Nota: álcool
-  afeta a classificação etária na Play Store.
+  morte de processo (`SavedStateHandle`). Dentro da PARTIDA, a paleta
+  âmbar/dourada é exclusiva do modo (overlay e card do Setup — nada de âmbar
+  no grid); no catálogo, o âmbar sinaliza novidade/atualização (mockup v2).
+  Nota: álcool afeta a classificação etária na Play Store.
 - **Seleção por baralhos**: a partida usa 1+ baralhos
   (`ConfiguracaoDaPartida.baralhos`, lista de ids); o monte é a união dos
-  cards deles. Categoria é **metadado do baralho** (etiqueta/filtro visual),
-  herdada pelos cards; o espírito da "Livre" sobrevive como "selecionar
-  todos os baralhos" (`CardCategory.LIVRE` segue no enum só para a UI
-  transitória do Setup — nenhum baralho a usa).
+  cards deles. Categoria é **metadado do baralho** (`CardCategory`:
+  PERSONAGEM_FILME, MUNDO_DA_MUSICA — não existe LIVRE), etiqueta herdada
+  pelos cards e filtro visual do catálogo; o espírito da antiga "Livre" vive
+  no atalho "Selecionar todos" do Setup, e todos os baralhos nascem
+  selecionados.
 - **União determinística** (`Baralho.uniaoDeterministica`): os cards dos
   baralhos selecionados são ordenados por chave estável — id do baralho, id
   do card — ANTES do `EmbaralhadorDeCards`. Mesma seleção + mesma seed →
   mesmo monte, independente da ordem de download/inserção no Room. Ids de
   baralho e de card são imutáveis para sempre (são a chave).
 - **`reiniciarPartida`** (no `PlacarFinal`): gera seed nova para os mesmos
-  jogadores/regras/categoria e reembaralha do zero — botão "Jogar de novo".
+  jogadores/regras/baralhos selecionados e reembaralha do zero — botão
+  "Jogar de novo".
 
 ## Arquitetura da UI
 
-- **3 rotas tipadas** (Home, Setup, Partida). Fases do jogo (VezDeJogar,
-  Grid, DicaRevelada, QuemAcertou, Anuncio, PlacarFinal) são **estados** do
+- **5 rotas tipadas** (Home, Setup, Partida, Catalogo, Colecao). Fases do
+  jogo (VezDeJogar, Grid, DicaRevelada, QuemAcertou, Anuncio, PlacarFinal)
+  são **estados** do
   `StateFlow<PartidaUiState>` — nunca rotas — trocados com `AnimatedContent`.
+- **Catálogo em dois níveis**: Catalogo lista as coleções (chips de filtro
+  por categoria, pontinho âmbar de novidade, card "Pedir um baralho" ao
+  final); Colecao lista os baralhos da coleção com selo de ciclo de vida
+  (`SeloDeEstado`: "✓ EDIÇÃO FINAL" verde / "🧪 EM EVOLUÇÃO" ciano) e botão
+  de 4 estados (Baixar / Atualizar âmbar / Baixado / Cancelar + progresso).
+  **Nunca listar os cards de um baralho** — respostas são surpresa.
+  Offline: `BannerOffline`, baixados 100% funcionais, não-baixados
+  esmaecidos — o jogo nunca bloqueia por falta de rede. Downloads vivem no
+  escopo do `ColecaoViewModel` (sobrevivem à dobra; sair da tela cancela).
+- **"Pedir um baralho"**: formulário no catálogo monta texto estruturado e
+  dispara o Sharesheet do Android (ACTION_SEND, text/plain) — o app não
+  transmite nada.
+- **Setup por baralhos**: seção "Baralhos da partida" lista os baixados
+  agrupados por coleção (checkbox + mini-selo), atalhos "Selecionar todos"
+  e "Catálogo →", contador vivo da união e validação viva (nenhum baralho /
+  cards insuficientes para as rodadas). Todos os baralhos nascem
+  selecionados; a lista recarrega ao voltar do catálogo (ON_RESUME);
+  `reiniciarPartida` preserva a seleção.
 - **Um `PartidaViewModel` por partida**, escopado à rota Partida. Nunca
   duplica regra do domínio: só traduz `EstadoDoTurno`/`Placar` em
   `PartidaUiState` e repassa eventos. A rota recebe `ConfiguracaoDaPartida`
@@ -140,22 +166,31 @@
   índice JSON + um JSON por baralho, formato em `docs/CATALOG_FORMAT.md`,
   parse e validação estrutural com violações legíveis no `ParserDoCatalogo`
   (`data/catalogo/`). Sem servidor, sem Firebase, sem chave de API no app.
-  A tela de catálogo lista, baixa e atualiza baralhos; o import usa o
-  mecanismo de versionamento do `CardsImporter`. A partida segue 100%
-  offline — rede só na tela de catálogo.
+  A URL do índice é a ÚNICA constante de rede
+  (`HttpFonteDoCatalogo.URL_DO_INDICE`; cliente OkHttp puro). O
+  `RepositorioDoCatalogo` cruza o índice com o Room e deriva NÃO BAIXADO /
+  BAIXADO / ATUALIZAÇÃO DISPONÍVEL; download passa pelo parser e **baralho
+  inválido nunca entra no Room**. O último índice bem-sucedido fica em cache
+  em disco (`ArquivoCacheDoIndice`, sem expiração) — offline mostra o último
+  estado conhecido. O `CardsImporter` é cirúrgico: substitui só os
+  embarcados, nunca apaga downloads. A partida segue 100% offline — rede só
+  na tela de catálogo.
 - **Baralho** (modelo de conteúdo): pertence a uma categoria existente e
   agrupa cards tematicamente (ex.: `PERSONAGEM_FILME` → "Harry Potter").
   Máximo de **100 cards por baralho**; crescimento além disso vira baralho
   novo ("Harry Potter 2"), preferindo subtítulos temáticos quando fizer
   sentido.
+- **Coleção** (`Colecao`: id, nome, ícone emoji): metadado de agrupamento —
+  o nível 1 do catálogo lista coleções, não baralhos. Não é entidade com
+  regras.
 - **Ciclo de vida do baralho**: `EM_DESENVOLVIMENTO` (versões novas podem
   adicionar, remover ou melhorar cards; o app atualiza por versionamento) →
   `FINALIZADO` (imutável para sempre; evolução só via novo baralho ou
   extensão). O catálogo e a UI sinalizam o estado (selo "em evolução" vs
   "edição final").
-- **Seleção múltipla no Setup**: a partida pode usar a união dos cards de
-  1+ baralhos — mesma filosofia da categoria LIVRE (filtro-união
-  determinístico, sem entidade "baralho mesclado" persistida).
+- **Seleção múltipla no Setup**: a partida usa a união dos cards de 1+
+  baralhos — filtro-união determinístico, sem entidade "baralho mesclado"
+  persistida.
 - **Fábrica interna (ferramenta do desenvolvedor, fora do app)**: pipeline
   Gemini gera → `ValidadorEditorial` valida → revisão humana → publicação no
   catálogo. As decisões da camada Gemini (modelo nunca hardcoded, saída
@@ -172,14 +207,12 @@
 - **Validação estrutural pré-`Card`**: o JSON cru do Gemini precisa de
   validação estrutural ANTES de construir `Card` (8 dicas deve virar
   violação legível na revisão, não exceção do construtor).
-- **Sub-fases**: **5A — Catálogo** (entidade Baralho no domínio + Room com
-  migração, índice e formato JSON do baralho, tela de catálogo com
-  listar/baixar/atualizar e selos de estado, seleção múltipla de baralhos no
-  Setup, união determinística na partida; validação no Z Fold) ·
-  **5B — Fábrica interna** (pipeline Gemini → validação → revisão como
-  ferramenta do desenvolvedor; o formato — script/CLI ou app-side oculto —
-  é **decisão em aberto**, a fechar no início da 5B) · **5C — visão
-  comercial** (backlog — ver "Backlog").
+- **Sub-fases**: **5A — Catálogo, CONCLUÍDA** (validação física no Z Fold
+  pendente — checklist em `docs/BUGS.md`) · **5B — Fábrica interna**
+  (pipeline Gemini → validação → revisão como ferramenta do desenvolvedor;
+  o formato — script/CLI ou app-side oculto — é **decisão em aberto**, a
+  fechar no início da 5B) · **5C — visão comercial** (backlog — ver
+  "Backlog").
 
 ## Backlog
 

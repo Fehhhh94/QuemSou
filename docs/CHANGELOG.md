@@ -2,6 +2,49 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fase 5A parte 2 — UI do catálogo, download e Setup por baralhos (2026-07-09)
+
+Segunda metade da 5A: o catálogo vira produto visível. **Rede existe SOMENTE
+na tela de catálogo** — a partida segue 100% offline.
+
+- **Coleção** (complemento do formato da parte 1): `{ id, nome, icone }`
+  como metadado de agrupamento no índice e no baralho (`Colecao` no domínio,
+  sem regras próprias); Room migra 2→3 (colunas achatadas em `baralhos`);
+  `cards.json` v4 com "Cinema Clássico" 🎬 e "Mundo da Música" 🎸. O índice
+  também ganhou `tamanhoEmBytes` opcional (meta do card).
+- **Camada de rede**: OkHttp puro (única dependência nova; permissão
+  INTERNET nova) em `HttpFonteDoCatalogo`, com progresso por bytes e
+  cancelamento propagado; URL do índice em constante única
+  (`TODO_URL_CATALOGO` — aguarda o repositório `QuemSou-Baralhos`).
+  `RepositorioDoCatalogo` deriva NÃO BAIXADO / BAIXADO / ATUALIZAÇÃO
+  DISPONÍVEL cruzando índice × Room; **baralho inválido nunca entra no
+  Room**; o último índice bem-sucedido fica em cache em disco (offline =
+  último estado conhecido). `CardsImporter` virou cirúrgico: update do app
+  não apaga downloads. Testes só com fakes — nenhum bate na rede.
+- **UI em dois níveis**: rotas novas Catalogo e Colecao + entrada "Baralhos"
+  na Home. Coleções com filtro por categoria, pontinho âmbar de novidade e
+  card "Pedir um baralho"; baralhos com selo de ciclo de vida (verde/ciano),
+  meta e botão de 4 estados com progresso. Cards de baralho nunca são
+  listados. Offline: banner + baixados funcionais + não-baixados esmaecidos.
+- **"Pedir um baralho"**: formulário → texto estruturado → Sharesheet
+  (ACTION_SEND); nada é transmitido pelo app.
+- **Setup por baralhos**: seção "Baralhos da partida" (agrupada por coleção,
+  checkbox + mini-selo, "Selecionar todos", "Catálogo →", contador vivo da
+  união) substitui os chips de categoria; validação nova (nenhum baralho /
+  cards insuficientes). Todos os baralhos nascem selecionados — o antigo
+  "Livre" como padrão. **Antes/depois**: `CardCategory.LIVRE` e a ponte
+  `BaralhosEmbarcados` (parte 1) foram REMOVIDAS — categoria agora é só
+  metadado/filtro; a regra do validador "categoria nunca LIVRE" virou
+  "categoria desconhecida" no parser.
+- **catalogo-seed/** (fora do versionamento): índice + JSONs dos dois
+  baralhos embarcados + baralho de teste (6 cards, coleção 🧪,
+  EM_DESENVOLVIMENTO) + README de publicação, prontos para o repositório
+  `QuemSou-Baralhos`.
+- **164 testes verdes** (rede/cache/estados com fakes, Setup por baralhos,
+  coleção no parser; antigos adaptados). **Validação física no Z Fold:
+  PENDENTE — checklist em `docs/BUGS.md`** (migração 1→2→3 por update,
+  download real, modo avião, dobra durante download, união de 2+ baralhos).
+
 ## Fase 5A parte 1 — entidade Baralho e seleção por baralhos (2026-07-09)
 
 Primeira metade da 5A: domínio, Room e formato do catálogo. Sem UI nova —
