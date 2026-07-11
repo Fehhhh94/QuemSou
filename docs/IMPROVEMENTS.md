@@ -144,3 +144,24 @@ passa a ser a do desenvolvedor, nunca do usuário final.
   classes/funções do domínio (`Turno`, `PartidaViewModel.proximoTurno()`
   etc.) e o id do recurso de string permanecem inalterados — a mudança é
   só de linguagem voltada ao jogador.
+
+## 🟣 Formato v2 — cards com 15 dicas (avaliação futura)
+
+- **Status**: backlog registrado em 2026-07-11, sem previsão — **não
+  iniciar sem decisão explícita do Felipe**. Posição na fila: depois da
+  5B, nunca no meio de uma fase.
+- **Ideia**: aumentar de 10 para 15 dicas por card.
+- **Impacto mapeado** (registrado para não redescobrir depois):
+  - **Pontuação**: a fórmula "cabo de guerra" vira 16 − N; o turno passa a
+    distribuir 15 pontos (hoje 10). Muda o invariante, a
+    `CalculadoraDePontos`, os testes de pontuação e o `GAME_RULES.md`.
+    Balanceamento a reavaliar (acerto na dica 1 = 15 pontos; maior
+    variância de placar).
+  - **Grid**: layout 2×5 vira 3×5; revalidar no Z Fold dobrado e
+    desdobrado.
+  - **Pontos que assumem "10"**: construtor de `Card`, `ValidadorEditorial`
+    (mensagens numeradas 1–10), `ParserDoCatalogo`, `CATALOG_FORMAT.md`,
+    envelope do `cards.json`, sorteio de shots.
+  - **Conteúdo**: 60 cards embarcados × 5 dicas novas = 300 dicas novas.
+  - **Ciclo de vida**: baralhos `FINALIZADO` são imutáveis — a mudança
+    exige formato v2 + baralhos "Edição 2", nunca edição dos existentes.

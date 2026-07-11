@@ -131,3 +131,22 @@ desinstalar)** — é isso que exercita as migrações Room de verdade:
   lugar do `Column` avulso. Fica pronto para reuso caso alguma tela futura
   precise de uma barra de ação inferior fora do `content` do `Scaffold`.
 - **Validado no Z Fold físico**: SIM (fechamento da Fase 3, 2026-07-09).
+
+## 5. Wrapper do Gradle customizado (UTF-8) — armadilha ao regenerar
+
+- **Contexto**: `gradlew` e `gradlew.bat` estão **customizados** (commits
+  `53ceaaf` e `830158e`, 2026-07-11) para matar o mojibake das ferramentas
+  de validação no console do Windows, em duas camadas: flags UTF-8 no
+  `DEFAULT_JVM_OPTS` (`-Dfile.encoding`/`-Dstdout.encoding`/
+  `-Dstderr.encoding` — garantem os bytes corretos com qualquer `java`
+  resolvido pelo PATH) e, só no `gradlew.bat`, `chcp 65001` automático em
+  volta da execução do java, com restauração do codepage anterior e
+  preservação do exit code do Gradle via `cmd /c exit`.
+- **Armadilha**: regenerar o wrapper (`./gradlew wrapper ...`) sobrescreve
+  os dois scripts e as customizações **somem silenciosamente** — o mojibake
+  ("Γ£ô v├ílido" no lugar de "✓ válido") volta ao rodar as ferramentas num
+  console recém-aberto.
+- **Ação ao regenerar**: reaplicar as customizações (diff contra o commit
+  `830158e`) e revalidar com `./gradlew validarCatalogo` num PowerShell
+  recém-aberto (sem `chcp` manual), conferindo acentos e ✓/✗ íntegros na
+  saída.
