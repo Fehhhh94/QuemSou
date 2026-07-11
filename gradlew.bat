@@ -36,10 +36,11 @@ set APP_HOME=%DIRNAME%
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-@rem O cliente do wrapper roda no java.exe resolvido por JAVA_HOME/PATH, que
-@rem pode ser uma JVM antiga com charset padrão Cp1252 no Windows — sem isto,
-@rem ele corrompe acentos e ✓/✗ ao retransmitir a saída do daemon, mesmo
-@rem quando o daemon e as tasks já escrevem em UTF-8.
+@rem O cliente do wrapper roda no java.exe resolvido por JAVA_HOME/PATH (pode
+@rem ser um Java 8 antigo com charset padrão Cp1252) — estas flags garantem
+@rem que ele reemita em UTF-8, independente da JVM, a saída de texto que
+@rem recebe do daemon. A outra metade do problema (o codepage com que o
+@rem console EXIBE esses bytes) é tratada em :execute.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m" "-Dfile.encoding=UTF-8" "-Dstdout.encoding=UTF-8" "-Dstderr.encoding=UTF-8"
 
 @rem Find java.exe
@@ -78,7 +79,23 @@ set CLASSPATH=
 
 
 @rem Execute Gradle
+@rem Um console Windows recém-aberto decodifica stdout com o codepage OEM
+@rem (437/850), exibindo os bytes UTF-8 do build como lixo ("Γ£ô v├ílido" no
+@rem lugar de "✓ válido") — validado por captura do screen buffer com e sem
+@rem chcp 65001. Coloca o console em UTF-8 (65001) só durante o build e
+@rem restaura o codepage anterior ao final, preservando o exit code. O parse
+@rem pega o número após o ":" da saída do chcp, em qualquer idioma do Windows.
+set GRADLEW_CP_ANTERIOR=
+for /f "tokens=2 delims=:" %%c in ('chcp.com 2^>nul') do set GRADLEW_CP_ANTERIOR=%%c
+if defined GRADLEW_CP_ANTERIOR set GRADLEW_CP_ANTERIOR=%GRADLEW_CP_ANTERIOR: =%
+if defined GRADLEW_CP_ANTERIOR set GRADLEW_CP_ANTERIOR=%GRADLEW_CP_ANTERIOR:.=%
+if defined GRADLEW_CP_ANTERIOR chcp.com 65001 >nul
+
 "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %*
+
+set GRADLEW_EXIT_CODE=%ERRORLEVEL%
+if defined GRADLEW_CP_ANTERIOR chcp.com %GRADLEW_CP_ANTERIOR% >nul
+cmd /c exit %GRADLEW_EXIT_CODE%
 
 :end
 @rem End local scope for the variables with windows NT shell
