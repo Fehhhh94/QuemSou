@@ -1,6 +1,6 @@
 # QuemSou — Guia do projeto para o Claude
 
-> **v16 (2026-07-09).** Este arquivo descreve apenas o **estado atual** do
+> **v17 (2026-07-11).** Este arquivo descreve apenas o **estado atual** do
 > projeto. Histórico de versões, decisões substituídas e o "porquê" das
 > mudanças vivem em `docs/CHANGELOG.md` — não aqui.
 
@@ -20,6 +20,14 @@
 - Editar cards = alterar `app/src/main/assets/cards.json` **e incrementar
   `version`**, senão a mudança não chega ao banco Room (espelho recarregado
   pelo `CardsImporter`).
+- **Hierarquia de memória**: em divergência entre a memória persistente do
+  Claude Code e os docs versionados, **os docs mandam** — corrigir a
+  memória imediatamente, nunca defendê-la.
+- **Memória persistente guarda só estado operacional**: fila de push,
+  pendências entre sessões, armadilhas de ambiente (ex.: wrapper do Gradle
+  customizado — `docs/BUGS.md` seção 5). **Nunca memorizar** regras do
+  jogo, arquitetura ou decisões de produto — isso tem dono nos docs; a
+  memória no máximo aponta para o doc, nunca duplica o conteúdo.
 
 ## Visão geral
 

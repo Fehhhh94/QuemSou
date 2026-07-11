@@ -2,6 +2,14 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-07-11 — CLAUDE.md v17
+- Novas regras inegociáveis de **memória persistente**: em divergência entre
+  a memória do Claude Code e os docs versionados, os docs mandam (a memória
+  é corrigida imediatamente, nunca defendida); a memória guarda só estado
+  operacional (fila de push, pendências entre sessões, armadilhas de
+  ambiente) — regras do jogo, arquitetura e decisões de produto têm dono nos
+  docs, e a memória no máximo aponta para eles, nunca duplica o conteúdo.
+
 ## Fase 5B parte 1 — validador de catálogo como ferramenta de linha de comando (2026-07-11)
 
 Primeira entrega da fábrica interna: uma régua executável para o agente
