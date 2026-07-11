@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.testing.Test
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -96,4 +99,41 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+// Fábrica interna (5B parte 1) — validador de catálogo como ferramenta de
+// linha de comando, reusando o domínio existente sem duplicar regra
+// nenhuma. Os pontos de entrada vivem em
+// `src/test/kotlin/.../ferramentas/catalogo/` (não em `main`) de propósito:
+// reusam o classpath já resolvido de `testDebugUnitTest` (JVM pura — o
+// domínio + kotlinx.serialization, sem Android em tempo de execução) e
+// nunca vão parar no APK.
+tasks.register<JavaExec>("validarBaralho") {
+    group = "catalogo"
+    description = "Valida um JSON de baralho do catálogo. Uso: -Parquivo=<caminho>"
+    dependsOn("compileDebugUnitTestKotlin", "processDebugUnitTestJavaRes", "transformDebugUnitTestClassesWithAsm")
+    mainClass.set("com.quemsou.app.ferramentas.catalogo.ValidarBaralhoKt")
+    // Sem isto, o processo filho usa a codificação padrão do console do
+    // Windows e imprime "á"/"✓" como lixo — as mensagens são em português.
+    jvmArgs("-Dstdout.encoding=UTF-8", "-Dstderr.encoding=UTF-8", "-Dfile.encoding=UTF-8")
+    doFirst {
+        val arquivo = project.findProperty("arquivo") as String?
+            ?: throw GradleException("Uso: ./gradlew validarBaralho -Parquivo=<caminho do JSON>")
+        args = listOf(arquivo)
+        classpath = tasks.named<Test>("testDebugUnitTest").get().classpath
+    }
+}
+
+tasks.register<JavaExec>("validarCatalogo") {
+    group = "catalogo"
+    description = "Valida indice.json + baralhos/ + consistência cruzada. Uso: -Ppasta=<raiz>"
+    dependsOn("compileDebugUnitTestKotlin", "processDebugUnitTestJavaRes", "transformDebugUnitTestClassesWithAsm")
+    mainClass.set("com.quemsou.app.ferramentas.catalogo.ValidarCatalogoKt")
+    jvmArgs("-Dstdout.encoding=UTF-8", "-Dstderr.encoding=UTF-8", "-Dfile.encoding=UTF-8")
+    doFirst {
+        val pasta = project.findProperty("pasta") as String?
+            ?: throw GradleException("Uso: ./gradlew validarCatalogo -Ppasta=<raiz do catálogo>")
+        args = listOf(pasta)
+        classpath = tasks.named<Test>("testDebugUnitTest").get().classpath
+    }
 }

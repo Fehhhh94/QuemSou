@@ -46,12 +46,20 @@
   (`ValidadorEditorial`, régua da fábrica interna); **5A concluída**
   (2026-07-09 — parte 1: entidade Baralho + Room + formato; parte 2: UI do
   catálogo em dois níveis, download com cache do índice, "Pedir um baralho"
-  e Setup por baralhos). **Pendente da 5A: validação física no Z Fold**
-  (checklist em `docs/BUGS.md`) e **trocar o `TODO_URL_CATALOGO`**
-  (`HttpFonteDoCatalogo.URL_DO_INDICE`) pela URL real após criar o
-  repositório `Fehhhh94/QuemSou-Baralhos` e publicar o conteúdo de
-  `catalogo-seed/`. **Próximo passo: 5B — fábrica interna** (formato
-  script/CLI vs app-side oculto é decisão em aberto).
+  e Setup por baralhos). Repositório `Fehhhh94/QuemSou-Baralhos` criado e
+  publicado; `HttpFonteDoCatalogo.URL_DO_INDICE` já aponta para a URL real
+  (o `TODO_URL_CATALOGO` foi resolvido). **Pendente da 5A: fechar a
+  validação física completa no Z Fold** (checklist em `docs/BUGS.md`) —
+  parte dela já rodou, achados registrados no mesmo arquivo.
+  **5B — fábrica interna EM ANDAMENTO**: **parte 1 concluída** — validador
+  de catálogo como ferramenta de linha de comando (`./gradlew
+  validarBaralho -Parquivo=<caminho>` e `./gradlew validarCatalogo
+  -Ppasta=<raiz>`; JVM pura, reusa `ParserDoCatalogo`/`ValidadorDeBaralho`/
+  `ValidadorEditorial` sem duplicar regra nenhuma — checa também a
+  consistência cruzada índice↔baralho, versão e contagem de cards).
+  **Próximo passo: 5B parte 2 — `CLAUDE.md` da fábrica no repositório
+  `QuemSou-Baralhos`** (regras editoriais + ritual de publicação + o
+  validador como régua).
 - **Fase 4 (Nearby Connections): no backlog**, sem previsão — ver "Backlog".
 - Única decisão de produto em aberto: **nome definitivo do app** ("QuemSou"
   é provisório em código, pacote e strings).
@@ -208,11 +216,12 @@
   validação estrutural ANTES de construir `Card` (8 dicas deve virar
   violação legível na revisão, não exceção do construtor).
 - **Sub-fases**: **5A — Catálogo, CONCLUÍDA** (validação física no Z Fold
-  pendente — checklist em `docs/BUGS.md`) · **5B — Fábrica interna**
-  (pipeline Gemini → validação → revisão como ferramenta do desenvolvedor;
-  o formato — script/CLI ou app-side oculto — é **decisão em aberto**, a
-  fechar no início da 5B) · **5C — visão comercial** (backlog — ver
-  "Backlog").
+  pendente — checklist em `docs/BUGS.md`) · **5B — Fábrica interna, EM
+  ANDAMENTO** (Claude Code opera no repositório `QuemSou-Baralhos`; decisão
+  de formato fechada — não é mais pipeline Gemini dentro do app: **parte 1
+  concluída** é a régua executável — `validarBaralho`/`validarCatalogo`,
+  tasks Gradle de linha de comando, JVM pura — que a fábrica usa antes da
+  revisão humana) · **5C — visão comercial** (backlog — ver "Backlog").
 
 ## Backlog
 

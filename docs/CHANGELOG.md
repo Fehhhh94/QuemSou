@@ -2,6 +2,48 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fase 5B parte 1 — validador de catálogo como ferramenta de linha de comando (2026-07-11)
+
+Primeira entrega da fábrica interna: uma régua executável para o agente
+(Claude Code, operando no repositório `QuemSou-Baralhos`) validar o
+trabalho antes da revisão humana — fecha a decisão em aberto de formato da
+5B (não é mais pipeline Gemini no app; é uma ferramenta de linha de comando
+que roda no repositório de conteúdo).
+
+- **`./gradlew validarBaralho -Parquivo=<caminho>`**: valida um único JSON
+  de baralho — estrutura + regras de conjunto (`ParserDoCatalogo`, que já
+  embute o `ValidadorDeBaralho`: teto de 100 cards, ids únicos, categoria
+  herdada) e, só se a estrutura for válida, as regras editoriais por card
+  (`ValidadorEditorial` — a única regra que o parser não cobre, já que
+  resposta/dica vazias já são violação estrutural). Saída legível em
+  português com origem de cada violação; exit code ≠ 0 se houver qualquer
+  violação.
+- **`./gradlew validarCatalogo -Ppasta=<raiz>`**: valida o `indice.json` +
+  todos os baralhos de `baralhos/` (mesma disciplina do comando acima) +
+  **consistência cruzada** índice↔baralho: versão declarada == versão do
+  arquivo, quantidade declarada == quantidade real, todo id do índice tem
+  arquivo `<id>.json` e vice-versa (nenhum órfão). Este último check é
+  exatamente o que teria pego o índice bumpado sem o arquivo do baralho
+  acompanhar — achado real da validação física da 5A (`docs/BUGS.md`).
+- **Sem módulo novo**: o projeto continua de módulo único (`:app`); os
+  pontos de entrada (`fun main`) vivem em
+  `app/src/test/kotlin/.../ferramentas/catalogo/` de propósito — reusam o
+  classpath já resolvido de `testDebugUnitTest` (JVM pura: o domínio +
+  kotlinx.serialization, sem Android em tempo de execução) sem nunca ir
+  parar no APK. As duas tasks Gradle são `JavaExec` com esse mesmo
+  classpath.
+- **Zero regra duplicada**: tudo delega a `ParserDoCatalogo`,
+  `ValidadorDeBaralho` e `ValidadorEditorial` já existentes — mesmas regras
+  usadas pelo app e pelo importador de assets.
+- **164→174 testes verdes** (10 novos, `NucleoDeValidacaoCliTest`: baralho
+  válido, arquivo inexistente, violação estrutural, dica que nomeia a
+  resposta, catálogo consistente, versão/quantidade divergente, entrada sem
+  arquivo, arquivo órfão, índice ausente).
+- **Doc**: `docs/CLAUDE.md` (Fase 5 — estado atual e arquitetura) registra
+  os dois comandos e fecha a decisão de formato da 5B; aproveitado para
+  corrigir uma referência desatualizada ao `TODO_URL_CATALOGO` (já
+  resolvido desde a publicação do repositório `QuemSou-Baralhos`).
+
 ## Fase 5A parte 2 — UI do catálogo, download e Setup por baralhos (2026-07-09)
 
 Segunda metade da 5A: o catálogo vira produto visível. **Rede existe SOMENTE
