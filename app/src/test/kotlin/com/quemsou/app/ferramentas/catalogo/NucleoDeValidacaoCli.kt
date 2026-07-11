@@ -7,6 +7,7 @@ import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.validacao.ResultadoValidacao
 import com.quemsou.app.domain.validacao.ValidadorEditorial
 import java.io.File
+import java.io.PrintStream
 import kotlin.system.exitProcess
 
 /**
@@ -146,4 +147,16 @@ fun validarPastaDoCatalogo(raiz: File): ResultadoDoCatalogo {
 fun falharComUso(mensagem: String): Nothing {
     System.err.println(mensagem)
     exitProcess(2)
+}
+
+/**
+ * Substitui `System.out`/`System.err` por streams que gravam em UTF-8 (não o
+ * charset padrão da plataforma). Sem isto, o `println` do Kotlin corrompe os
+ * acentos e os símbolos ✓/✗ no console do Windows (Cp1252) mesmo com os
+ * jvmArgs de encoding da task Gradle — as duas frentes juntas deixam a
+ * ferramenta correta mesmo se alguém rodar o jar fora do Gradle.
+ */
+fun forcarUtf8NoConsole() {
+    System.setOut(PrintStream(System.out, true, Charsets.UTF_8))
+    System.setErr(PrintStream(System.err, true, Charsets.UTF_8))
 }

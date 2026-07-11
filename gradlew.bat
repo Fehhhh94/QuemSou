@@ -36,7 +36,11 @@ set APP_HOME=%DIRNAME%
 for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+@rem O cliente do wrapper roda no java.exe resolvido por JAVA_HOME/PATH, que
+@rem pode ser uma JVM antiga com charset padrão Cp1252 no Windows — sem isto,
+@rem ele corrompe acentos e ✓/✗ ao retransmitir a saída do daemon, mesmo
+@rem quando o daemon e as tasks já escrevem em UTF-8.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m" "-Dfile.encoding=UTF-8" "-Dstdout.encoding=UTF-8" "-Dstderr.encoding=UTF-8"
 
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome

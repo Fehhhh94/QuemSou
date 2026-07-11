@@ -10,6 +10,7 @@ import kotlin.system.exitProcess
  * Uso: `./gradlew validarBaralho -Parquivo=<caminho do JSON>`
  */
 fun main(args: Array<String>) {
+    forcarUtf8NoConsole()
     val caminho = args.getOrNull(0)
         ?: falharComUso("Uso: ./gradlew validarBaralho -Parquivo=<caminho do JSON>")
     val resultado = validarArquivoDeBaralho(File(caminho))

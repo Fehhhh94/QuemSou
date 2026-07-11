@@ -12,6 +12,7 @@ import kotlin.system.exitProcess
  * Uso: `./gradlew validarCatalogo -Ppasta=<raiz do checkout do catálogo>`
  */
 fun main(args: Array<String>) {
+    forcarUtf8NoConsole()
     val pasta = args.getOrNull(0)
         ?: falharComUso("Uso: ./gradlew validarCatalogo -Ppasta=<raiz do catálogo>")
     val raiz = File(pasta)
