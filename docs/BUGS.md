@@ -41,7 +41,29 @@ desinstalar)** — é isso que exercita as migrações Room de verdade:
 9. **Pedir um baralho**: preencher tema e enviar — o Sharesheet abre com o
    texto estruturado.
 
-## 1. Validação prematura na tela de Configuração
+## 1. Motivo de bloqueio "cards insuficientes" — achado da validação física da 5A (revisão)
+
+- **Sintoma relatado**: no Z Fold, selecionando apenas o baralho de teste (6
+  cards) no Setup, o botão "Começar partida" ficava corretamente
+  desabilitado, mas nenhum motivo visível aparecia — o usuário não sabia por
+  que não podia seguir.
+- **Investigação**: `SetupViewModel.kt` e `SetupScreen.kt` já implementam
+  exatamente esse comportamento. `motivoDoBloqueio`/`motivoDoBloqueioVisivel`
+  cobrem `NENHUM_BARALHO` e `CARDS_INSUFICIENTES` com exibição **imediata**
+  (sem o gate de interação que existe só para `NOMES_VAZIOS`), exibidas como
+  `Text` de erro no `bottomBar` via `BarraDeAcaoInferior`, com as strings
+  `setup_bloqueio_nenhum_baralho` e `setup_bloqueio_cards_insuficientes` já
+  cadastradas. O teste `` `uniao com menos cards que rodadas bloqueia` ``
+  (`SetupViewModelTest.kt`) já cobre o cenário e passa.
+- **Conclusão**: nenhuma mudança de código foi necessária — é exatamente o
+  comportamento que o item 6 do checklist de validação física já descreve
+  como esperado. O achado deve ter vindo de um APK instalado antes deste
+  código existir (build anterior ao commit que trouxe o Setup por
+  baralhos).
+- **Ação pendente**: revalidar no Z Fold físico com o **APK atual** antes de
+  marcar o item 6 do checklist como concluído.
+
+## 2. Validação prematura na tela de Configuração
 
 - **Sintoma**: a mensagem "Dê um nome a todos os jogadores" aparecia assim
   que a tela de Configuração abria, antes de qualquer interação do usuário —
@@ -64,7 +86,7 @@ desinstalar)** — é isso que exercita as migrações Room de verdade:
   não contar o evento de foco inicial da composição como "toque").
 - **Validado no Z Fold físico**: SIM (fechamento da Fase 3, 2026-07-09).
 
-## 2. Categoria "Livre" ausente na tela de Configuração
+## 3. Categoria "Livre" ausente na tela de Configuração
 
 - **Sintoma**: só apareciam os chips "Personagem de filme" e "Mundo da
   música"; havia espaço vazio abaixo deles. A especificação define 3 opções
@@ -86,7 +108,7 @@ desinstalar)** — é isso que exercita as migrações Room de verdade:
   existente.
 - **Validado no Z Fold físico**: SIM (fechamento da Fase 3, 2026-07-09).
 
-## 3. Botão "Começar partida" cortado pela barra de navegação do sistema
+## 4. Botão "Começar partida" cortado pela barra de navegação do sistema
 
 - **Sintoma**: no Z Fold (Android 16, edge-to-edge via `enableEdgeToEdge()`
   em `MainActivity`), o botão "Começar partida" da tela de Configuração
