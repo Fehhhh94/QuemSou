@@ -11,6 +11,8 @@ import com.quemsou.app.data.catalogo.ArquivoCacheDoIndice
 import com.quemsou.app.data.catalogo.CacheDoIndice
 import com.quemsou.app.data.catalogo.FonteDoCatalogo
 import com.quemsou.app.data.catalogo.HttpFonteDoCatalogo
+import com.quemsou.app.data.feedback.DataStoreModoDevFeedbackStore
+import com.quemsou.app.data.feedback.ModoDevFeedbackStore
 import com.quemsou.app.data.importer.AssetsFonteDeCardsJson
 import com.quemsou.app.data.importer.CardsVersionStore
 import com.quemsou.app.data.importer.DataStoreCardsVersionStore
@@ -51,6 +53,9 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindCacheDoIndice(impl: ArquivoCacheDoIndice): CacheDoIndice
+
+    @Binds
+    abstract fun bindModoDevFeedbackStore(impl: DataStoreModoDevFeedbackStore): ModoDevFeedbackStore
 
     companion object {
 
