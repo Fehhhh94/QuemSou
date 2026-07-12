@@ -1,6 +1,6 @@
 # QuemSou — Guia do projeto para o Claude
 
-> **v18 (2026-07-11).** Este arquivo descreve apenas o **estado atual** do
+> **v19 (2026-07-11).** Este arquivo descreve apenas o **estado atual** do
 > projeto. Histórico de versões, decisões substituídas e o "porquê" das
 > mudanças vivem em `docs/CHANGELOG.md` — não aqui.
 
@@ -232,10 +232,9 @@
   fábrica. Nada disso toca `domain/` — vive em `data/feedback/`,
   `data/local/` e `presentation/`. Regras:
   - **Ativação**: preferência `modoDevFeedback` (DataStore, padrão false),
-    alternada SÓ por 7 toques no título da Home (easter egg padrão
-    Android), com Snackbar de confirmação. Com o modo desligado, **nenhum
-    composable do feedback entra na composição** — o jogador comum nunca vê
-    nada.
+    alternada SÓ por **toque longo no título da Home** (easter egg), com
+    Snackbar de confirmação. Com o modo desligado, **nenhum composable do
+    feedback entra na composição** — o jogador comum nunca vê nada.
   - **Widget no Anúncio** (Acerto e Queimado, igual): entre o bloco da
     resposta e o botão de avançar, identidade "andaime" — borda TRACEJADA
     violeta (tokens `DevVioleta`/`DevVioletaEscuro`, claro/escuro), selo

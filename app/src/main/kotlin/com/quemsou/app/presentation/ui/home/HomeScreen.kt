@@ -1,7 +1,9 @@
 package com.quemsou.app.presentation.ui.home
 
 import android.content.Intent
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,15 +26,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,9 +49,9 @@ import kotlinx.coroutines.launch
  * baralhos, ou (fase 4) entrar em uma partida por código via Nearby
  * Connections — por ora desabilitado.
  *
- * O título esconde o easter egg do **modo dev de feedback** (7 toques, padrão
- * Android de opções de desenvolvedor); a alternância é confirmada por
- * Snackbar. Com o modo ligado e registros no Room, aparece o item discreto
+ * O título esconde o easter egg do **modo dev de feedback** (toque longo);
+ * a alternância é confirmada por Snackbar. Com o modo ligado e registros no
+ * Room, aparece o item discreto
  * "Exportar feedback (N)" (Sharesheet, padrão "Pedir um baralho") + "Limpar
  * feedback" com confirmação. Não há nenhuma outra entrada de UI para o modo.
  */
@@ -85,7 +84,7 @@ fun HomeScreen(
         onCreateMatch = onCreateMatch,
         onAbrirCatalogo = onAbrirCatalogo,
         onJoinWithCode = onJoinWithCode,
-        onSeteToquesNoTitulo = viewModel::alternarModoDev,
+        onToqueLongoNoTitulo = viewModel::alternarModoDev,
         onExportarFeedback = {
             // Mesmo padrão do "Pedir um baralho": ACTION_SEND text/plain — o
             // JSON sai pelo app que o dev escolher; nada é transmitido daqui.
@@ -110,7 +109,7 @@ private fun HomeContent(
     onCreateMatch: () -> Unit,
     onAbrirCatalogo: () -> Unit,
     onJoinWithCode: () -> Unit,
-    onSeteToquesNoTitulo: () -> Unit,
+    onToqueLongoNoTitulo: () -> Unit,
     onExportarFeedback: () -> Unit,
     onLimparFeedback: () -> Unit,
 ) {
@@ -126,7 +125,7 @@ private fun HomeContent(
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            TituloComEasterEgg(onSeteToques = onSeteToquesNoTitulo)
+            TituloComEasterEgg(onToqueLongo = onToqueLongoNoTitulo)
             Text(
                 text = stringResource(id = R.string.home_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
@@ -243,35 +242,29 @@ private fun ItemDevDeFeedback(
 }
 
 /**
- * Título da Home com o contador escondido de 7 toques (easter egg do modo dev
- * de feedback). Toques com mais de 2 s de intervalo reiniciam a contagem;
- * `detectTapGestures` (sem `clickable`) para não ganhar ripple nem semântica
- * de botão — o título continua parecendo um título.
+ * Título da Home com o easter egg do modo dev de feedback: **toque longo**
+ * alterna o modo (os 7 toques da versão anterior não ativavam no Z Fold —
+ * achado da validação física, `docs/BUGS.md`). Sem `indication` para o
+ * título não ganhar ripple no toque comum; o `padding` vem DEPOIS do
+ * `combinedClickable` de propósito — infla a área de toque para além do
+ * texto sem mudar a posição visual do título.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TituloComEasterEgg(onSeteToques: () -> Unit) {
-    var toques by remember { mutableIntStateOf(0) }
-    var ultimoToqueEmMs by remember { mutableLongStateOf(0L) }
-
+private fun TituloComEasterEgg(onToqueLongo: () -> Unit) {
     Text(
         text = stringResource(id = R.string.home_title),
         style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.pointerInput(Unit) {
-            detectTapGestures {
-                val agora = System.currentTimeMillis()
-                toques = if (agora - ultimoToqueEmMs > JANELA_ENTRE_TOQUES_MS) 1 else toques + 1
-                ultimoToqueEmMs = agora
-                if (toques == TOQUES_PARA_ALTERNAR) {
-                    toques = 0
-                    onSeteToques()
-                }
-            }
-        },
+        modifier = Modifier
+            .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onLongClick = onToqueLongo,
+                onClick = {},
+            )
+            .padding(16.dp),
     )
 }
-
-private const val TOQUES_PARA_ALTERNAR = 7
-private const val JANELA_ENTRE_TOQUES_MS = 2_000L
 
 @Preview(showBackground = true)
 @Composable
@@ -284,7 +277,7 @@ private fun HomeScreenPreview() {
             onCreateMatch = {},
             onAbrirCatalogo = {},
             onJoinWithCode = {},
-            onSeteToquesNoTitulo = {},
+            onToqueLongoNoTitulo = {},
             onExportarFeedback = {},
             onLimparFeedback = {},
         )

@@ -2,6 +2,16 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-07-11 — CLAUDE.md v19
+- **Ativação do modo dev de feedback**: **antes**, 7 toques no título da
+  Home (easter egg padrão Android, contador com janela de 2 s no
+  `detectTapGestures`); **depois**, **toque longo** no título
+  (`combinedClickable` com `onLongClick`, sem ripple, área de toque
+  inflada com padding). Motivo: achado da validação física — os 7 toques
+  não ativavam o modo no Z Fold (registro em `docs/BUGS.md` seção 6);
+  toque longo é gesto único, sem contador nem janela de tempo. O Snackbar
+  de confirmação permanece o mesmo.
+
 ## Fase 5B parte 2 (lado app) — feedback de cards dev-only na partida (2026-07-11)
 
 Ferramenta de desenvolvedor, não feature: avaliar cards durante partidas

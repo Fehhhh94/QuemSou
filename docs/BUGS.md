@@ -43,12 +43,12 @@ desinstalar)** — é isso que exercita as migrações Room de verdade:
 10. **Migração Room 3→4 por update** (5B parte 2): instalar o APK novo por
     cima, abrir o app e jogar — sem crash na abertura; baralhos baixados e
     o histórico de feedback anterior (se houver) preservados.
-11. **Fluxo completo de feedback em partida real** (5B parte 2): 7 toques
-    no título da Home ligam o modo dev (Snackbar); no Anúncio (acerto E
-    queimado) o widget violeta tracejado aparece; votar/desmarcar; comentar
-    com o teclado aberto mantém a resposta visível; "Continuar" grava;
-    pular (sem voto) não grava; com o modo desligado o widget some e a
-    partida fica idêntica à de sempre.
+11. **Fluxo completo de feedback em partida real** (5B parte 2): toque
+    longo no título da Home liga o modo dev (Snackbar); no Anúncio (acerto
+    E queimado) o widget violeta tracejado aparece; votar/desmarcar;
+    comentar com o teclado aberto mantém a resposta visível; "Continuar"
+    grava; pular (sem voto) não grava; com o modo desligado o widget some
+    e a partida fica idêntica à de sempre.
 12. **Export do feedback** (5B parte 2): "Exportar feedback (N)" na Home
     (N bate com os votos dados) abre o Sharesheet com JSON
     `quemsou-feedback` válido (respostas presentes via join); "Limpar
@@ -163,3 +163,21 @@ desinstalar)** — é isso que exercita as migrações Room de verdade:
   `830158e`) e revalidar com `./gradlew validarCatalogo` num PowerShell
   recém-aberto (sem `chcp` manual), conferindo acentos e ✓/✗ íntegros na
   saída.
+
+## 6. Easter egg de 7 toques não ativava o modo dev no Z Fold
+
+- **Sintoma**: na validação física do fluxo de feedback (item 11 do
+  checklist acima), 7 toques no título da Home não ligavam o modo dev de
+  feedback no Z Fold — nenhum Snackbar, nenhuma reação.
+- **Investigação**: a causa raiz do contador não foi depurada a fundo — a
+  implementação usava `detectTapGestures` com contador e janela de 2 s
+  entre toques, e ferramenta de dev não justifica sessão de depuração de
+  gesto no aparelho. Decisão pragmática: **trocar o mecanismo** por um
+  gesto único e sem estado.
+- **Correção**: toque longo no título (`combinedClickable` com
+  `onLongClick`, `indication = null` para o título não ganhar ripple no
+  toque comum, padding depois do clickable inflando a área de toque). O
+  contador, a janela de tempo e as constantes dos 7 toques foram removidos
+  por inteiro. Snackbar de confirmação inalterado.
+- **Validado no Z Fold físico**: PENDENTE — revalidar dentro do item 11 do
+  checklist.
