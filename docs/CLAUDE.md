@@ -1,6 +1,6 @@
 # QuemSou — Guia do projeto para o Claude
 
-> **v20 (2026-07-12).** Este arquivo descreve apenas o **estado atual** do
+> **v21 (2026-07-12).** Este arquivo descreve apenas o **estado atual** do
 > projeto. Histórico de versões, decisões substituídas e o "porquê" das
 > mudanças vivem em `docs/CHANGELOG.md` — não aqui.
 
@@ -173,6 +173,10 @@
 - Componentes reutilizáveis em `presentation/ui/components/` (`ChipTipoDeCard`,
   `AvatarInicial`, `ChipDeJogador`, `RodapeDePontos`, `ConfirmDialog`,
   `BarraDeAcaoInferior`). Tema Material 3 claro/escuro.
+- **Versão visível**: o rodapé da Home exibe o `versionName` do build
+  (fonte única: `app/build.gradle.kts`; builds debug ganham sufixo
+  `MMdd.HHmm` por build) — identificação imediata de build defasado no
+  aparelho.
 - Voltar em qualquer fase (`BackHandler`) abre confirmação de abandono;
   confirmar sai para Home.
 - Setup: agrupamento opcional via toggle "Jogar em times" + chip cíclico por
@@ -308,6 +312,11 @@
 
 - Planejar/decidir no Claude.ai → gerar prompt → executar no Claude Code →
   validar no aparelho → voltar ao Claude.ai para o veredito.
+- **Visível-primeiro**: toda feature nova nasce com confirmação visual
+  imediata na UI; mecanismo escondido (gesto, easter egg) só como
+  refinamento posterior de algo já validado visível. Ao validar no
+  aparelho, conferir o `versionName` no rodapé da Home antes de confiar em
+  qualquer achado — build defasado não pode mascarar resultado.
 - Mockups visuais (HTML/SVG) aprovados **antes** de qualquer código de tela.
 - KDoc e commits em português, formato `tipo: descrição`.
 - Antes de sugerir push manual: conferir `git log origin/main..HEAD`.

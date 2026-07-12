@@ -13,6 +13,9 @@
     <string name="home_how_to_play_dialog_body">Um jogador é o leitor da rodada e lê as dicas do card para os demais, os adivinhadores. Cada card tem 10 dicas, mas o grid de 1 a 10 é escolhido às cegas — a posição não indica se a dica é fácil ou difícil.\n\nA cada dica revelada, quem escolhe a próxima posição gira entre os adivinhadores. Quem acertar com N dicas usadas ganha 11 − N pontos: acertar logo na 1ª dica vale 10 pontos, na 10ª vale só 1. Se o leitor pontua (regra da configuração), ele ganha 1 ponto por dica revelada sem acerto; se ninguém acertar até a 10ª dica, ou os jogadores desistirem, o card é queimado e o leitor leva 10 pontos.\n\nCada jogador pode jogar por si ou agrupado em time — dá até para misturar times e jogadores solo na mesma partida. Os pontos de quem pontua vão para o seu grupo, e o placar final soma por grupo. No fim das rodadas, o grupo com mais pontos vence — empate é declarado, sem desempate.</string>
     <string name="home_how_to_play_dialog_close">Entendi</string>
 
+    <!-- Home — versão do build no rodapé -->
+    <string name="home_versao">v%1$s</string>
+
     <!-- Home — modo dev de feedback (Switch visível no rodapé) -->
     <string name="home_dev_switch">Modo dev</string>
     <string name="home_dev_snackbar_ligado">Modo dev de feedback ativado</string>

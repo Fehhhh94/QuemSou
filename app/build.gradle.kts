@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+import java.util.Date
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.testing.Test
 
@@ -19,12 +21,23 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        // Fonte única da versão exibida no rodapé da Home. O sufixo -dev
+        // marca a fase pré-lançamento; some quando houver release de verdade.
+        versionName = "0.5.0-dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            // Sufixo que muda a cada build (MMdd.HHmm): o rodapé da Home
+            // denuncia build local defasado no aparelho — na validação
+            // física da 5B parte 2, um APK antigo passou despercebido
+            // porque a tela não dizia qual build estava rodando. Sem
+            // configuration cache no projeto, o custo é só regenerar o
+            // BuildConfig/manifest do debug.
+            versionNameSuffix = "-" + SimpleDateFormat("MMdd.HHmm").format(Date())
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -45,6 +58,8 @@ android {
 
     buildFeatures {
         compose = true
+        // BuildConfig.VERSION_NAME alimenta o rodapé da Home.
+        buildConfig = true
     }
 
     packaging {

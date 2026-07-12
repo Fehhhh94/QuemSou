@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.quemsou.app.BuildConfig
 import com.quemsou.app.R
 import com.quemsou.app.presentation.ui.components.ConfirmDialog
 import com.quemsou.app.presentation.ui.theme.DevVioleta
@@ -80,6 +81,7 @@ fun HomeScreen(
 
     HomeContent(
         snackbarHostState = snackbarHostState,
+        versaoDoBuild = BuildConfig.VERSION_NAME,
         modoDev = modoDev,
         exportarVisivel = exportarVisivel,
         quantidadeDeFeedback = quantidadeDeFeedback,
@@ -106,6 +108,7 @@ fun HomeScreen(
 @Composable
 private fun HomeContent(
     snackbarHostState: SnackbarHostState,
+    versaoDoBuild: String,
     modoDev: Boolean,
     exportarVisivel: Boolean,
     quantidadeDeFeedback: Int,
@@ -188,6 +191,17 @@ private fun HomeContent(
                 onAlternarModoDev = onAlternarModoDev,
                 onExportar = onExportarFeedback,
                 onLimpar = { confirmarLimpeza = true },
+            )
+            // Identificação de build sempre visível (lição da validação
+            // física: um APK defasado passou despercebido porque a tela não
+            // dizia qual build estava rodando). Debug ganha sufixo por build.
+            Text(
+                text = stringResource(R.string.home_versao, versaoDoBuild),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 4.dp),
             )
         }
     }
@@ -285,6 +299,7 @@ private fun HomeScreenPreview() {
     QuemSouTheme {
         HomeContent(
             snackbarHostState = SnackbarHostState(),
+            versaoDoBuild = "0.5.0-dev",
             modoDev = false,
             exportarVisivel = false,
             quantidadeDeFeedback = 0,

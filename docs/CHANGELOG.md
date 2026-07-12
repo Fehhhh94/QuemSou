@@ -2,6 +2,18 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-07-12 — CLAUDE.md v21
+- **Versão visível no rodapé da Home** + regra **"visível-primeiro"** no
+  fluxo de trabalho. Motivo: na validação física da 5B parte 2, um build
+  defasado no aparelho passou despercebido porque a feature nova (ativação
+  do modo dev) era invisível — olhando a tela, não dava para distinguir
+  "não implementado" de "build antigo". Agora: `versionName` no rodapé
+  (`0.5.0-dev`, fonte única no `build.gradle.kts`; debug ganha sufixo
+  `MMdd.HHmm` que muda a cada build, barato porque o projeto não usa
+  configuration cache), e toda feature nova nasce com confirmação visual
+  imediata — gesto/easter egg só como refinamento de algo já validado
+  visível. `buildConfig = true` ligado para o `BuildConfig.VERSION_NAME`.
+
 ### 2026-07-12 — CLAUDE.md v20
 - **Ativação do modo dev de feedback**: **antes**, toque longo no título da
   Home (v19 — nunca chegou a ser validado fisicamente); **depois**, Switch
