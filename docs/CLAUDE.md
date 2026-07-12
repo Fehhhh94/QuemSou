@@ -1,6 +1,6 @@
 # QuemSou — Guia do projeto para o Claude
 
-> **v22 (2026-07-12).** Este arquivo descreve apenas o **estado atual** do
+> **v23 (2026-07-12).** Este arquivo descreve apenas o **estado atual** do
 > projeto. Histórico de versões, decisões substituídas e o "porquê" das
 > mudanças vivem em `docs/CHANGELOG.md` — não aqui.
 
@@ -67,14 +67,19 @@
   `ValidadorEditorial` sem duplicar regra nenhuma — checa também a
   consistência cruzada índice↔baralho, versão e contagem de cards).
   **Parte 2 (lado app) concluída** (2026-07-11) e **validada fisicamente
-  no Z Fold** (2026-07-12: fluxo de feedback, export, limpeza,
-  invisibilidade com o modo desligado e migração Room 3→4 por update).
-  Única pendência de validação restante: a **revalidação ritual da
-  restauração pós-morte de processo** (`docs/BUGS.md` seção 7 — não-bug;
-  am kill + relançamento pelo ícone, nunca `am start -n`). **Próximo
-  passo: 5B parte 2 — lado fábrica** (`CLAUDE.md` da fábrica no repositório `QuemSou-Baralhos`:
-  regras editoriais + ritual de publicação + o validador como régua; o
-  export de feedback do app alimenta a revisão dos baralhos).
+  no Z Fold** (2026-07-12). **Parte 2 (lado fábrica) concluída e
+  publicada** (2026-07-12): `CLAUDE.md` v1 do `QuemSou-Baralhos` —
+  regras editoriais (aponta para `docs/CARDS_GUIDE.md`, nunca duplica),
+  ritual de publicação com a régua cross-repo (`validarCatalogo` rodada
+  daqui apontando `-Ppasta=` para a raiz da fábrica), ritual de ingestão
+  do export `quemsou-feedback` v1, aviso do cache do GitHub raw (~5 min)
+  e proibição de reescrita de histórico sem confirmação. **Com isso a
+  5B está CONCLUÍDA.** Única pendência de validação restante: a
+  **revalidação ritual da restauração pós-morte de processo**
+  (`docs/BUGS.md` seção 7 — não-bug; am kill + relançamento pelo ícone,
+  nunca `am start -n`). **Próximo passo: primeiro ciclo de geração de
+  conteúdo na fábrica** (Claude Code gera cards → régua → revisão
+  humana → publicação atômica).
 - **Fase 4 (Nearby Connections): no backlog**, sem previsão — ver "Backlog".
 - Única decisão de produto em aberto: **nome definitivo do app** ("QuemSou"
   é provisório em código, pacote e strings).
@@ -274,15 +279,14 @@
     (ACTION_SEND, text/plain — padrão "Pedir um baralho"). Exportar NÃO
     apaga; "Limpar feedback" é ação separada com `ConfirmDialog`.
 - **Sub-fases**: **5A — Catálogo, CONCLUÍDA e validada fisicamente**
-  (2026-07-12) · **5B — Fábrica interna, EM
-  ANDAMENTO** (Claude Code opera no repositório `QuemSou-Baralhos`; decisão
-  de formato fechada — não é mais pipeline Gemini dentro do app: **parte 1
-  concluída** é a régua executável — `validarBaralho`/`validarCatalogo`,
-  tasks Gradle de linha de comando, JVM pura — que a fábrica usa antes da
-  revisão humana; **parte 2 lado app concluída** é o modo dev de feedback
-  acima, que alimenta a revisão com dados de partida real; falta o lado
-  fábrica — `CLAUDE.md` do `QuemSou-Baralhos`) · **5C — visão comercial**
-  (backlog — ver "Backlog").
+  (2026-07-12) · **5B — Fábrica interna, CONCLUÍDA** (2026-07-12; não é
+  pipeline Gemini dentro do app: parte 1 = régua executável
+  `validarBaralho`/`validarCatalogo`, tasks Gradle de linha de comando,
+  JVM pura; parte 2 lado app = modo dev de feedback acima; parte 2 lado
+  fábrica = `CLAUDE.md` v1 do `QuemSou-Baralhos` com regras editoriais,
+  ritual de publicação e ingestão de feedback — a régua roda sempre
+  deste repositório, cross-repo, nunca duplicada lá) · **5C — visão
+  comercial** (backlog — ver "Backlog").
 
 ## Backlog
 

@@ -2,6 +2,24 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-07-12 — CLAUDE.md v23
+- **5B parte 2 (lado fábrica) concluída → Fase 5B CONCLUÍDA.** Criado o
+  `CLAUDE.md` v1 do `QuemSou-Baralhos` (commit `24f4163` lá): regras
+  editoriais por ponteiro para `docs/CARDS_GUIDE.md` (nunca duplica),
+  ritual de publicação com a régua cross-repo (`validarCatalogo` rodada
+  deste repositório apontando `-Ppasta=` para a raiz da fábrica), ritual
+  de ingestão do export `quemsou-feedback` v1, aviso do cache do GitHub
+  raw (~5 min) e proibição de reescrita de histórico sem confirmação
+  explícita.
+- **Antes/depois**: "Estado atual" e "Sub-fases" do guia deixaram de
+  apontar o lado fábrica como pendente; próximo passo passou a ser o
+  **primeiro ciclo de geração de conteúdo na fábrica**.
+- **Registro operacional**: durante a criação do `CLAUDE.md` da fábrica,
+  um `CLAUDE.md` pré-existente com notas operacionais foi sobrescrito e o
+  histórico local foi reescrito sem anúncio; as notas relevantes (cache
+  do raw) foram reincorporadas e a proibição de reescrita virou regra
+  inegociável do repo da fábrica.
+
 ## Fechamento da validação física — Modo Shot + 5A + 5B parte 2 (2026-07-12)
 
 Sem mudança de código — apenas documentação (`docs/CLAUDE.md` v22).
