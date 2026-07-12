@@ -1,9 +1,6 @@
 package com.quemsou.app.presentation.ui.home
 
 import android.content.Intent
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +17,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -49,11 +48,12 @@ import kotlinx.coroutines.launch
  * baralhos, ou (fase 4) entrar em uma partida por código via Nearby
  * Connections — por ora desabilitado.
  *
- * O título esconde o easter egg do **modo dev de feedback** (toque longo);
- * a alternância é confirmada por Snackbar. Com o modo ligado e registros no
- * Room, aparece o item discreto
- * "Exportar feedback (N)" (Sharesheet, padrão "Pedir um baralho") + "Limpar
- * feedback" com confirmação. Não há nenhuma outra entrada de UI para o modo.
+ * O rodapé traz o Switch **"Modo dev"** do feedback de cards — controle
+ * VISÍVEL deliberado (o feedback vai virar feature pública; a transição
+ * está registrada em `docs/IMPROVEMENTS.md`), discreto para não competir
+ * com as ações principais. A alternância é confirmada por Snackbar; com o
+ * modo ligado e registros no Room, o rodapé agrupa também o "Exportar
+ * feedback (N)" e o "Limpar feedback".
  */
 @Composable
 fun HomeScreen(
@@ -62,6 +62,7 @@ fun HomeScreen(
     onJoinWithCode: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    val modoDev by viewModel.modoDev.collectAsState()
     val avisoDeModoDev by viewModel.avisoDeModoDev.collectAsState()
     val exportarVisivel by viewModel.exportarVisivel.collectAsState()
     val quantidadeDeFeedback by viewModel.quantidadeDeFeedback.collectAsState()
@@ -79,12 +80,13 @@ fun HomeScreen(
 
     HomeContent(
         snackbarHostState = snackbarHostState,
+        modoDev = modoDev,
         exportarVisivel = exportarVisivel,
         quantidadeDeFeedback = quantidadeDeFeedback,
         onCreateMatch = onCreateMatch,
         onAbrirCatalogo = onAbrirCatalogo,
         onJoinWithCode = onJoinWithCode,
-        onToqueLongoNoTitulo = viewModel::alternarModoDev,
+        onAlternarModoDev = viewModel::alternarModoDev,
         onExportarFeedback = {
             // Mesmo padrão do "Pedir um baralho": ACTION_SEND text/plain — o
             // JSON sai pelo app que o dev escolher; nada é transmitido daqui.
@@ -104,12 +106,13 @@ fun HomeScreen(
 @Composable
 private fun HomeContent(
     snackbarHostState: SnackbarHostState,
+    modoDev: Boolean,
     exportarVisivel: Boolean,
     quantidadeDeFeedback: Int,
     onCreateMatch: () -> Unit,
     onAbrirCatalogo: () -> Unit,
     onJoinWithCode: () -> Unit,
-    onToqueLongoNoTitulo: () -> Unit,
+    onAlternarModoDev: () -> Unit,
     onExportarFeedback: () -> Unit,
     onLimparFeedback: () -> Unit,
 ) {
@@ -122,60 +125,70 @@ private fun HomeContent(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            TituloComEasterEgg(onToqueLongo = onToqueLongoNoTitulo)
-            Text(
-                text = stringResource(id = R.string.home_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Button(
-                onClick = onCreateMatch,
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(text = stringResource(id = R.string.home_create_match))
-            }
-            OutlinedButton(
-                onClick = onAbrirCatalogo,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-            ) {
-                Text(text = stringResource(id = R.string.home_baralhos))
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                OutlinedButton(
-                    onClick = onJoinWithCode,
-                    enabled = false,
+                Text(
+                    text = stringResource(id = R.string.home_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Text(
+                    text = stringResource(id = R.string.home_subtitle),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Button(
+                    onClick = onCreateMatch,
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth()
                         .height(52.dp),
                 ) {
-                    Text(text = stringResource(id = R.string.home_join_with_code))
+                    Text(text = stringResource(id = R.string.home_create_match))
                 }
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text(stringResource(id = R.string.home_join_badge)) },
-                )
+                OutlinedButton(
+                    onClick = onAbrirCatalogo,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                ) {
+                    Text(text = stringResource(id = R.string.home_baralhos))
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedButton(
+                        onClick = onJoinWithCode,
+                        enabled = false,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp),
+                    ) {
+                        Text(text = stringResource(id = R.string.home_join_with_code))
+                    }
+                    AssistChip(
+                        onClick = {},
+                        enabled = false,
+                        label = { Text(stringResource(id = R.string.home_join_badge)) },
+                    )
+                }
+                TextButton(onClick = { mostrarComoJogar = true }) {
+                    Text(text = stringResource(id = R.string.home_how_to_play))
+                }
             }
-            TextButton(onClick = { mostrarComoJogar = true }) {
-                Text(text = stringResource(id = R.string.home_how_to_play))
-            }
-            if (exportarVisivel) {
-                ItemDevDeFeedback(
-                    quantidade = quantidadeDeFeedback,
-                    onExportar = onExportarFeedback,
-                    onLimpar = { confirmarLimpeza = true },
-                )
-            }
+            RodapeDevDeFeedback(
+                modoDev = modoDev,
+                exportarVisivel = exportarVisivel,
+                quantidadeDeFeedback = quantidadeDeFeedback,
+                onAlternarModoDev = onAlternarModoDev,
+                onExportar = onExportarFeedback,
+                onLimpar = { confirmarLimpeza = true },
+            )
         }
     }
 
@@ -208,62 +221,62 @@ private fun HomeContent(
 }
 
 /**
- * Item discreto do modo dev na Home: exportar o feedback acumulado (N vivo
- * do Room) e limpar o histórico. Violeta do modo dev — a mesma identidade
- * "andaime" do widget do Anúncio; invisível com o modo desligado ou sem
- * registros.
+ * Rodapé do modo dev de feedback: a linha "Modo dev" com o Switch (controle
+ * visível deliberado — ver KDoc da tela) e, com o modo ligado e registros no
+ * Room, o export/limpeza agrupados logo abaixo. Fica no rodapé de propósito:
+ * presente sem competir com as ações principais da Home.
  */
 @Composable
-private fun ItemDevDeFeedback(
-    quantidade: Int,
+private fun RodapeDevDeFeedback(
+    modoDev: Boolean,
+    exportarVisivel: Boolean,
+    quantidadeDeFeedback: Int,
+    onAlternarModoDev: () -> Unit,
     onExportar: () -> Unit,
     onLimpar: () -> Unit,
 ) {
     val acento = if (isSystemInDarkTheme()) DevVioleta else DevVioletaEscuro
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        TextButton(onClick = onExportar) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Text(
-                text = stringResource(R.string.home_dev_exportar, quantidade),
+                text = stringResource(R.string.home_dev_switch),
                 style = MaterialTheme.typography.labelLarge,
-                color = acento,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Switch(
+                checked = modoDev,
+                onCheckedChange = { onAlternarModoDev() },
+                colors = SwitchDefaults.colors(checkedTrackColor = acento),
             )
         }
-        TextButton(onClick = onLimpar) {
-            Text(
-                text = stringResource(R.string.home_dev_limpar),
-                style = MaterialTheme.typography.labelLarge,
-                color = acento,
-            )
+        if (exportarVisivel) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = onExportar) {
+                    Text(
+                        text = stringResource(R.string.home_dev_exportar, quantidadeDeFeedback),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = acento,
+                    )
+                }
+                TextButton(onClick = onLimpar) {
+                    Text(
+                        text = stringResource(R.string.home_dev_limpar),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = acento,
+                    )
+                }
+            }
         }
     }
-}
-
-/**
- * Título da Home com o easter egg do modo dev de feedback: **toque longo**
- * alterna o modo (os 7 toques da versão anterior não ativavam no Z Fold —
- * achado da validação física, `docs/BUGS.md`). Sem `indication` para o
- * título não ganhar ripple no toque comum; o `padding` vem DEPOIS do
- * `combinedClickable` de propósito — infla a área de toque para além do
- * texto sem mudar a posição visual do título.
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun TituloComEasterEgg(onToqueLongo: () -> Unit) {
-    Text(
-        text = stringResource(id = R.string.home_title),
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier
-            .combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onLongClick = onToqueLongo,
-                onClick = {},
-            )
-            .padding(16.dp),
-    )
 }
 
 @Preview(showBackground = true)
@@ -272,12 +285,13 @@ private fun HomeScreenPreview() {
     QuemSouTheme {
         HomeContent(
             snackbarHostState = SnackbarHostState(),
+            modoDev = false,
             exportarVisivel = false,
             quantidadeDeFeedback = 0,
             onCreateMatch = {},
             onAbrirCatalogo = {},
             onJoinWithCode = {},
-            onToqueLongoNoTitulo = {},
+            onAlternarModoDev = {},
             onExportarFeedback = {},
             onLimparFeedback = {},
         )

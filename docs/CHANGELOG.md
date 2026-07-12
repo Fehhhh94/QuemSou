@@ -2,6 +2,17 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-07-12 — CLAUDE.md v20
+- **Ativação do modo dev de feedback**: **antes**, toque longo no título da
+  Home (v19 — nunca chegou a ser validado fisicamente); **depois**, Switch
+  M3 **"Modo dev"** visível no rodapé da Home, agrupado com o "Exportar
+  feedback (N)"/"Limpar feedback" quando o modo está ligado. Decisão de
+  produto: o feedback de cards vai virar **feature pública** — controle
+  visível é deliberado, não andaime; a transição (renomear, tirar a
+  identidade violeta de andaime, padrão ligado/desligado, canal de envio
+  que escale) está registrada em `docs/IMPROVEMENTS.md`. Snackbar de
+  confirmação permanece; `HomeViewModel.alternarModoDev` inalterado.
+
 ### 2026-07-11 — CLAUDE.md v19
 - **Ativação do modo dev de feedback**: **antes**, 7 toques no título da
   Home (easter egg padrão Android, contador com janela de 2 s no

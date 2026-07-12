@@ -9,10 +9,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
- * Preferência do **modo dev de feedback** (5B parte 2) — ferramenta de
- * desenvolvedor, não feature: com o modo desligado (padrão), nenhum composable
- * de feedback entra na composição e o jogador comum nunca vê nada. A única
- * entrada de UI para alternar é o easter egg de toque longo no título da Home.
+ * Preferência do **modo dev de feedback** (5B parte 2): com o modo desligado
+ * (padrão), nenhum composable de feedback entra na composição. A entrada de
+ * UI para alternar é o Switch "Modo dev" no rodapé da Home — controle
+ * visível deliberado: o feedback de cards vai virar feature pública
+ * (transição registrada em `docs/IMPROVEMENTS.md`).
  *
  * Abstraído para os testes JVM dos ViewModels usarem um fake em memória.
  */

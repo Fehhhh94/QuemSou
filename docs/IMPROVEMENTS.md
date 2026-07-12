@@ -145,6 +145,36 @@ passa a ser a do desenvolvedor, nunca do usuário final.
   etc.) e o id do recurso de string permanecem inalterados — a mudança é
   só de linguagem voltada ao jogador.
 
+## 🟣 Feedback de cards como feature pública (transição futura)
+
+- **Status**: registrado em 2026-07-12, sem previsão — **não iniciar sem
+  decisão explícita do Felipe**. Decisão de produto já tomada: o feedback
+  de cards (hoje "modo dev", 5B parte 2) **vai virar feature pública**; o
+  Switch visível na Home (`CLAUDE.md` v20) é o primeiro passo deliberado
+  dessa direção — o que segue abaixo é o que falta decidir/fazer na
+  virada.
+- **Renomear**: "Modo dev" não é nome de feature de jogador — achar nome
+  voltado ao jogador (ex.: "Avaliar cards"). Vale para o rótulo do Switch,
+  os textos do Snackbar e, na medida do razoável, os identificadores
+  (`modoDevFeedback`, `FeedbackDevWidget` etc. — renomear código pode
+  ficar para a própria virada, mas registrado que o nome interno ficou
+  datado).
+- **Remover a identidade de andaime**: selo "DEV", borda tracejada e os
+  tokens violeta (`DevVioleta`/`DevVioletaEscuro`) existem para gritar
+  "ferramenta interna". Como feature, o widget do Anúncio precisa de
+  visual integrado ao tema — redesenhar com mockup aprovado antes, como
+  sempre.
+- **Padrão ligado/desligado**: hoje nasce desligado (dev opt-in). Para
+  jogador comum, decidir o default — ligado por padrão maximiza coleta mas
+  adiciona um passo entre as jogadas; avaliar com playtest.
+- **Canal de envio que escale**: o Sharesheet manual serve ao dev, não a
+  todos os jogadores (depende de gesto deliberado e de escolher destino).
+  Decidir o canal da versão pública — mantendo a filosofia do app (sem
+  servidor próprio, sem chave de API no cliente, offline-first: a partida
+  nunca pode depender de rede). Restrições que qualquer opção precisa
+  respeitar: consentimento explícito e conteúdo mínimo (voto + ids +
+  comentário; nada de identificadores pessoais).
+
 ## 🟣 Formato v2 — cards com 15 dicas (avaliação futura)
 
 - **Status**: backlog registrado em 2026-07-11, sem previsão — **não

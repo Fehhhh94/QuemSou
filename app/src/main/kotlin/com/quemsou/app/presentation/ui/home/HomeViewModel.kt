@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel da Home — existe só pelo **modo dev de feedback** (5B parte 2):
- * alternância pelo easter egg de toque longo no título e, com o modo ligado,
- * o export/limpeza dos registros. Nada aqui toca o fluxo normal do jogador.
+ * alternância pelo Switch "Modo dev" do rodapé e, com o modo ligado, o
+ * export/limpeza dos registros. Nada aqui toca o fluxo normal do jogador.
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -53,7 +53,7 @@ class HomeViewModel @Inject constructor(
      */
     val avisoDeModoDev: StateFlow<Boolean?> = _avisoDeModoDev.asStateFlow()
 
-    /** Toque longo no título: alterna o modo dev e agenda o aviso. */
+    /** Switch "Modo dev" do rodapé: alterna o modo dev e agenda o aviso. */
     fun alternarModoDev() {
         viewModelScope.launch {
             _avisoDeModoDev.value = modoDevStore.alternar()

@@ -1,6 +1,6 @@
 # QuemSou — Guia do projeto para o Claude
 
-> **v19 (2026-07-11).** Este arquivo descreve apenas o **estado atual** do
+> **v20 (2026-07-12).** Este arquivo descreve apenas o **estado atual** do
 > projeto. Histórico de versões, decisões substituídas e o "porquê" das
 > mudanças vivem em `docs/CHANGELOG.md` — não aqui.
 
@@ -227,14 +227,19 @@
 - **Validação estrutural pré-`Card`**: o JSON cru do Gemini precisa de
   validação estrutural ANTES de construir `Card` (8 dicas deve virar
   violação legível na revisão, não exceção do construtor).
-- **Modo dev de feedback** (ferramenta do desenvolvedor DENTRO do app, 5B
-  parte 2 — não é feature): avaliar cards em partida real e exportar para a
+- **Modo dev de feedback** (5B parte 2 — hoje ferramenta do desenvolvedor
+  DENTRO do app; vai virar feature pública, transição em
+  `docs/IMPROVEMENTS.md`): avaliar cards em partida real e exportar para a
   fábrica. Nada disso toca `domain/` — vive em `data/feedback/`,
   `data/local/` e `presentation/`. Regras:
   - **Ativação**: preferência `modoDevFeedback` (DataStore, padrão false),
-    alternada SÓ por **toque longo no título da Home** (easter egg), com
-    Snackbar de confirmação. Com o modo desligado, **nenhum composable do
-    feedback entra na composição** — o jogador comum nunca vê nada.
+    alternada pelo **Switch "Modo dev"** no rodapé da Home, com Snackbar de
+    confirmação. O controle é VISÍVEL de propósito — decisão de produto: o
+    feedback de cards vai virar feature pública; a transição (nome,
+    identidade visual, padrão, canal de envio) está registrada em
+    `docs/IMPROVEMENTS.md`. Com o modo desligado, **nenhum composable do
+    feedback entra na composição** — o jogador comum não vê nada além do
+    Switch.
   - **Widget no Anúncio** (Acerto e Queimado, igual): entre o bloco da
     resposta e o botão de avançar, identidade "andaime" — borda TRACEJADA
     violeta (tokens `DevVioleta`/`DevVioletaEscuro`, claro/escuro), selo

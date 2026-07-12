@@ -43,12 +43,13 @@ desinstalar)** — é isso que exercita as migrações Room de verdade:
 10. **Migração Room 3→4 por update** (5B parte 2): instalar o APK novo por
     cima, abrir o app e jogar — sem crash na abertura; baralhos baixados e
     o histórico de feedback anterior (se houver) preservados.
-11. **Fluxo completo de feedback em partida real** (5B parte 2): toque
-    longo no título da Home liga o modo dev (Snackbar); no Anúncio (acerto
+11. **Fluxo completo de feedback em partida real** (5B parte 2): o Switch
+    "Modo dev" no rodapé da Home liga o modo (Snackbar); no Anúncio (acerto
     E queimado) o widget violeta tracejado aparece; votar/desmarcar;
     comentar com o teclado aberto mantém a resposta visível; "Continuar"
-    grava; pular (sem voto) não grava; com o modo desligado o widget some
-    e a partida fica idêntica à de sempre.
+    grava; pular (sem voto) não grava; com o modo desligado o widget e o
+    export somem e a partida fica idêntica à de sempre (só o Switch
+    permanece na Home).
 12. **Export do feedback** (5B parte 2): "Exportar feedback (N)" na Home
     (N bate com os votos dados) abre o Sharesheet com JSON
     `quemsou-feedback` válido (respostas presentes via join); "Limpar
@@ -174,10 +175,14 @@ desinstalar)** — é isso que exercita as migrações Room de verdade:
   entre toques, e ferramenta de dev não justifica sessão de depuração de
   gesto no aparelho. Decisão pragmática: **trocar o mecanismo** por um
   gesto único e sem estado.
-- **Correção**: toque longo no título (`combinedClickable` com
-  `onLongClick`, `indication = null` para o título não ganhar ripple no
-  toque comum, padding depois do clickable inflando a área de toque). O
-  contador, a janela de tempo e as constantes dos 7 toques foram removidos
-  por inteiro. Snackbar de confirmação inalterado.
-- **Validado no Z Fold físico**: PENDENTE — revalidar dentro do item 11 do
-  checklist.
+- **Correção (1ª tentativa)**: toque longo no título (`combinedClickable`
+  com `onLongClick`). Contador, janela de tempo e constantes dos 7 toques
+  removidos por inteiro. **Nunca chegou a ser validado fisicamente**: antes
+  da validação, a decisão de produto tornou o feedback candidato a feature
+  pública e o easter egg deixou de fazer sentido.
+- **Correção (vigente)**: Switch M3 **"Modo dev"** visível no rodapé da
+  Home (`CLAUDE.md` v20) — o toque longo foi removido junto com o que o
+  suportava; o título voltou a texto simples. Snackbar de confirmação
+  inalterado nas duas trocas.
+- **Validado no Z Fold físico**: PENDENTE — revalidar o item 11 do
+  checklist com o Switch.
