@@ -73,3 +73,23 @@ val MIGRACAO_2_3 = object : Migration(2, 3) {
         db.execSQL("ALTER TABLE `baralhos_novo` RENAME TO `baralhos`")
     }
 }
+
+/**
+ * Migração 3 → 4 (5B parte 2): cria a tabela `feedback_de_cards` do modo dev
+ * de feedback — vazia, puramente aditiva, sem tocar `baralhos`/`cards`.
+ * Deliberadamente sem FK: o histórico de feedback sobrevive à reimportação e
+ * à remoção de baralhos. O SQL espelha o schema exportado
+ * (`app/schemas/.../4.json`) que o Room valida.
+ */
+val MIGRACAO_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `feedback_de_cards` (" +
+                "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`baralhoId` TEXT NOT NULL, `cardId` TEXT NOT NULL, " +
+                "`voto` TEXT NOT NULL, `comentario` TEXT, " +
+                "`rodada` INTEGER NOT NULL, `resultadoDoTurno` TEXT NOT NULL, " +
+                "`numeroDaDicaDoAcerto` INTEGER, `criadoEm` INTEGER NOT NULL)",
+        )
+    }
+}
