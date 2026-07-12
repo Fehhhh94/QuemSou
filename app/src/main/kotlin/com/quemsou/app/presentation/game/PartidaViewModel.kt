@@ -3,6 +3,11 @@ package com.quemsou.app.presentation.game
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.quemsou.app.data.feedback.ModoDevFeedbackStore
+import com.quemsou.app.data.feedback.NovoFeedback
+import com.quemsou.app.data.feedback.RegistroDeFeedback
+import com.quemsou.app.data.feedback.ResultadoDoTurnoRegistrado
+import com.quemsou.app.data.feedback.VotoDeCard
 import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.EstadoDoTurno
@@ -21,6 +26,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -51,12 +58,30 @@ import kotlinx.coroutines.launch
 class PartidaViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repositorioDeCards: RepositorioDeCards,
+    private val modoDevFeedbackStore: ModoDevFeedbackStore,
+    private val registroDeFeedback: RegistroDeFeedback,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PartidaUiState>(PartidaUiState.Carregando)
 
     /** Estado único que dirige toda a UI da partida. */
     val uiState: StateFlow<PartidaUiState> = _uiState.asStateFlow()
+
+    private val _feedbackDev = MutableStateFlow<FeedbackDevUiState?>(null)
+
+    /**
+     * Estado do widget dev de feedback no Anúncio (modo dev de feedback):
+     * não nulo apenas durante um Anúncio com o modo dev ligado — nulo
+     * significa que o widget não entra na composição. Deliberadamente **fora**
+     * do [PartidaUiState]: voto e comentário mudam a cada toque/tecla, e
+     * dentro do estado da fase cada mudança dispararia a animação do
+     * `AnimatedContent` da tela.
+     *
+     * Feedback pendente (voto/comentário ainda sem "Continuar") **não**
+     * sobrevive à morte de processo — limitação aceita da ferramenta de dev;
+     * não vale um `SavedStateHandle` próprio.
+     */
+    val feedbackDev: StateFlow<FeedbackDevUiState?> = _feedbackDev.asStateFlow()
 
     private val _abandonoSolicitado = MutableStateFlow(false)
 
@@ -73,6 +98,12 @@ class PartidaViewModel @Inject constructor(
     private lateinit var gruposBase: List<Grupo>
     private lateinit var baralhosSelecionados: List<Baralho>
     private var turno: Turno? = null
+
+    /** `true` com o modo dev de feedback ligado — lido uma vez na montagem. */
+    private var modoDevFeedbackAtivo = false
+
+    /** De qual baralho veio cada card do monte (o domínio não carrega isso). */
+    private var baralhoIdPorCardId: Map<String, String> = emptyMap()
 
     init {
         viewModelScope.launch { inicializar() }
@@ -179,6 +210,7 @@ class PartidaViewModel @Inject constructor(
     fun proximoTurno() {
         val turnoAtual = turno ?: return
         if (_uiState.value !is PartidaUiState.Anuncio) return
+        gravarFeedbackPendente(turnoAtual)
         partida = partida.encerrarTurno(turnoAtual)
         turno = null
         savedStateHandle[CHAVE_RODADA] = partida.rodadaAtual
@@ -190,6 +222,22 @@ class PartidaViewModel @Inject constructor(
         } else {
             mudarFase(FASE_VEZ_DE_JOGAR, estadoVezDeJogar())
         }
+    }
+
+    /**
+     * Toque num chip do widget dev de feedback: seleciona o [voto] — ou
+     * desmarca, se ele já era o selecionado. Ignorado fora do Anúncio ou com
+     * o modo dev desligado (o estado é nulo e nada muda).
+     */
+    fun votarNoCard(voto: VotoDeCard) {
+        _feedbackDev.update { atual ->
+            atual?.copy(voto = if (atual.voto == voto) null else voto)
+        }
+    }
+
+    /** Digitação no comentário opcional do widget dev de feedback. */
+    fun comentarFeedback(texto: String) {
+        _feedbackDev.update { atual -> atual?.copy(comentario = texto) }
     }
 
     /** Botão voltar interceptado: pede para abandonar a partida. */
@@ -247,6 +295,10 @@ class PartidaViewModel @Inject constructor(
         }
         gruposBase = montarGrupos()
         baralhosSelecionados = repositorioDeCards.buscarPorIds(configuracao.baralhos)
+        modoDevFeedbackAtivo = modoDevFeedbackStore.modoDevFeedback.first()
+        baralhoIdPorCardId = baralhosSelecionados
+            .flatMap { baralho -> baralho.cards.map { card -> card.id to baralho.id } }
+            .toMap()
         val base = CriarPartida.executar(
             codigo = configuracao.codigo,
             jogadores = jogadoresBase,
@@ -336,6 +388,12 @@ class PartidaViewModel @Inject constructor(
                     FASE_QUEM_ACERTOU -> estadoQuemAcertou()
                     else -> estadoAnuncio()
                 }
+                // O widget dev volta zerado no Anúncio restaurado: voto e
+                // comentário pendentes não sobrevivem à morte de processo
+                // (limitação aceita — ver KDoc de [feedbackDev]).
+                if (fase == FASE_ANUNCIO && modoDevFeedbackAtivo) {
+                    _feedbackDev.value = FeedbackDevUiState()
+                }
             }
         }
     }
@@ -362,6 +420,11 @@ class PartidaViewModel @Inject constructor(
 
     private fun mudarFase(fase: String, estado: PartidaUiState) {
         savedStateHandle[CHAVE_FASE] = fase
+        // O widget dev de feedback existe apenas durante o Anúncio com o modo
+        // dev ligado; qualquer outra fase o descarta (voto não confirmado se
+        // perde — pular é legítimo).
+        _feedbackDev.value =
+            if (fase == FASE_ANUNCIO && modoDevFeedbackAtivo) FeedbackDevUiState() else null
         _uiState.value = estado
     }
 
@@ -463,6 +526,32 @@ class PartidaViewModel @Inject constructor(
 
     private fun nomeDe(jogadorId: String): String =
         partida.jogadores.first { it.id == jogadorId }.nome
+
+    /**
+     * Grava o feedback do widget dev, se houver voto — chamado pelo
+     * [proximoTurno] **antes** de encerrar o turno (a rodada ainda é a do
+     * card avaliado). Sem voto, nada é gravado: pular é legítimo. Comentário
+     * em branco vira `null` (comentário sem conteúdo não existe).
+     */
+    private fun gravarFeedbackPendente(turnoAtual: Turno) {
+        val pendente = _feedbackDev.value ?: return
+        val voto = pendente.voto ?: return
+        val fim = turnoAtual.estado as? EstadoDoTurno.TurnoEncerrado ?: return
+        val novo = NovoFeedback(
+            baralhoId = baralhoIdPorCardId.getValue(turnoAtual.card.id),
+            cardId = turnoAtual.card.id,
+            voto = voto,
+            comentario = pendente.comentario.trim().ifBlank { null },
+            rodada = partida.rodadaAtual,
+            resultadoDoTurno = when (fim) {
+                is EstadoDoTurno.TurnoEncerrado.Acerto -> ResultadoDoTurnoRegistrado.ACERTO
+                is EstadoDoTurno.TurnoEncerrado.Queimado -> ResultadoDoTurnoRegistrado.QUEIMADO
+            },
+            numeroDaDicaDoAcerto =
+                (fim as? EstadoDoTurno.TurnoEncerrado.Acerto)?.dicasUsadas,
+        )
+        viewModelScope.launch { registroDeFeedback.registrar(novo) }
+    }
 
     // endregion
 

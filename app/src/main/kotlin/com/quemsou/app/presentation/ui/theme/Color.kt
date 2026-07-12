@@ -33,3 +33,10 @@ val SeloVerde = Color(0xFF2E7D32)
 val SeloVerdeClaro = Color(0xFF81C784) // variante do tema escuro
 val SeloCiano = Color(0xFF00838F)
 val SeloCianoClaro = Color(0xFF4DD0E1) // variante do tema escuro
+
+// Modo dev de feedback (5B parte 2): identidade "andaime" violeta do widget
+// no Anúncio e do item de export na Home — NUNCA âmbar (exclusivo do Modo
+// Shot dentro da partida). Borda tracejada e fundo derivam do acento com
+// alpha (0.45/0.10, mockup-feedback-anuncio-v1).
+val DevVioleta = Color(0xFF9A86E8)
+val DevVioletaEscuro = Color(0xFF5F4BB6) // variante do tema claro (contraste sobre fundo claro)

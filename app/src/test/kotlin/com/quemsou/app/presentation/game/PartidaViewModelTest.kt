@@ -1,6 +1,12 @@
 package com.quemsou.app.presentation.game
 
 import androidx.lifecycle.SavedStateHandle
+import com.quemsou.app.data.feedback.ModoDevFeedbackStore
+import com.quemsou.app.data.feedback.NovoFeedback
+import com.quemsou.app.data.feedback.RegistroDeFeedback
+import com.quemsou.app.data.feedback.ResultadoDoTurnoRegistrado
+import com.quemsou.app.data.feedback.VotoDeCard
+import com.quemsou.app.data.local.FeedbackComResposta
 import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.CardCategory
@@ -11,8 +17,12 @@ import com.quemsou.app.domain.repository.RepositorioDeCards
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.navigation.JogadorConfigurado
 import com.quemsou.app.testutil.MainDispatcherRule
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -26,6 +36,38 @@ class PartidaViewModelTest {
         override suspend fun buscarPorIds(ids: List<String>) = baralhos.filter { it.id in ids }
 
         override suspend fun buscarTodos() = baralhos
+    }
+
+    /** Guarda o modo dev em memória — sem DataStore. */
+    private class ModoDevFake(ativo: Boolean) : ModoDevFeedbackStore {
+        private val estado = MutableStateFlow(ativo)
+
+        override val modoDevFeedback: Flow<Boolean> = estado
+
+        override suspend fun alternar(): Boolean {
+            estado.value = !estado.value
+            return estado.value
+        }
+    }
+
+    /** Acumula os feedbacks gravados em memória — sem Room. */
+    private class RegistroDeFeedbackFake : RegistroDeFeedback {
+        val registrados = mutableListOf<NovoFeedback>()
+        private val quantidade = MutableStateFlow(0)
+
+        override suspend fun registrar(novo: NovoFeedback) {
+            registrados += novo
+            quantidade.value = registrados.size
+        }
+
+        override fun quantidade(): Flow<Int> = quantidade
+
+        override suspend fun buscarTodosComResposta() = emptyList<FeedbackComResposta>()
+
+        override suspend fun apagarTudo() {
+            registrados.clear()
+            quantidade.value = 0
+        }
     }
 
     private fun cards(quantidade: Int = 10) = List(quantidade) { indice ->
@@ -75,7 +117,9 @@ class PartidaViewModelTest {
     private fun viewModel(
         configuracao: ConfiguracaoDaPartida = configuracao(),
         handle: SavedStateHandle = handleDe(configuracao),
-    ) = PartidaViewModel(handle, RepositorioFake(baralhos()))
+        modoDev: Boolean = false,
+        registro: RegistroDeFeedback = RegistroDeFeedbackFake(),
+    ) = PartidaViewModel(handle, RepositorioFake(baralhos()), ModoDevFake(modoDev), registro)
 
     @Test
     fun `partida completa por eventos ate o placar final`() {
@@ -200,7 +244,7 @@ class PartidaViewModelTest {
     @Test
     fun `morte de processo restaura a mesma fase, posicoes e placar`() {
         val handle = handleDe(configuracao())
-        val antes = PartidaViewModel(handle, RepositorioFake(baralhos()))
+        val antes = viewModel(handle = handle)
 
         // Rodada 1 completa (Bia acerta com 2 dicas: acertador +9, leitor +1) e metade da rodada 2.
         antes.iniciarTurno()
@@ -216,7 +260,7 @@ class PartidaViewModelTest {
         val estadoAntes = antes.uiState.value as PartidaUiState.Grid
 
         // "Morte de processo": novo ViewModel com o mesmo SavedStateHandle.
-        val depois = PartidaViewModel(handle, RepositorioFake(baralhos()))
+        val depois = viewModel(handle = handle)
 
         assertEquals(estadoAntes, depois.uiState.value)
 
@@ -236,7 +280,7 @@ class PartidaViewModelTest {
     fun `placar final agrega os pontos por grupo com grupos mistos`() {
         // "Ana & Bia" num grupo; Caio solo — grupos mistos na mesma partida.
         val handle = handleDe(configuracao(grupos = listOf("g1", "g1", null)))
-        val viewModel = PartidaViewModel(handle, RepositorioFake(baralhos()))
+        val viewModel = viewModel(handle = handle)
 
         // Rodada 1 (leitora Ana): Bia acerta na 1ª dica → grupo "Ana & Bia" +10.
         viewModel.iniciarTurno()
@@ -246,7 +290,7 @@ class PartidaViewModelTest {
         viewModel.proximoTurno()
 
         // Morte de processo entre as rodadas: os pontos por grupo sobrevivem.
-        val restaurado = PartidaViewModel(handle, RepositorioFake(baralhos()))
+        val restaurado = viewModel(handle = handle)
 
         // Rodada 2 (leitora Bia): Caio acerta na 2ª dica → Caio +9 e a
         // leitora Bia +1 — o ponto da leitora vai para o grupo "Ana & Bia".
@@ -334,13 +378,13 @@ class PartidaViewModelTest {
     @Test
     fun `morte de processo com o overlay do shot aberto restaura o overlay`() {
         val handle = handleDe(configuracao(modoShot = true, quantidadeDeShots = 3))
-        val antes = PartidaViewModel(handle, RepositorioFake(baralhos()))
+        val antes = viewModel(handle = handle)
         antes.iniciarTurno()
         val overlayAntes = antes.tocarAteAbrirUmShot()
 
         // "Morte de processo": novo ViewModel com o mesmo SavedStateHandle
         // volta EXATAMENTE ao overlay — posição pendente e bebedor incluídos.
-        val depois = PartidaViewModel(handle, RepositorioFake(baralhos()))
+        val depois = viewModel(handle = handle)
         assertEquals(overlayAntes, depois.uiState.value)
 
         // E o fluxo segue dali: o "Bebi!" revela a mesma posição pendente.
@@ -430,4 +474,150 @@ class PartidaViewModelTest {
 
         assertEquals(vez, viewModel.uiState.value)
     }
+
+    // region Modo dev de feedback
+
+    /** Leva a partida até o Anúncio de acerto (Bia acerta na 2ª dica da rodada 1). */
+    private fun PartidaViewModel.jogarAteOAnuncioDeAcerto() {
+        iniciarTurno()
+        revelarDica(3)
+        outraDica()
+        revelarDica(7)
+        abrirQuemAcertou()
+        registrarAcerto("j2")
+        check(uiState.value is PartidaUiState.Anuncio.Acerto)
+    }
+
+    @Test
+    fun `sem modo dev o anuncio nao cria estado de feedback`() {
+        val viewModel = viewModel(modoDev = false)
+
+        viewModel.jogarAteOAnuncioDeAcerto()
+
+        assertNull(viewModel.feedbackDev.value)
+    }
+
+    @Test
+    fun `com modo dev o anuncio cria o widget zerado e avancar o descarta`() {
+        val viewModel = viewModel(modoDev = true)
+        assertNull(viewModel.feedbackDev.value)
+
+        viewModel.jogarAteOAnuncioDeAcerto()
+        assertEquals(FeedbackDevUiState(), viewModel.feedbackDev.value)
+
+        viewModel.proximoTurno()
+        assertNull(viewModel.feedbackDev.value)
+    }
+
+    @Test
+    fun `votar seleciona e votar de novo desmarca`() {
+        val viewModel = viewModel(modoDev = true)
+        viewModel.jogarAteOAnuncioDeAcerto()
+
+        viewModel.votarNoCard(VotoDeCard.BOM)
+        assertEquals(VotoDeCard.BOM, viewModel.feedbackDev.value?.voto)
+
+        viewModel.votarNoCard(VotoDeCard.FRACO)
+        assertEquals(VotoDeCard.FRACO, viewModel.feedbackDev.value?.voto)
+
+        viewModel.votarNoCard(VotoDeCard.FRACO)
+        assertNull(viewModel.feedbackDev.value?.voto)
+    }
+
+    @Test
+    fun `continuar grava o voto e o comentario com os dados do turno`() {
+        val registro = RegistroDeFeedbackFake()
+        val viewModel = viewModel(modoDev = true, registro = registro)
+        viewModel.jogarAteOAnuncioDeAcerto()
+
+        viewModel.votarNoCard(VotoDeCard.BOM)
+        viewModel.comentarFeedback("  dica 3 entrega demais  ")
+        viewModel.proximoTurno()
+
+        val gravado = registro.registrados.single()
+        assertEquals("b1", gravado.baralhoId)
+        assertTrue(gravado.cardId.startsWith("card-"))
+        assertEquals(VotoDeCard.BOM, gravado.voto)
+        assertEquals("dica 3 entrega demais", gravado.comentario)
+        assertEquals(1, gravado.rodada)
+        assertEquals(ResultadoDoTurnoRegistrado.ACERTO, gravado.resultadoDoTurno)
+        assertEquals(2, gravado.numeroDaDicaDoAcerto)
+    }
+
+    @Test
+    fun `continuar sem voto nao grava nada`() {
+        val registro = RegistroDeFeedbackFake()
+        val viewModel = viewModel(modoDev = true, registro = registro)
+        viewModel.jogarAteOAnuncioDeAcerto()
+
+        viewModel.comentarFeedback("comentário órfão nunca existe")
+        viewModel.proximoTurno()
+
+        assertTrue(registro.registrados.isEmpty())
+        assertTrue(viewModel.uiState.value is PartidaUiState.VezDeJogar)
+    }
+
+    @Test
+    fun `card queimado grava resultado queimado sem numero de dica`() {
+        val registro = RegistroDeFeedbackFake()
+        val viewModel = viewModel(modoDev = true, registro = registro)
+        viewModel.iniciarTurno()
+        viewModel.revelarDica(1)
+        viewModel.queimarCard()
+
+        viewModel.votarNoCard(VotoDeCard.FRACO)
+        viewModel.proximoTurno()
+
+        val gravado = registro.registrados.single()
+        assertEquals(VotoDeCard.FRACO, gravado.voto)
+        assertEquals(ResultadoDoTurnoRegistrado.QUEIMADO, gravado.resultadoDoTurno)
+        assertNull(gravado.numeroDaDicaDoAcerto)
+        assertNull(gravado.comentario)
+    }
+
+    @Test
+    fun `comentario em branco e gravado como null`() {
+        val registro = RegistroDeFeedbackFake()
+        val viewModel = viewModel(modoDev = true, registro = registro)
+        viewModel.jogarAteOAnuncioDeAcerto()
+
+        viewModel.votarNoCard(VotoDeCard.BOM)
+        viewModel.comentarFeedback("   ")
+        viewModel.proximoTurno()
+
+        assertNull(registro.registrados.single().comentario)
+    }
+
+    @Test
+    fun `votar fora do anuncio e ignorado`() {
+        val registro = RegistroDeFeedbackFake()
+        val viewModel = viewModel(modoDev = true, registro = registro)
+        viewModel.iniciarTurno()
+
+        viewModel.votarNoCard(VotoDeCard.BOM)
+        viewModel.comentarFeedback("cedo demais")
+
+        assertNull(viewModel.feedbackDev.value)
+        assertTrue(registro.registrados.isEmpty())
+    }
+
+    @Test
+    fun `morte de processo no anuncio recria o widget zerado sem gravar nada`() {
+        val registro = RegistroDeFeedbackFake()
+        val handle = handleDe(configuracao())
+        val antes = viewModel(handle = handle, modoDev = true, registro = registro)
+        antes.jogarAteOAnuncioDeAcerto()
+        antes.votarNoCard(VotoDeCard.FRACO)
+        antes.comentarFeedback("voto pendente se perde")
+
+        // "Morte de processo": voto e comentário não confirmados não
+        // sobrevivem (limitação aceita); o widget volta zerado no Anúncio.
+        val depois = viewModel(handle = handle, modoDev = true, registro = registro)
+
+        assertNotNull(depois.uiState.value as PartidaUiState.Anuncio.Acerto)
+        assertEquals(FeedbackDevUiState(), depois.feedbackDev.value)
+        assertTrue(registro.registrados.isEmpty())
+    }
+
+    // endregion
 }

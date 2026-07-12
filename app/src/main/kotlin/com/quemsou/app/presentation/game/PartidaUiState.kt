@@ -1,5 +1,6 @@
 package com.quemsou.app.presentation.game
 
+import com.quemsou.app.data.feedback.VotoDeCard
 import com.quemsou.app.domain.model.CardType
 
 /**
@@ -121,6 +122,20 @@ sealed interface PartidaUiState {
         val empate: Boolean,
     ) : PartidaUiState
 }
+
+/**
+ * Estado do widget dev de feedback no Anúncio (modo dev de feedback, 5B
+ * parte 2). Existe (não nulo) **apenas** durante um Anúncio com o modo dev
+ * ligado — com o modo desligado, nenhum composable do widget entra na
+ * composição. Avaliar é opcional: sem [voto], nada é gravado no "Continuar".
+ *
+ * @property voto veredito atual; `null` = nenhum chip selecionado.
+ * @property comentario texto do comentário opcional (só gravado com voto).
+ */
+data class FeedbackDevUiState(
+    val voto: VotoDeCard? = null,
+    val comentario: String = "",
+)
 
 /** Um adivinhador listado na fase QuemAcertou. */
 data class AdivinhadorUi(val id: String, val nome: String)

@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
@@ -42,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quemsou.app.R
+import com.quemsou.app.data.feedback.VotoDeCard
 import com.quemsou.app.presentation.ui.components.AvatarInicial
 import com.quemsou.app.presentation.ui.components.BarraDeAcaoInferior
 import com.quemsou.app.presentation.ui.components.ChipDeJogador
@@ -390,14 +394,26 @@ internal fun QuemAcertouSheet(
     }
 }
 
+/**
+ * Fim de turno com a resposta revelada. [feedbackDev] não nulo (modo dev de
+ * feedback ligado) insere o widget dev entre o bloco da resposta e o botão
+ * de avançar — com o modo desligado, nenhum composable do widget entra na
+ * composição. O `imePadding` + scroll deixam o bloco da resposta encolher com
+ * o teclado do comentário aberto, mantendo a resposta visível.
+ */
 @Composable
 internal fun AnuncioContent(
     estado: PartidaUiState.Anuncio,
+    feedbackDev: FeedbackDevUiState?,
+    onVotar: (VotoDeCard) -> Unit,
+    onComentar: (String) -> Unit,
     onProximoTurno: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -442,6 +458,13 @@ internal fun AnuncioContent(
                     stringResource(R.string.partida_anuncio_pontos_leitor, estado.nomeDoLeitor, estado.pontosDoLeitor),
                 )
             }
+        }
+        if (feedbackDev != null) {
+            FeedbackDevWidget(
+                estado = feedbackDev,
+                onVotar = onVotar,
+                onComentar = onComentar,
+            )
         }
         Button(
             onClick = onProximoTurno,

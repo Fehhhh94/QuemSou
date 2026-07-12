@@ -132,6 +132,14 @@
     <string name="partida_anuncio_proximo_turno">Próxima jogada</string>
     <string name="partida_anuncio_ver_placar">Ver placar</string>
 
+    <!-- Partida — widget dev de feedback (só com o modo dev ligado) -->
+    <string name="partida_feedback_selo">DEV</string>
+    <string name="partida_feedback_pergunta">Como foi este card?</string>
+    <string name="partida_feedback_bom">👍 Bom</string>
+    <string name="partida_feedback_fraco">👎 Fraco</string>
+    <string name="partida_feedback_comentar">✏️ Comentar (opcional)</string>
+    <string name="partida_feedback_comentario_placeholder">O que você notou neste card?</string>
+
     <!-- Partida — PlacarFinal -->
     <string name="placar_titulo">Fim de partida</string>
     <string name="placar_vencedor">%1$s venceu!</string>

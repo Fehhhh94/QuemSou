@@ -33,6 +33,7 @@ fun PartidaScreen(
     viewModel: PartidaViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val feedbackDev by viewModel.feedbackDev.collectAsState()
     val abandonoSolicitado by viewModel.abandonoSolicitado.collectAsState()
     var confirmarQueimar by remember { mutableStateOf(false) }
 
@@ -74,6 +75,9 @@ fun PartidaScreen(
 
                     is PartidaUiState.Anuncio -> AnuncioContent(
                         estado = estado,
+                        feedbackDev = feedbackDev,
+                        onVotar = viewModel::votarNoCard,
+                        onComentar = viewModel::comentarFeedback,
                         onProximoTurno = viewModel::proximoTurno,
                     )
 
