@@ -211,3 +211,26 @@ passa a ser a do desenvolvedor, nunca do usuário final.
   consistência cruzada já existentes (versão, contagem, órfãos);
   divergência vira violação legível. Campo ausente segue válido (é
   opcional).
+
+## 🟣 Feedback dev — julgamento do desfecho do turno (calibragem de cards)
+
+- **Status**: registrado em 2026-07-12 — desenho aprovado, **implementar
+  SOMENTE após o primeiro ciclo completo de feedback com o formato v1 em
+  partida real** (validar se a granularidade atual já resolve antes de
+  refinar). Mockup obrigatório antes do código, como sempre.
+- **Motivação**: o voto por card (👍/👎) diz que o card é fraco, mas não o
+  porquê. A pergunta editorial que falta é sobre o desfecho: o acerto foi
+  justo ou a dica era vaga (chute)? O card queimou por ser difícil na
+  medida ou por dicas vagas demais?
+- **Desenho aprovado (2026-07-12)**: um chip opcional a mais no widget de
+  feedback do Anúncio, contextual ao resultado, visível só após o voto no
+  card (mesmo padrão do "Comentar"):
+  - Turno com acerto: "A dica do acerto entregou?" → Entregou demais / Na
+    medida / Vaga (chute).
+  - Turno queimado: "Por que queimou?" → Difícil na medida / Dicas vagas
+    demais.
+  - Sem resposta, nada é gravado — o ritmo da mesa continua mandando.
+- **Custo estimado**: campo novo nullable (`julgamentoDoDesfecho`) em
+  `feedback_de_cards` → migração Room 4→5; dois chips condicionais no
+  widget; formato de export `quemsou-feedback` v1→v2; ritual de ingestão
+  da fábrica aprende o v2.
