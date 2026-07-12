@@ -16,6 +16,12 @@
     <!-- Home — modo dev de feedback (easter egg de 7 toques no título) -->
     <string name="home_dev_snackbar_ligado">Modo dev de feedback ativado</string>
     <string name="home_dev_snackbar_desligado">Modo dev de feedback desativado</string>
+    <string name="home_dev_exportar">Exportar feedback (%1$d)</string>
+    <string name="home_dev_limpar">Limpar feedback</string>
+    <string name="home_dev_limpar_titulo">Limpar feedback?</string>
+    <string name="home_dev_limpar_corpo">Todos os registros de feedback serão apagados do aparelho. Exportar não apaga — esta ação sim, e não pode ser desfeita.</string>
+    <string name="home_dev_limpar_confirmar">Apagar tudo</string>
+    <string name="home_dev_limpar_cancelar">Cancelar</string>
 
     <!-- Catálogo -->
     <string name="catalogo_titulo">Baralhos</string>

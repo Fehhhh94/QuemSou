@@ -1,5 +1,8 @@
 package com.quemsou.app.presentation.ui.home
 
+import android.content.Intent
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,21 +24,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.quemsou.app.R
+import com.quemsou.app.presentation.ui.components.ConfirmDialog
+import com.quemsou.app.presentation.ui.theme.DevVioleta
+import com.quemsou.app.presentation.ui.theme.DevVioletaEscuro
 import com.quemsou.app.presentation.ui.theme.QuemSouTheme
+import kotlinx.coroutines.launch
 
 /**
  * Tela inicial do app: começar uma partida nova, abrir o catálogo de
@@ -44,7 +52,9 @@ import com.quemsou.app.presentation.ui.theme.QuemSouTheme
  *
  * O título esconde o easter egg do **modo dev de feedback** (7 toques, padrão
  * Android de opções de desenvolvedor); a alternância é confirmada por
- * Snackbar. Não há nenhuma outra entrada de UI para o modo.
+ * Snackbar. Com o modo ligado e registros no Room, aparece o item discreto
+ * "Exportar feedback (N)" (Sharesheet, padrão "Pedir um baralho") + "Limpar
+ * feedback" com confirmação. Não há nenhuma outra entrada de UI para o modo.
  */
 @Composable
 fun HomeScreen(
@@ -54,7 +64,11 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val avisoDeModoDev by viewModel.avisoDeModoDev.collectAsState()
+    val exportarVisivel by viewModel.exportarVisivel.collectAsState()
+    val quantidadeDeFeedback by viewModel.quantidadeDeFeedback.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val escopo = rememberCoroutineScope()
+    val contexto = LocalContext.current
 
     val textoLigado = stringResource(R.string.home_dev_snackbar_ligado)
     val textoDesligado = stringResource(R.string.home_dev_snackbar_desligado)
@@ -66,22 +80,42 @@ fun HomeScreen(
 
     HomeContent(
         snackbarHostState = snackbarHostState,
+        exportarVisivel = exportarVisivel,
+        quantidadeDeFeedback = quantidadeDeFeedback,
         onCreateMatch = onCreateMatch,
         onAbrirCatalogo = onAbrirCatalogo,
         onJoinWithCode = onJoinWithCode,
         onSeteToquesNoTitulo = viewModel::alternarModoDev,
+        onExportarFeedback = {
+            // Mesmo padrão do "Pedir um baralho": ACTION_SEND text/plain — o
+            // JSON sai pelo app que o dev escolher; nada é transmitido daqui.
+            escopo.launch {
+                val json = viewModel.montarJsonDeExport()
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, json)
+                }
+                contexto.startActivity(Intent.createChooser(intent, null))
+            }
+        },
+        onLimparFeedback = viewModel::limparFeedback,
     )
 }
 
 @Composable
 private fun HomeContent(
     snackbarHostState: SnackbarHostState,
+    exportarVisivel: Boolean,
+    quantidadeDeFeedback: Int,
     onCreateMatch: () -> Unit,
     onAbrirCatalogo: () -> Unit,
     onJoinWithCode: () -> Unit,
     onSeteToquesNoTitulo: () -> Unit,
+    onExportarFeedback: () -> Unit,
+    onLimparFeedback: () -> Unit,
 ) {
     var mostrarComoJogar by remember { mutableStateOf(false) }
+    var confirmarLimpeza by remember { mutableStateOf(false) }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { innerPadding ->
         Column(
@@ -136,6 +170,13 @@ private fun HomeContent(
             TextButton(onClick = { mostrarComoJogar = true }) {
                 Text(text = stringResource(id = R.string.home_how_to_play))
             }
+            if (exportarVisivel) {
+                ItemDevDeFeedback(
+                    quantidade = quantidadeDeFeedback,
+                    onExportar = onExportarFeedback,
+                    onLimpar = { confirmarLimpeza = true },
+                )
+            }
         }
     }
 
@@ -150,6 +191,54 @@ private fun HomeContent(
                 }
             },
         )
+    }
+
+    if (confirmarLimpeza) {
+        ConfirmDialog(
+            titulo = stringResource(R.string.home_dev_limpar_titulo),
+            texto = stringResource(R.string.home_dev_limpar_corpo),
+            textoConfirmar = stringResource(R.string.home_dev_limpar_confirmar),
+            textoCancelar = stringResource(R.string.home_dev_limpar_cancelar),
+            onConfirmar = {
+                confirmarLimpeza = false
+                onLimparFeedback()
+            },
+            onCancelar = { confirmarLimpeza = false },
+        )
+    }
+}
+
+/**
+ * Item discreto do modo dev na Home: exportar o feedback acumulado (N vivo
+ * do Room) e limpar o histórico. Violeta do modo dev — a mesma identidade
+ * "andaime" do widget do Anúncio; invisível com o modo desligado ou sem
+ * registros.
+ */
+@Composable
+private fun ItemDevDeFeedback(
+    quantidade: Int,
+    onExportar: () -> Unit,
+    onLimpar: () -> Unit,
+) {
+    val acento = if (isSystemInDarkTheme()) DevVioleta else DevVioletaEscuro
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextButton(onClick = onExportar) {
+            Text(
+                text = stringResource(R.string.home_dev_exportar, quantidade),
+                style = MaterialTheme.typography.labelLarge,
+                color = acento,
+            )
+        }
+        TextButton(onClick = onLimpar) {
+            Text(
+                text = stringResource(R.string.home_dev_limpar),
+                style = MaterialTheme.typography.labelLarge,
+                color = acento,
+            )
+        }
     }
 }
 
@@ -190,10 +279,14 @@ private fun HomeScreenPreview() {
     QuemSouTheme {
         HomeContent(
             snackbarHostState = SnackbarHostState(),
+            exportarVisivel = false,
+            quantidadeDeFeedback = 0,
             onCreateMatch = {},
             onAbrirCatalogo = {},
             onJoinWithCode = {},
             onSeteToquesNoTitulo = {},
+            onExportarFeedback = {},
+            onLimparFeedback = {},
         )
     }
 }
