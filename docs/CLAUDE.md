@@ -1,6 +1,6 @@
 # QuemSou — Guia do projeto para o Claude
 
-> **v17 (2026-07-11).** Este arquivo descreve apenas o **estado atual** do
+> **v18 (2026-07-11).** Este arquivo descreve apenas o **estado atual** do
 > projeto. Histórico de versões, decisões substituídas e o "porquê" das
 > mudanças vivem em `docs/CHANGELOG.md` — não aqui.
 
@@ -47,7 +47,7 @@
   baralhos embarcados FINALIZADOS** — "Cinema Clássico — Edição 1" (30
   `PERSONAGEM_FILME`, coleção 🎬) e "Mundo da Música — Edição 1" (30
   `MUNDO_DA_MUSICA`, coleção 🎸) —, validados pelo `BaralhoDeAssetsTest`.
-  **164 testes verdes.**
+  **191 testes verdes.**
 - **Modo Shot entregue** (2026-07-09); validação física no Z Fold pendente
   — incluir na próxima sessão de jogo.
 - **Fase 5 — EM ANDAMENTO** (Catálogo de Baralhos): 5.1 concluída
@@ -65,9 +65,13 @@
   -Ppasta=<raiz>`; JVM pura, reusa `ParserDoCatalogo`/`ValidadorDeBaralho`/
   `ValidadorEditorial` sem duplicar regra nenhuma — checa também a
   consistência cruzada índice↔baralho, versão e contagem de cards).
-  **Próximo passo: 5B parte 2 — `CLAUDE.md` da fábrica no repositório
-  `QuemSou-Baralhos`** (regras editoriais + ritual de publicação + o
-  validador como régua).
+  **Parte 2 (lado app) concluída** (2026-07-11): modo dev de feedback de
+  cards durante a partida — ver "Modo dev de feedback" abaixo; Room migra
+  3→4 (tabela `feedback_de_cards`); **validação física no Z Fold
+  pendente** (checklist em `docs/BUGS.md`). **Próximo passo: 5B parte 2 —
+  lado fábrica** (`CLAUDE.md` da fábrica no repositório `QuemSou-Baralhos`:
+  regras editoriais + ritual de publicação + o validador como régua; o
+  export de feedback do app alimenta a revisão dos baralhos).
 - **Fase 4 (Nearby Connections): no backlog**, sem previsão — ver "Backlog".
 - Única decisão de produto em aberto: **nome definitivo do app** ("QuemSou"
   é provisório em código, pacote e strings).
@@ -223,13 +227,46 @@
 - **Validação estrutural pré-`Card`**: o JSON cru do Gemini precisa de
   validação estrutural ANTES de construir `Card` (8 dicas deve virar
   violação legível na revisão, não exceção do construtor).
+- **Modo dev de feedback** (ferramenta do desenvolvedor DENTRO do app, 5B
+  parte 2 — não é feature): avaliar cards em partida real e exportar para a
+  fábrica. Nada disso toca `domain/` — vive em `data/feedback/`,
+  `data/local/` e `presentation/`. Regras:
+  - **Ativação**: preferência `modoDevFeedback` (DataStore, padrão false),
+    alternada SÓ por 7 toques no título da Home (easter egg padrão
+    Android), com Snackbar de confirmação. Com o modo desligado, **nenhum
+    composable do feedback entra na composição** — o jogador comum nunca vê
+    nada.
+  - **Widget no Anúncio** (Acerto e Queimado, igual): entre o bloco da
+    resposta e o botão de avançar, identidade "andaime" — borda TRACEJADA
+    violeta (tokens `DevVioleta`/`DevVioletaEscuro`, claro/escuro), selo
+    "DEV", pergunta "Como foi este card?", chips "👍 Bom"/"👎 Fraco" com
+    toggle (tocar de novo desmarca) e link "✏️ Comentar (opcional)" que só
+    existe após um voto. **Nunca âmbar** (exclusivo do Modo Shot). Sem
+    botão salvar: "Continuar" grava e avança; **sem voto nada é gravado**
+    (pular é legítimo) — o ritmo da mesa manda. Voto pendente não sobrevive
+    à morte de processo (limitação aceita, KDoc em
+    `PartidaViewModel.feedbackDev`).
+  - **Persistência**: tabela `feedback_de_cards` (baralhoId, cardId, voto
+    BOM|FRACO, comentário opcional, rodada, resultado ACERTO|QUEIMADO,
+    dica do acerto, criadoEm) — **histórico completo por inserção**, nunca
+    sobrescreve; sem FK de propósito (reimportar/remover baralho não apaga
+    o histórico).
+  - **Export**: item discreto "Exportar feedback (N)" na Home (oculto com
+    N == 0 ou modo desligado) monta o JSON `quemsou-feedback` versão 1
+    (`exportadoEm` e `criadoEm` em ISO-8601; `resposta` de cada card via
+    join com o Room, nula se o card já não existe) e dispara o Sharesheet
+    (ACTION_SEND, text/plain — padrão "Pedir um baralho"). Exportar NÃO
+    apaga; "Limpar feedback" é ação separada com `ConfirmDialog`.
 - **Sub-fases**: **5A — Catálogo, CONCLUÍDA** (validação física no Z Fold
   pendente — checklist em `docs/BUGS.md`) · **5B — Fábrica interna, EM
   ANDAMENTO** (Claude Code opera no repositório `QuemSou-Baralhos`; decisão
   de formato fechada — não é mais pipeline Gemini dentro do app: **parte 1
   concluída** é a régua executável — `validarBaralho`/`validarCatalogo`,
   tasks Gradle de linha de comando, JVM pura — que a fábrica usa antes da
-  revisão humana) · **5C — visão comercial** (backlog — ver "Backlog").
+  revisão humana; **parte 2 lado app concluída** é o modo dev de feedback
+  acima, que alimenta a revisão com dados de partida real; falta o lado
+  fábrica — `CLAUDE.md` do `QuemSou-Baralhos`) · **5C — visão comercial**
+  (backlog — ver "Backlog").
 
 ## Backlog
 

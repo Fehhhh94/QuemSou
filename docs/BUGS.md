@@ -4,7 +4,7 @@ Bugs encontrados em teste de jogo físico (Samsung Galaxy Z Fold, Android 16)
 após o fechamento documental da Fase 3. Corrigidos em código e **validados
 no Z Fold físico no fechamento da Fase 3 (2026-07-09)**.
 
-## Checklist de validação física — Modo Shot + Fase 5A (pendente)
+## Checklist de validação física — Modo Shot + Fase 5A + 5B parte 2 (pendente)
 
 Validar no Z Fold físico, **por update em cima do app instalado (sem
 desinstalar)** — é isso que exercita as migrações Room de verdade:
@@ -40,6 +40,19 @@ desinstalar)** — é isso que exercita as migrações Room de verdade:
    restaura o overlay; pontuação idêntica com o modo ligado.
 9. **Pedir um baralho**: preencher tema e enviar — o Sharesheet abre com o
    texto estruturado.
+10. **Migração Room 3→4 por update** (5B parte 2): instalar o APK novo por
+    cima, abrir o app e jogar — sem crash na abertura; baralhos baixados e
+    o histórico de feedback anterior (se houver) preservados.
+11. **Fluxo completo de feedback em partida real** (5B parte 2): 7 toques
+    no título da Home ligam o modo dev (Snackbar); no Anúncio (acerto E
+    queimado) o widget violeta tracejado aparece; votar/desmarcar; comentar
+    com o teclado aberto mantém a resposta visível; "Continuar" grava;
+    pular (sem voto) não grava; com o modo desligado o widget some e a
+    partida fica idêntica à de sempre.
+12. **Export do feedback** (5B parte 2): "Exportar feedback (N)" na Home
+    (N bate com os votos dados) abre o Sharesheet com JSON
+    `quemsou-feedback` válido (respostas presentes via join); "Limpar
+    feedback" pede confirmação, zera e esconde o item.
 
 ## 1. Motivo de bloqueio "cards insuficientes" — achado da validação física da 5A (revisão)
 

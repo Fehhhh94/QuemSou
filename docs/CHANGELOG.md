@@ -2,6 +2,55 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fase 5B parte 2 (lado app) — feedback de cards dev-only na partida (2026-07-11)
+
+Ferramenta de desenvolvedor, não feature: avaliar cards durante partidas
+reais e exportar o resultado para a fábrica interna. Nada toca `domain/`
+(segue Kotlin puro e intocado) — tudo vive em `data/feedback/`,
+`data/local/` e `presentation/`. Jogador comum nunca vê nada: com o modo
+desligado (padrão), nenhum composable do feedback entra na composição.
+Mockup aprovado: `mockup-feedback-anuncio-v1.html`.
+
+- **Modo dev (DataStore)**: preferência `modoDevFeedback` (padrão false)
+  atrás de `ModoDevFeedbackStore`; alternância exclusivamente por 7 toques
+  no título da Home (easter egg padrão Android), Snackbar confirma
+  "ativado"/"desativado". Nenhuma outra entrada de UI.
+- **Room migração 3→4**: nova tabela `feedback_de_cards`
+  (`FeedbackDeCardEntity`: baralhoId, cardId, voto BOM|FRACO, comentário
+  opcional, rodada, resultado ACERTO|QUEIMADO, número da dica do acerto,
+  criadoEm). Histórico completo por inserção — nunca sobrescreve; **sem FK
+  de propósito**: reimportação/remoção de baralho não apaga o histórico da
+  fábrica. Migração puramente aditiva com SQL idêntico ao schema exportado
+  (`app/schemas/.../4.json`). Nota: como as migrações anteriores, sem teste
+  automatizado — o projeto não usa Robolectric/instrumentação; a validação
+  é física, por update no Z Fold (checklist em `docs/BUGS.md`).
+- **Widget no Anúncio** (Acerto e Queimado, igual): entre o bloco da
+  resposta e o botão de avançar, identidade "andaime" — borda tracejada
+  violeta (tokens novos `DevVioleta`/`DevVioletaEscuro`; nunca âmbar, que é
+  exclusivo do Modo Shot), selo "DEV", chips 👍/👎 com toggle e comentário
+  inline que só existe após um voto. Sem botão salvar: "Continuar" grava
+  (voto + comentário + dados do turno) e avança; sem voto nada é gravado —
+  avaliar é opcional e nunca bloqueia a mesa. Estado do widget em
+  `StateFlow` próprio (`PartidaViewModel.feedbackDev`), fora do
+  `PartidaUiState`, para voto/tecla não reanimar o `AnimatedContent`; voto
+  pendente não sobrevive à morte de processo (limitação aceita, em KDoc).
+  `AnuncioContent` ganhou `imePadding` + scroll: com o teclado aberto o
+  bloco da resposta encolhe mas a resposta continua visível.
+- **Export via Sharesheet** (padrão "Pedir um baralho"): item discreto
+  "Exportar feedback (N)" na Home (N vivo via Flow; oculto com N == 0 ou
+  modo desligado) monta o JSON `quemsou-feedback` versão 1 — `resposta` de
+  cada card via LEFT JOIN com `cards` (nula se o card já não existe no
+  aparelho), timestamps ISO-8601 — e dispara ACTION_SEND text/plain.
+  Exportar NÃO apaga; "Limpar feedback" é ação separada com ConfirmDialog.
+  `HomeViewModel` novo (a Home não tinha ViewModel).
+- **174→191 testes verdes** (17 novos): mapeamento entidade↔export com JSON
+  estável (`ExportadorDeFeedbackTest`), lógica do `PartidaViewModel`
+  (votar/desmarcar/comentar, gravação no continuar com dados do turno,
+  nada gravado sem voto, queimado sem número de dica, comentário em branco
+  vira null, widget zerado após morte de processo) e `HomeViewModelTest`
+  (toggle + aviso, visibilidade do export condicionada ao modo dev e a
+  N > 0, limpeza).
+
 ### 2026-07-11 — CLAUDE.md v17
 - Novas regras inegociáveis de **memória persistente**: em divergência entre
   a memória do Claude Code e os docs versionados, os docs mandam (a memória
