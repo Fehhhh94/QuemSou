@@ -2,6 +2,37 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+## Fechamento da validação física — Modo Shot + 5A + 5B parte 2 (2026-07-12)
+
+Sem mudança de código — apenas documentação (`docs/CLAUDE.md` v22).
+
+- **Checklist de validação física no Z Fold (Android 16): CONCLUÍDO** por
+  Felipe em 2026-07-12 (`docs/BUGS.md`): catálogo com rede real (download
+  do baralho de teste, bump v2→v3 acendendo o "Atualizar" âmbar + pontinho
+  de novidade, comportamento offline), **migração Room 3→4 por update em
+  cima do app instalado**, **Modo Shot** (overlay que só avança no "Bebi!",
+  pedágio sem mudança de pontuação, invariante dos 10 pontos) e **feedback
+  dev** (fluxo completo no Anúncio, export via Sharesheet, limpeza com
+  confirmação, invisibilidade total com o modo desligado).
+- Com isso, **Modo Shot, 5A e 5B parte 2 (lado app) passam a "concluída e
+  validada fisicamente"** — as pendências de validação física dessas
+  entregas saem do `docs/CLAUDE.md`; as pendências das seções 1 e 6 do
+  `docs/BUGS.md` (revalidar itens 6 e 11 do checklist) fecham juntas.
+- **Morte de processo é não-bug** (`docs/BUGS.md` seção 7): diagnóstico de
+  2026-07-12 no emulador (API 35) — `am kill` em background e "Don't keep
+  activities" restauram a partida perfeitamente; o "reabre na Home" visto
+  no Z Fold veio do **swipe nos recentes**, que remove a task e descarta o
+  estado salvo por semântica do Android (dispensa intencional). Fica
+  pendente só a **revalidação ritual no Z Fold** (am kill + relançamento
+  pelo ícone; nunca `am start -n`, que empilha uma activity nova e produz
+  falso negativo).
+- **"Retomar partida" entra no Backlog** do `docs/CLAUDE.md` (escopo
+  aprovado: persistência em disco para a partida sobreviver também ao
+  swipe; **mockup pendente — não iniciar sem desenho aprovado**).
+- Achado colateral do bump v2→v3: `tamanhoEmBytes` do índice fica defasado
+  sem ninguém medir — melhoria registrada em `docs/IMPROVEMENTS.md`
+  (`validarCatalogo` conferir declarado vs real).
+
 ### 2026-07-12 — CLAUDE.md v21
 - **Versão visível no rodapé da Home** + regra **"visível-primeiro"** no
   fluxo de trabalho. Motivo: na validação física da 5B parte 2, um build

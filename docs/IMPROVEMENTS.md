@@ -2,10 +2,10 @@
 
 ## ✅ Modo Shot (entregue)
 
-- **Status**: **entregue em 2026-07-09** — regra vigente registrada em
-  `docs/GAME_RULES.md` ("Modo Shot (regra opcional)") e no guia
-  `docs/CLAUDE.md`; detalhes da entrega no `docs/CHANGELOG.md`. Validação
-  física no Z Fold pendente. A especificação original fica abaixo como
+- **Status**: **entregue em 2026-07-09 e validado fisicamente no Z Fold em
+  2026-07-12** — regra vigente registrada em `docs/GAME_RULES.md` ("Modo
+  Shot (regra opcional)") e no guia `docs/CLAUDE.md`; detalhes da entrega
+  no `docs/CHANGELOG.md`. A especificação original fica abaixo como
   registro.
 - `RegrasPartida`: `modoShot: Boolean = false` + `quantidadeDeShots: Int = 2`
   (1–3, visível na Configuração só com o toggle ligado).
@@ -195,3 +195,19 @@ passa a ser a do desenvolvedor, nunca do usuário final.
   - **Conteúdo**: 60 cards embarcados × 5 dicas novas = 300 dicas novas.
   - **Ciclo de vida**: baralhos `FINALIZADO` são imutáveis — a mudança
     exige formato v2 + baralhos "Edição 2", nunca edição dos existentes.
+
+## 🟣 validarCatalogo: conferir `tamanhoEmBytes` declarado vs real
+
+- **Status**: registrado em 2026-07-12 — achado do bump v2→v3 do baralho
+  de teste no fechamento da validação física (`docs/BUGS.md`, item 3 do
+  checklist). Melhoria pequena, na próxima passada pelo validador.
+- **Problema**: o `tamanhoEmBytes` do índice é opcional e declarado à mão;
+  ao bumpar um baralho o campo fica defasado sem ninguém perceber —
+  nenhuma camada mede o tamanho real do arquivo (o app só o exibe como
+  meta no card do catálogo).
+- **Melhoria**: `./gradlew validarCatalogo` passa a comparar o
+  `tamanhoEmBytes` declarado no índice com o tamanho real do arquivo
+  `baralhos/<id>.json` correspondente — mesma família dos checks de
+  consistência cruzada já existentes (versão, contagem, órfãos);
+  divergência vira violação legível. Campo ausente segue válido (é
+  opcional).

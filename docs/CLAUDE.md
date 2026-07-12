@@ -1,6 +1,6 @@
 # QuemSou — Guia do projeto para o Claude
 
-> **v21 (2026-07-12).** Este arquivo descreve apenas o **estado atual** do
+> **v22 (2026-07-12).** Este arquivo descreve apenas o **estado atual** do
 > projeto. Histórico de versões, decisões substituídas e o "porquê" das
 > mudanças vivem em `docs/CHANGELOG.md` — não aqui.
 
@@ -48,28 +48,31 @@
   `PERSONAGEM_FILME`, coleção 🎬) e "Mundo da Música — Edição 1" (30
   `MUNDO_DA_MUSICA`, coleção 🎸) —, validados pelo `BaralhoDeAssetsTest`.
   **191 testes verdes.**
-- **Modo Shot entregue** (2026-07-09); validação física no Z Fold pendente
-  — incluir na próxima sessão de jogo.
+- **Modo Shot entregue** (2026-07-09) e **validado fisicamente no Z Fold**
+  (2026-07-12): overlay, pedágio e invariante dos 10 pontos conferidos em
+  jogo real.
 - **Fase 5 — EM ANDAMENTO** (Catálogo de Baralhos): 5.1 concluída
   (`ValidadorEditorial`, régua da fábrica interna); **5A concluída**
   (2026-07-09 — parte 1: entidade Baralho + Room + formato; parte 2: UI do
   catálogo em dois níveis, download com cache do índice, "Pedir um baralho"
   e Setup por baralhos). Repositório `Fehhhh94/QuemSou-Baralhos` criado e
   publicado; `HttpFonteDoCatalogo.URL_DO_INDICE` já aponta para a URL real
-  (o `TODO_URL_CATALOGO` foi resolvido). **Pendente da 5A: fechar a
-  validação física completa no Z Fold** (checklist em `docs/BUGS.md`) —
-  parte dela já rodou, achados registrados no mesmo arquivo.
+  (o `TODO_URL_CATALOGO` foi resolvido). **Validação física da 5A no Z Fold
+  concluída** (fechamento em 2026-07-12 — rede real, download, bump
+  v2→v3, offline; achados em `docs/BUGS.md`).
   **5B — fábrica interna EM ANDAMENTO**: **parte 1 concluída** — validador
   de catálogo como ferramenta de linha de comando (`./gradlew
   validarBaralho -Parquivo=<caminho>` e `./gradlew validarCatalogo
   -Ppasta=<raiz>`; JVM pura, reusa `ParserDoCatalogo`/`ValidadorDeBaralho`/
   `ValidadorEditorial` sem duplicar regra nenhuma — checa também a
   consistência cruzada índice↔baralho, versão e contagem de cards).
-  **Parte 2 (lado app) concluída** (2026-07-11): modo dev de feedback de
-  cards durante a partida — ver "Modo dev de feedback" abaixo; Room migra
-  3→4 (tabela `feedback_de_cards`); **validação física no Z Fold
-  pendente** (checklist em `docs/BUGS.md`). **Próximo passo: 5B parte 2 —
-  lado fábrica** (`CLAUDE.md` da fábrica no repositório `QuemSou-Baralhos`:
+  **Parte 2 (lado app) concluída** (2026-07-11) e **validada fisicamente
+  no Z Fold** (2026-07-12: fluxo de feedback, export, limpeza,
+  invisibilidade com o modo desligado e migração Room 3→4 por update).
+  Única pendência de validação restante: a **revalidação ritual da
+  restauração pós-morte de processo** (`docs/BUGS.md` seção 7 — não-bug;
+  am kill + relançamento pelo ícone, nunca `am start -n`). **Próximo
+  passo: 5B parte 2 — lado fábrica** (`CLAUDE.md` da fábrica no repositório `QuemSou-Baralhos`:
   regras editoriais + ritual de publicação + o validador como régua; o
   export de feedback do app alimenta a revisão dos baralhos).
 - **Fase 4 (Nearby Connections): no backlog**, sem previsão — ver "Backlog".
@@ -162,6 +165,11 @@
   em JSON (um único argumento serializável; nunca objetos de domínio).
 - **Restauração pós-morte de processo**: `SavedStateHandle` mínimo +
   recriação determinística por seed, reexecutando as revelações salvas.
+  **Não cobre swipe nos recentes** — o Android remove a task e descarta o
+  estado salvo (não-bug, `docs/BUGS.md` seção 7); sobreviver ao swipe é o
+  backlog "Retomar partida". Testar restauração sempre com `am kill` +
+  relançamento pelo ícone — nunca `am start -n`, que empilha uma activity
+  nova na task e produz falso negativo.
 - **Erros**: domínio lança exceção (`check`/`require` →
   `IllegalStateException`/`IllegalArgumentException`); o ViewModel **ignora
   eventos fora de fase** (toques duplicados não derrubam o app) — exceções
@@ -265,8 +273,8 @@
     join com o Room, nula se o card já não existe) e dispara o Sharesheet
     (ACTION_SEND, text/plain — padrão "Pedir um baralho"). Exportar NÃO
     apaga; "Limpar feedback" é ação separada com `ConfirmDialog`.
-- **Sub-fases**: **5A — Catálogo, CONCLUÍDA** (validação física no Z Fold
-  pendente — checklist em `docs/BUGS.md`) · **5B — Fábrica interna, EM
+- **Sub-fases**: **5A — Catálogo, CONCLUÍDA e validada fisicamente**
+  (2026-07-12) · **5B — Fábrica interna, EM
   ANDAMENTO** (Claude Code opera no repositório `QuemSou-Baralhos`; decisão
   de formato fechada — não é mais pipeline Gemini dentro do app: **parte 1
   concluída** é a régua executável — `validarBaralho`/`validarCatalogo`,
@@ -285,6 +293,13 @@
   `EmbaralhadorDeCards` viram embaralhamento interno do anfitrião. Retomada
   começa pelo **desenho da arquitetura da camada Nearby** antes de qualquer
   código; validação exige **2+ aparelhos físicos** (emulador não testa Nearby).
+- **"Retomar partida" — persistir a partida em disco** (escopo aprovado em
+  2026-07-12; **não iniciar sem mockup aprovado** — desenho antes de
+  código, como sempre): a restauração por `SavedStateHandle` não sobrevive
+  ao swipe nos recentes — o Android descarta a task por design (não-bug,
+  `docs/BUGS.md` seção 7). A ideia: gravar a `ConfiguracaoDaPartida` + as
+  chaves mínimas de estado em disco a cada mudança de fase e oferecer
+  "Retomar partida" na Home, com limpeza no placar final e no abandono.
 - **Visão comercial de baralhos (5C)**: baralhos customizados pagos sob
   demanda. Restrição registrada: conteúdo com marca registrada (Harry
   Potter etc.) **não pode ser vendido** — customizado pago só para temas
