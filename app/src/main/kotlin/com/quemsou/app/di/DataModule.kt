@@ -11,6 +11,8 @@ import com.quemsou.app.data.catalogo.ArquivoCacheDoIndice
 import com.quemsou.app.data.catalogo.CacheDoIndice
 import com.quemsou.app.data.catalogo.FonteDoCatalogo
 import com.quemsou.app.data.catalogo.HttpFonteDoCatalogo
+import com.quemsou.app.data.espelho.KtorServidorDoEspelho
+import com.quemsou.app.data.espelho.ServidorDoEspelho
 import com.quemsou.app.data.feedback.DataStoreModoDevFeedbackStore
 import com.quemsou.app.data.feedback.ModoDevFeedbackStore
 import com.quemsou.app.data.feedback.RegistroDeFeedback
@@ -63,6 +65,11 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindRegistroDeFeedback(impl: RegistroDeFeedbackLocal): RegistroDeFeedback
+
+    /** Singleton: só pode existir um servidor disputando a porta do espelho. */
+    @Binds
+    @Singleton
+    abstract fun bindServidorDoEspelho(impl: KtorServidorDoEspelho): ServidorDoEspelho
 
     companion object {
 

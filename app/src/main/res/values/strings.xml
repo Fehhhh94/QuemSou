@@ -68,6 +68,23 @@
     <string name="setup_baralhos_contador">%1$d baralhos · %2$d cards no monte, embaralhados juntos</string>
     <string name="setup_bloqueio_nenhum_baralho">Selecione pelo menos um baralho</string>
     <string name="setup_bloqueio_cards_insuficientes">Os baralhos selecionados não têm cards para todas as rodadas</string>
+    <!-- Setup — espelho de leitura (4A parte 1: só o pareamento) -->
+    <string name="setup_espelho_titulo">Espelho de leitura</string>
+    <string name="setup_espelho_descricao">Cada jogador abre este endereço no navegador do próprio celular. Na vez dele de ler, a dica aparece por lá.</string>
+    <string name="setup_espelho_qr_cd">QR code com o endereço do espelho de leitura</string>
+    <string name="setup_espelho_entrou">✓ entrou</string>
+    <string name="setup_espelho_aguardando">aguardando</string>
+    <string name="setup_espelho_este_aparelho">📱 este aparelho</string>
+    <string name="setup_espelho_sem_nome">Jogador %1$d</string>
+    <string name="setup_espelho_dica_toque">Toque no seu nome se é você quem está com este celular. Toque em quem já entrou para liberar o lugar.</string>
+    <string name="setup_espelho_liberar_titulo">Liberar o lugar de %1$s?</string>
+    <string name="setup_espelho_liberar_corpo">O nome volta a ficar disponível no navegador e essa pessoa pode entrar de novo. Use quando alguém perdeu a sessão — fechou a aba anônima, limpou o navegador ou trocou de celular.</string>
+    <string name="setup_espelho_liberar_confirmar">Liberar lugar</string>
+    <string name="setup_espelho_liberar_cancelar">Cancelar</string>
+    <string name="setup_espelho_sem_rede">O espelho precisa de Wi-Fi. Conecte este celular à mesma rede dos jogadores e ligue de novo.</string>
+    <string name="setup_espelho_sem_porta">Não deu para abrir o espelho: nenhuma porta livre neste aparelho.</string>
+    <string name="setup_espelho_nota">Começar a partida não depende do espelho — o jogo funciona igual sem ninguém conectado.</string>
+
     <string name="setup_jogar_em_times_titulo">Jogar em times</string>
     <string name="setup_jogadores_titulo">Jogadores</string>
     <string name="setup_jogador_nome_placeholder">Nome do jogador %1$d</string>

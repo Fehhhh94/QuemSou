@@ -105,6 +105,16 @@ dependencies {
     // a partida segue 100% offline.
     implementation(libs.okhttp)
 
+    // Espelho de leitura (4A): servidor HTTP embarcado no aparelho do
+    // anfitrião, engine CIO (Kotlin puro sobre coroutines, sem Netty). Só
+    // fala com a rede local — nada sai do Wi-Fi da mesa.
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.cio)
+
+    // Geração do QR do endereço do espelho, na memória e sem rede. Só o
+    // núcleo do ZXing: o desenho do bitmap é nosso (presentation/ui/components).
+    implementation(libs.zxing.core)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))

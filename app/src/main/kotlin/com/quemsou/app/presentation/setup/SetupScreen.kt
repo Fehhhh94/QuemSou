@@ -1,12 +1,15 @@
 package com.quemsou.app.presentation.setup
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -42,8 +45,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -55,7 +60,11 @@ import com.quemsou.app.domain.model.Partida
 import com.quemsou.app.domain.model.RegrasPartida
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.presentation.ui.components.BarraDeAcaoInferior
+import com.quemsou.app.presentation.ui.components.CodigoQr
+import com.quemsou.app.presentation.ui.components.ConfirmDialog
 import com.quemsou.app.presentation.ui.components.SeloDeEstado
+import com.quemsou.app.presentation.ui.theme.SeloVerde
+import com.quemsou.app.presentation.ui.theme.SeloVerdeClaro
 import com.quemsou.app.presentation.ui.theme.ShotAmbar
 
 /** Tela de configuração da partida: baralhos, jogadores, grupos e regras. */
@@ -127,6 +136,13 @@ fun SetupScreen(
                 )
             }
             item {
+                SecaoEspelho(
+                    uiState = uiState,
+                    onAlternar = viewModel::alternarEspelho,
+                    onTocarNaLinha = viewModel::tocarNaLinhaDoEspelho,
+                )
+            }
+            item {
                 SecaoJogarEmTimes(ativo = uiState.jogarEmTimes, onAlternar = viewModel::alternarJogarEmTimes)
             }
             item {
@@ -170,6 +186,20 @@ fun SetupScreen(
                 )
             }
         }
+    }
+
+    uiState.espelhoLugarALiberar?.let { jogadorId ->
+        val indice = uiState.jogadores.indexOfFirst { it.id == jogadorId }
+        val nome = uiState.jogadores.getOrNull(indice)?.nome?.trim().orEmpty()
+            .ifBlank { stringResource(R.string.setup_espelho_sem_nome, indice + 1) }
+        ConfirmDialog(
+            titulo = stringResource(R.string.setup_espelho_liberar_titulo, nome),
+            texto = stringResource(R.string.setup_espelho_liberar_corpo),
+            textoConfirmar = stringResource(R.string.setup_espelho_liberar_confirmar),
+            textoCancelar = stringResource(R.string.setup_espelho_liberar_cancelar),
+            onConfirmar = viewModel::confirmarLiberarLugar,
+            onCancelar = viewModel::cancelarLiberarLugar,
+        )
     }
 }
 
@@ -240,6 +270,127 @@ private fun SecaoBaralhos(
             ),
             style = MaterialTheme.typography.bodyMedium,
         )
+    }
+}
+
+/**
+ * Espelho de leitura (4A parte 1): o anfitrião liga o servidor local, mostra
+ * o QR e o endereço, e acompanha quem já entrou pelo navegador.
+ *
+ * Fica **abaixo dos baralhos e antes dos jogadores** de propósito: quem lê o
+ * QR precisa dos nomes já digitados. Começar a partida NÃO depende disto —
+ * ninguém conectado é um estado perfeitamente válido.
+ *
+ * Cada linha da lista é tocável e o toque significa uma coisa diferente
+ * conforme o estado ([SetupUiState.estadoNoEspelho]); a dica de uso acima da
+ * lista existe porque um alvo de toque sem convite não é descoberto.
+ */
+@Composable
+private fun SecaoEspelho(
+    uiState: SetupUiState,
+    onAlternar: () -> Unit,
+    onTocarNaLinha: (String) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(stringResource(R.string.setup_espelho_titulo), style = MaterialTheme.typography.titleMedium)
+            Switch(
+                checked = uiState.espelhoLigado,
+                onCheckedChange = { onAlternar() },
+                enabled = !uiState.espelhoIniciando,
+            )
+        }
+        Text(
+            text = stringResource(R.string.setup_espelho_descricao),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        uiState.espelhoFalha?.let { falha ->
+            Text(
+                text = stringResource(
+                    when (falha) {
+                        FalhaDoEspelho.SEM_REDE -> R.string.setup_espelho_sem_rede
+                        FalhaDoEspelho.SEM_PORTA -> R.string.setup_espelho_sem_porta
+                    },
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+
+        val endereco = uiState.espelhoEndereco
+        if (uiState.espelhoLigado && endereco != null) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                CodigoQr(
+                    conteudo = endereco,
+                    contentDescription = stringResource(R.string.setup_espelho_qr_cd),
+                )
+                Text(
+                    text = endereco,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontFamily = FontFamily.Monospace,
+                )
+            }
+            Text(
+                text = stringResource(R.string.setup_espelho_dica_toque),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            // Mesmo verde do selo "edição final" do catálogo, com a variante
+            // clara/escura do tema — o ✓ é confirmação, não novidade. "Este
+            // aparelho" fica em onSurface: contraste cheio, sem cor própria,
+            // para não competir com o verde de quem entrou pela rede.
+            val verdeDoEntrou = if (isSystemInDarkTheme()) SeloVerdeClaro else SeloVerde
+            uiState.jogadores.forEachIndexed { indice, jogador ->
+                val estado = uiState.estadoNoEspelho(jogador.id)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onTocarNaLinha(jogador.id) }
+                        .heightIn(min = 48.dp)
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = jogador.nome.trim().ifBlank {
+                            stringResource(R.string.setup_espelho_sem_nome, indice + 1)
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        text = stringResource(
+                            when (estado) {
+                                EstadoNoEspelho.ESTE_APARELHO -> R.string.setup_espelho_este_aparelho
+                                EstadoNoEspelho.ENTROU -> R.string.setup_espelho_entrou
+                                EstadoNoEspelho.AGUARDANDO -> R.string.setup_espelho_aguardando
+                            },
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = when (estado) {
+                            EstadoNoEspelho.ESTE_APARELHO -> MaterialTheme.colorScheme.onSurface
+                            EstadoNoEspelho.ENTROU -> verdeDoEntrou
+                            EstadoNoEspelho.AGUARDANDO -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                }
+            }
+            Text(
+                text = stringResource(R.string.setup_espelho_nota),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

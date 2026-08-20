@@ -234,3 +234,36 @@ ressalva: a restauração pós-morte de processo (parte do item 8) é
 - **Decisão de produto derivada**: sobreviver também ao swipe exige
   persistência em disco — backlog "Retomar partida" no `docs/CLAUDE.md`
   (escopo aprovado, mockup pendente).
+
+## 8. Ktor travado na 3.2.4 — atualizar Ktor exige atualizar o Kotlin junto
+
+- **Contexto**: a Fase 4A (espelho de leitura) trouxe o Ktor server
+  embarcado. A versão está fixada em **3.2.4** no `gradle/libs.versions.toml`
+  — que **não** é a mais recente da linha 3.
+- **Causa**: cada release do Ktor é publicado com os metadados Kotlin do
+  compilador que o construiu, e o compilador **não lê metadados de uma
+  versão maior que a sua**. O projeto está em **Kotlin 2.1.0**, e o corte é
+  nítido:
+
+  | Ktor | Compilado com Kotlin |
+  |------|----------------------|
+  | 3.2.0 – **3.2.4** | 2.1.21 ✅ |
+  | 3.3.0 – 3.3.3 | 2.2.x ❌ |
+  | 3.4.x | 2.3.0 ❌ |
+  | 3.5.x | 2.3.21 ❌ |
+
+- **Sintoma se alguém subir a versão sozinha**: erro de compilação do tipo
+  *"Class 'io.ktor…' was compiled with an incompatible version of Kotlin. The
+  binary version of its metadata is 2.2.0, expected version is 2.1.0"* —
+  não é falha de resolução de dependência, e mexer em repositório ou cache
+  não resolve.
+- **Ação ao atualizar**: **subir Kotlin e Ktor no mesmo commit**, nunca só o
+  Ktor. Subir o Kotlin arrasta KSP (`ksp` é versionado como
+  `<kotlin>-<ksp>`), o plugin do Compose e possivelmente o Hilt — ou seja,
+  é uma tarefa de manutenção de build, não um bump de linha única.
+- **Como conferir antes de tentar**: o `.module` do artefato no Maven
+  Central declara o `kotlin-stdlib` que ele exige, e esse é o Kotlin que o
+  construiu —
+  `https://repo1.maven.org/maven2/io/ktor/ktor-server-cio-jvm/<versão>/ktor-server-cio-jvm-<versão>.module`.
+  Se o `requires` do stdlib for maior que o Kotlin do projeto, aquela versão
+  do Ktor está fora de alcance.

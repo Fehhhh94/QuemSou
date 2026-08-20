@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Rede existe SOMENTE na tela de catálogo (baixar/atualizar baralhos);
-         a partida segue 100% offline. -->
+    <!-- Rede só em dois lugares: a tela de catálogo (baixar/atualizar
+         baralhos, internet de verdade) e o espelho de leitura (4A), que
+         abre um socket de escuta na rede LOCAL da mesa e nunca sai dela.
+         A partida em si segue 100% offline. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
