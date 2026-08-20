@@ -16,6 +16,9 @@ app/.cxx/
 .idea/
 *.hprof
 
+# Configuração pessoal dos agentes nesta máquina
+.claude/settings.local.json
+
 # Keystore (nunca versionar chaves de assinatura)
 *.jks
 *.keystore

@@ -1,26 +1,52 @@
 # QuemSou
 
-QuemSou é um jogo de adivinhação por dicas para grupos presenciais, no estilo Perfil.
-Cada jogador pega um card no próprio celular; o card tem 1 resposta secreta e 10 dicas
-em curva de dificuldade. O app é 100% offline na v1 — sem Firebase, sem internet.
+Jogo Android presencial de adivinhação por dicas. Um jogador lê até dez dicas;
+os demais tentam descobrir a resposta. O jogo suporta grupos, baralhos locais,
+Modo Shot opcional e um espelho de leitura acessível pelo navegador na rede
+local.
 
-## Status
+## Estado do projeto
 
-Fase 0 — esqueleto do projeto. Veja [docs/CHANGELOG.md](docs/CHANGELOG.md) para o
-histórico de mudanças, [docs/GAME_RULES.md](docs/GAME_RULES.md) para as regras do
-jogo e [docs/CARDS_GUIDE.md](docs/CARDS_GUIDE.md) para o guia de criação de cards.
+- Partida principal offline e jogável em um único aparelho.
+- Catálogo de baralhos com cache e downloads opcionais.
+- Fase 4A parte 1 implementada: pareamento do espelho por QR/URL local.
+- Partes 2 e 3 do espelho ainda pendentes.
 
-## Stack técnica
+Estado e próxima ação: [Handoff ativo](docs/HANDOFF_ACTIVE.md).
 
-- Kotlin 2.1.0 + Jetpack Compose (Material 3)
-- Arquitetura: Clean Architecture + MVVM
-- Injeção de dependência: Hilt
-- Persistência local: Room
-- Navegação: Navigation Compose com rotas tipadas (`kotlinx.serialization`)
-- `minSdk` 26 · `targetSdk`/`compileSdk` 35
+## Começar rápido
 
-## Build
+Pré-requisitos: Android Studio/JBR configurado pelo projeto e Android SDK 35.
 
+```powershell
+.\gradlew.bat test
+.\gradlew.bat assembleDebug
 ```
-./gradlew assembleDebug
-```
+
+APK gerado em `app/build/outputs/apk/debug/app-debug.apk`.
+
+## Stack
+
+- Kotlin + Jetpack Compose Material 3
+- Clean Architecture + MVVM
+- Hilt/KSP, Room e DataStore
+- Navigation Compose com rotas tipadas
+- OkHttp para catálogo
+- Ktor CIO para servidor HTTP local
+- ZXing core para QR gerado no aparelho
+
+## Documentação
+
+Use o [índice da documentação](docs/DOCS_INDEX.md) para carregar somente o que
+precisa:
+
+- [Contexto e arquitetura atuais](docs/PROJECT_CONTEXT.md)
+- [Regras do jogo](docs/GAME_RULES.md)
+- [Runbook de suporte](docs/SUPPORT_RUNBOOK.md)
+- [Bugs e armadilhas](docs/BUGS.md)
+- [Formato do catálogo](docs/CATALOG_FORMAT.md)
+- [Criação de cards](docs/CARDS_GUIDE.md)
+- [Histórico](docs/CHANGELOG.md)
+
+Agentes devem começar por `AGENTS.md` ou `CLAUDE.md`. **Nunca fazer push por
+agente**; o push é manual do Felipe.

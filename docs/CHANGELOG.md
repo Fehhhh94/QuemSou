@@ -2,6 +2,137 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-08-20 — documentação operacional compartilhada
+
+- **Entrada rápida para agentes**: `AGENTS.md` e `CLAUDE.md` na raiz passam a
+  ser bootstraps mínimos para Codex/GPT e Claude Code, ambos apontando às mesmas
+  regras. `.claude/settings.local.json` foi explicitamente ignorado por ser
+  configuração pessoal da máquina.
+- **Contexto sob demanda**: criados `AI_RULES.md`, `AI_COLLABORATION.md` e
+  `DOCS_INDEX.md`. O índice roteia cada tipo de tarefa ao documento dono, sem
+  exigir a leitura do changelog ou de toda a arquitetura.
+- **Estado separado da história**: `PROJECT_CONTEXT.md` concentra produto,
+  arquitetura e estágio vigentes; `HANDOFF_ACTIVE.md` guarda apenas worktree,
+  evidência, pendências e próxima ação. O antigo `docs/CLAUDE.md` virou ponte
+  legada curta, eliminando a duplicação de regras e estado.
+- **Suporte reproduzível**: `SUPPORT_RUNBOOK.md` define dados mínimos,
+  privacidade, triagem, diagnóstico do espelho/catálogo, coleta ADB,
+  severidade, escalonamento e critério de encerramento.
+- **Manutenção**: `DOC_SYNC.md` define fontes donas e matriz de atualização.
+  O README deixou a descrição obsoleta da Fase 0 e agora oferece build rápido,
+  estado real e rotas da documentação.
+
+Esta reorganização não altera regras do jogo nem comportamento do aplicativo.
+
+### 2026-08-20 — Fase 4A parte 1: endurecimento do servidor local
+
+- **Subida sem corrida**: o Setup agora expõe o estado `espelhoIniciando`,
+  desabilita o switch durante a operação e ignora toques repetidos. O servidor
+  usa uma geração e uma trava própria para impedir que uma subida cancelada ao
+  sair da tela publique ou deixe um Ktor órfão.
+- **Porta conquistada de verdade**: removida a sondagem prévia com
+  `ServerSocket`, que deixava uma janela entre testar e ocupar a porta. A
+  própria engine CIO tenta 8080 e as seguintes; falhas limpam o candidato e
+  viram `SemPorta`, sem escapar para o ViewModel.
+- **SSE autenticado**: `/estado` passa a exigir `jogador` **e** o token
+  devolvido por `/entrar`; o par precisa pertencer à mesma sessão. Isso evita
+  que a parte 2 exponha dica ou resposta pela simples descoberta de um id.
+- **Teste de concorrência**: duplo toque enquanto o início está suspenso sobe
+  uma única instância e mantém o estado do switch coerente.
+
+### 2026-08-01 — Fase 4A parte 1: marcador "este aparelho" e liberar lugar
+
+Dois buracos da lista do Setup, fechados na mesma tela. Ambos vivem em
+`data/espelho/` + `presentation/`; **`domain/` intocado** e o marcador **não
+entra na `ConfiguracaoDaPartida`** — é estado de pareamento, não de partida.
+
+- **Marcador "este aparelho"**: quem segura o celular anfitrião nunca vai
+  escanear o próprio QR, e antes disso ficava eternamente em "aguardando"
+  com o nome ainda disponível para outro tocar por engano. Agora o
+  `RegistroDeSessoes` tem `esteAparelho` (`StateFlow<String?>`, no máximo um
+  por vez, padrão nenhum): o id marcado **nasce ocupado**, é recusado no
+  `reivindicar` e **some** da lista servida em `/jogadores` — em vez de
+  aparecer esmaecido, porque oferecer aquele nome só convidaria ao engano.
+  A marca cai sozinha se o jogador sair do elenco ou o espelho for
+  desligado no switch.
+- **Liberar lugar**: sessão morta (aba anônima fechada, navegador limpo,
+  troca de celular) prendia o id a um token que não existe mais, sem saída
+  na parte 1. `RegistroDeSessoes.liberarLugar` devolve o lugar à mesa, e o
+  Setup o expõe pelo `ConfirmDialog` já existente. Na parte 2, o SSE
+  acompanhando presença resolve isso sozinho.
+- **Um gesto, três desfechos**: tocar numa linha da lista faz o que o
+  estado daquela linha pede — aguardando marca "este aparelho", marcado
+  desmarca, entrou abre a confirmação de liberar. O estado virou o enum
+  `EstadoNoEspelho`, calculado em `SetupUiState.estadoNoEspelho`, para a
+  exibição e a ação lerem a mesma fonte. A linha exibe "📱 este aparelho"
+  em `onSurface` (contraste cheio, sem cor própria) — distinto do ✓ verde de
+  quem entrou pela rede e do "aguardando" apagado. Uma dica de uso acima da
+  lista anuncia o toque, que sem convite não seria descoberto.
+- **Testes**: o `ServidorFake` do `SetupViewModelTest` passou a **delegar a
+  um `RegistroDeSessoes` de verdade** em vez de reimplementar as regras de
+  pareamento — o teste do ViewModel não pode virar uma segunda versão das
+  mesmas regras. **229 testes verdes** (eram 210).
+- **Armadilha registrada** (`docs/BUGS.md` seção 8): o Ktor está fixado em
+  3.2.4 porque da 3.3 em diante os artefatos são compilados com Kotlin
+  2.2/2.3 e o compilador 2.1.0 do projeto não lê esses metadados —
+  **atualizar Ktor exige atualizar o Kotlin no mesmo commit**, o que arrasta
+  KSP e o plugin do Compose.
+
+## Fase 4A — Espelho de leitura, parte 1 (pareamento) — 2026-08-01
+
+Sub-fase nova, **não é a Fase 4 (Nearby)**, que segue no backlog. O aparelho
+do anfitrião sobe um servidor HTTP na rede local; os outros jogadores abrem
+uma URL no navegador do próprio celular e, na vez deles de ler, verão ali a
+dica e a resposta. **Esta parte 1 entrega só o pareamento** — nenhuma dica e
+nenhum evento de jogo trafegam ainda.
+
+- **Dependências novas**: Ktor server embarcado com engine **CIO**
+  (`ktor-server-core`, `ktor-server-cio`) e **ZXing `core`** para o QR
+  gerado na memória, sem rede e sem biblioteca de UI. Ktor fixado em
+  **3.2.4**: é a última linha do Ktor 3 compilada com Kotlin 2.1.x — da 3.3
+  em diante os metadados são de Kotlin 2.2/2.3 e o compilador 2.1.0 deste
+  projeto não os lê. Subir o Ktor exige subir o Kotlin junto.
+- **Pacote novo `data/espelho/`**:
+  - `RegistroDeSessoes` — Kotlin puro, sem Android; guarda quem já pegou
+    qual jogador. Um jogador, uma sessão; reivindicar id já tomado falha;
+    o mesmo token retoma o próprio lugar (reconexão não rouba lugar);
+    sessão conhecida que troca de nome libera o anterior; token de execução
+    anterior do servidor vale como sessão nova. Expõe `StateFlow` do mapa
+    jogadorId → conectado. **É a peça testável** — 11 testes JVM.
+  - `EnderecoLocal` — IPv4 da rede local via `NetworkInterface` (nada de
+    `WifiManager`, que pediria `ACCESS_WIFI_STATE`), aceitando só
+    interfaces alcançáveis pela mesa (`wlan`, `ap`, `swlan`, `eth`) e
+    descartando dados móveis, VPN e loopback. Nulo = sem rede.
+  - `ServidorDoEspelho` (interface) + `KtorServidorDoEspelho` — porta 8080,
+    caindo para as seguintes se ocupada (a própria engine tenta e conquista
+    cada porta, sem janela entre sondagem e bind). Rotas `GET /` e `GET /app.js` (cliente
+    estático de `assets/espelho/`), `GET /jogadores`, `POST /entrar` e
+    `GET /estado?jogador=<id>&token=<token>` em SSE — **nesta parte 1 o SSE emite só
+    `{"fase":"aguardando"}` e keep-alives**; a estrutura do canal fica
+    pronta e o conteúdo vem na parte 2.
+- **Cliente estático** em `app/src/main/assets/espelho/` (`index.html` +
+  `app.js`): sem framework e **sem CDN** — a mesa pode estar sem internet.
+  Tema escuro sóbrio, de propósito **nada parecido pixel a pixel com a tela
+  do app**. Lista os nomes, esmaece os já em uso, guarda o token em
+  `localStorage` e cai na tela de espera com o nome do jogador.
+- **Setup**: seção "Espelho de leitura" abaixo dos baralhos, com switch
+  (**padrão desligado — nada sobe sem o toque**), QR do endereço, o
+  endereço em texto monoespaçado e a lista viva de "✓ entrou" (verde do
+  selo do catálogo) / "aguardando". Sem rede, o switch volta a desligado com
+  a mensagem explicando que precisa de Wi-Fi. **Começar a partida não exige
+  ninguém conectado** — o jogo funciona igual sem espelho nenhum.
+- **`JogadorEmEdicao` ganhou `id`** — identidade estável de linha, atribuída
+  pelo `SetupViewModel` e nunca reaproveitada. Não vai para o domínio:
+  existe para remover ou renomear um jogador não fazer o ✓ de quem já entrou
+  pular de linha.
+- **Escopo do servidor**: nesta parte, o ViewModel do Setup; sair da tela o
+  derruba (`onCleared`). Na parte 2 ele passa a sobreviver até o fim da
+  partida.
+- **Nada em `domain/`** e **nenhuma regra de jogo tocada** — pontuação, seed
+  e embaralhamento intactos. **210 testes verdes** (eram 191).
+- **Pendentes**: parte 2 (dica e resposta no canal, servidor vivo durante a
+  partida) e parte 3.
+
 ### 2026-07-12 — CLAUDE.md v23
 - **5B parte 2 (lado fábrica) concluída → Fase 5B CONCLUÍDA.** Criado o
   `CLAUDE.md` v1 do `QuemSou-Baralhos` (commit `24f4163` lá): regras
