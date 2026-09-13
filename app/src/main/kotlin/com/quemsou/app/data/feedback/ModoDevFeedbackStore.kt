@@ -32,11 +32,11 @@ class DataStoreModoDevFeedbackStore @Inject constructor(
 ) : ModoDevFeedbackStore {
 
     override val modoDevFeedback: Flow<Boolean> =
-        dataStore.data.map { preferencias -> preferencias[CHAVE_MODO_DEV] ?: false }
+        dataStore.data.map { preferencias -> preferencias[CHAVE_MODO_DEV] ?: true }
 
     override suspend fun alternar(): Boolean {
         val novas = dataStore.edit { preferencias ->
-            preferencias[CHAVE_MODO_DEV] = !(preferencias[CHAVE_MODO_DEV] ?: false)
+            preferencias[CHAVE_MODO_DEV] = !(preferencias[CHAVE_MODO_DEV] ?: true)
         }
         return novas[CHAVE_MODO_DEV] ?: false
     }

@@ -12,6 +12,14 @@ enum class VotoDeCard { BOM, FRACO }
 /** Como o turno do card avaliado terminou. */
 enum class ResultadoDoTurnoRegistrado { ACERTO, QUEIMADO }
 
+/** Cópia editorial do que foi jogado, independente de alterações futuras no catálogo. */
+@kotlinx.serialization.Serializable
+data class ContextoDeFeedback(
+    val card: com.quemsou.app.data.catalogo.CardDoBaralhoJson,
+    val versaoDoBaralho: Int,
+    val dicasReveladas: List<String>,
+)
+
 /**
  * Um feedback pronto para gravar — tudo menos o que a persistência gera
  * (id autogerado e `criadoEm`, carimbado pela implementação real).
@@ -27,6 +35,7 @@ data class NovoFeedback(
     val rodada: Int,
     val resultadoDoTurno: ResultadoDoTurnoRegistrado,
     val numeroDaDicaDoAcerto: Int?,
+    val contextoJson: String = "",
 )
 
 /**
@@ -65,6 +74,7 @@ class RegistroDeFeedbackLocal @Inject constructor(
                 resultadoDoTurno = novo.resultadoDoTurno.name,
                 numeroDaDicaDoAcerto = novo.numeroDaDicaDoAcerto,
                 criadoEm = System.currentTimeMillis(),
+                contextoJson = novo.contextoJson,
             ),
         )
     }

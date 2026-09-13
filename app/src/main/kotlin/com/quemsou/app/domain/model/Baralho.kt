@@ -1,10 +1,10 @@
 package com.quemsou.app.domain.model
 
 /**
- * Um baralho do catálogo: conjunto temático de cards de uma categoria (ex.:
- * `PERSONAGEM_FILME` → "Cinema Clássico — Edição 1"). Todo card pertence a
- * exatamente um baralho — a categoria é metadado do baralho, herdada pelos
- * seus cards.
+ * Coleção editorial de respostas para uma experiência de jogo. [cards]
+ * mantém referências de catálogo compatíveis; a mesma resposta pode integrar
+ * várias coleções/temas e compartilha o banco de dicas no acervo local.
+ * A carta jogável é preparada para cada rodada a partir desse banco.
  *
  * O teto de [MAXIMO_DE_CARDS] cards por baralho **não** é validado aqui: é
  * regra de conteúdo com violação legível, checada pelo

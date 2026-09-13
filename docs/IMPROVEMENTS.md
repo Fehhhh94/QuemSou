@@ -1,5 +1,14 @@
 # Improvements
 
+## Criação automática e dicas inéditas (2026-09-12)
+
+Pedido atual de Felipe substitui o fluxo manual da fábrica nesta unidade:
+criar baralho diretamente no celular, executar geração/revisão pelo Codex,
+receber automaticamente e usar avaliações para ampliar a qualidade. Acervo
+canônico por resposta, com pelo menos 60 dicas na geração e seleção de dez
+inéditas por celular. Implementação local e pendências: `DECK_STUDIO.md`.
+Nenhuma implementação de pagamentos ou marketplace nesta entrega.
+
 ## ✅ Modo Shot (entregue)
 
 - **Status**: **entregue em 2026-07-09 e validado fisicamente no Z Fold em

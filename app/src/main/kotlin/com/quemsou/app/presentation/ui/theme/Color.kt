@@ -2,22 +2,25 @@ package com.quemsou.app.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Paleta provisória da Fase 0 — cores definitivas do jogo virão numa fase futura.
-val QuemSouPrimary = Color(0xFFBB86FC)
-val QuemSouOnPrimary = Color(0xFF000000)
-val QuemSouSecondary = Color(0xFF03DAC6)
-val QuemSouBackground = Color(0xFF121212)
-val QuemSouSurface = Color(0xFF1E1E1E)
-val QuemSouOnBackground = Color(0xFFE1E1E1)
-val QuemSouOnSurface = Color(0xFFE1E1E1)
+// Identidade da central de jogos: azul, papel quente e verde-lima.
+val FestaAzul = Color(0xFF3049D8)
+val FestaLima = Color(0xFFD6F58A)
+val FestaTinta = Color(0xFF20243A)
+val FestaCoral = Color(0xFFFFAFA0)
+val QuemSouPrimary = Color(0xFFBAC3FF)
+val QuemSouOnPrimary = Color(0xFF15287F)
+val QuemSouSecondary = FestaLima
+val QuemSouBackground = Color(0xFF141720)
+val QuemSouSurface = Color(0xFF1D2130)
+val QuemSouOnBackground = Color(0xFFF4F1E9)
+val QuemSouOnSurface = Color(0xFFF4F1E9)
 
-// Contrapartida clara da mesma paleta provisória (3.3 — suporte a tema claro).
-val QuemSouPrimaryLight = Color(0xFF6650A4)
+val QuemSouPrimaryLight = FestaAzul
 val QuemSouOnPrimaryLight = Color(0xFFFFFFFF)
-val QuemSouBackgroundLight = Color(0xFFFFFBFE)
-val QuemSouSurfaceLight = Color(0xFFF3EDF7)
-val QuemSouOnBackgroundLight = Color(0xFF1C1B1F)
-val QuemSouOnSurfaceLight = Color(0xFF1C1B1F)
+val QuemSouBackgroundLight = Color(0xFFF7F5EE)
+val QuemSouSurfaceLight = Color(0xFFFFFDF7)
+val QuemSouOnBackgroundLight = FestaTinta
+val QuemSouOnSurfaceLight = FestaTinta
 
 // Paleta âmbar/dourada do Modo Shot (overlay e card do Setup) — dentro da
 // PARTIDA é exclusiva do modo: nada de âmbar no grid nem nas demais fases.

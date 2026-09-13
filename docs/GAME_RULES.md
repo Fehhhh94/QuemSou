@@ -3,7 +3,53 @@
 Este arquivo é o dono das regras do QuemSou: qualquer regra implementada no
 código deve estar registrada aqui.
 
-## O card
+## Tema, resposta, baralho e carta
+
+Conceito aprovado por Felipe em 2026-09-12, antes da continuação da fábrica:
+
+| Conceito | Responsabilidade |
+|---|---|
+| Tema | Assunto do conteúdo; as categorias atuais continuam sendo as etiquetas disponíveis. |
+| Resposta | Identidade do que deve ser adivinhado; pode aparecer em diferentes temas e baralhos. |
+| Banco de dicas | Acervo de fatos daquela resposta, compartilhado entre os baralhos instalados. |
+| Baralho | Coleção editorial de respostas para uma experiência de jogo, reutilizável entre partidas. |
+| Carta | Uma resposta com exatamente dez dicas disponíveis, preparada para uma rodada. |
+| Partida | Sequência de respostas distintas escolhidas dos baralhos selecionados conforme o histórico local. |
+
+`AcervoDeRespostas` reúne referências por id canônico ou nome normalizado,
+inclusive aliases transitivos. As dicas de todos os baralhos instalados
+alimentam o banco da resposta, mesmo quando apenas um deles foi selecionado.
+Para correções do mesmo id de dica, prevalece a versão editorial mais alta;
+empates usam id do baralho/card. Id e texto normalizado eliminam duplicatas.
+Nomes homônimos/aliases precisam de curadoria: o app não infere identidade
+semântica. A variedade não estima dificuldade; o desafio depende da curadoria.
+
+## A carta e o consumo de dicas
+
+- A resposta pode voltar em outra partida; as dicas utilizadas neste celular
+  não voltam. O acervo pode conter 60 ou mais dicas por resposta, mas a carta
+  preparada para jogar continua tendo exatamente dez.
+- Ao preparar a rodada, as dez dicas ficam **reservadas**, sem consumo.
+  Cada revelação salva o histórico e o checkpoint da partida na mesma
+  transação **antes de mostrar o texto**. Falha de gravação não exibe a dica;
+  tentar novamente recupera o último estado persistido.
+- Acerto, queima ou abandono liberam as dicas ocultas. Exemplo: banco com
+  60 dicas, acerto após três revelações → três usadas e **57 disponíveis**,
+  incluindo as sete que estavam reservadas e não foram vistas.
+- Queimar com menos de dez revelações não consome as restantes. O anúncio
+  revela a resposta, sem mostrar automaticamente as dicas ocultas.
+- A mesma rodada restaurada recupera carta, posições, fase, pontos e Shot
+  pendente. Dicas já reveladas continuam visíveis nessa rodada; não entram
+  em cartas futuras. Um checkpoint Room prevalece sobre SavedState atrasado.
+- Existe uma partida ativa por instalação. Abandono confirmado libera suas
+  reservas; iniciar outra sessão também encerra reservas da anterior. Apenas
+  montar o monte não marca respostas nem dicas como jogadas.
+- Com menos de dez dicas disponíveis, a resposta fica fora de novas partidas.
+  Não existe reciclagem automática. Pedir mais dicas amplia seu acervo.
+  As nove (ou menos) restantes são preservadas para quando o acervo crescer.
+- O histórico cruza baralhos por identidade editorial e texto normalizado.
+  Renomear a edição não reinicia esse histórico. Paráfrases precisam ser
+  barradas na revisão editorial.
 
 - Todo card tem uma resposta secreta (pessoa, lugar ou coisa) e **exatamente
   10 dicas** autossuficientes. As dicas **não têm curva de dificuldade** —
@@ -13,7 +59,13 @@ código deve estar registrada aqui.
   cada turno (embaralhamento determinístico por seed em `Turno.criar`, no
   domínio; a posição não indica dificuldade).
 - **Card queimado** (ninguém acertou): é **descartado** — não volta ao
-  baralho (`RegrasPartida.descartarCardQueimado`, padrão **SIM**).
+  monte dessa partida (`RegrasPartida.descartarCardQueimado`, padrão **SIM**).
+  A resposta pode voltar em outra partida conforme a rotação e as dicas livres.
+
+O histórico é do celular anfitrião/instalação, compartilhado pelos jogadores
+locais. Reinstalar/limpar dados pode apagá-lo. No upgrade da versão experimental
+Room v5, o consumo antigo de dez dicas é preservado: sem registro de quais
+foram vistas, não é seguro devolver as sete retroativamente.
 
 ## Jogadores e grupos
 
@@ -80,7 +132,8 @@ código deve estar registrada aqui.
   Quando desativado, o leitor ganha 0.
 - **Card queimado** (10 dicas sem acerto, ou desistência): o acertador não
   pontua e o leitor ganha **10 pontos** (0 se `leitorPontua` estiver
-  desligado) — as 10 dicas foram todas reveladas sem ninguém acertar.
+  desligado), inclusive na desistência antecipada. Isso não transforma dicas
+  ocultas em dicas utilizadas.
 - **Destino dos pontos (v4)**: os pontos calculados para acertador e leitor
   são creditados ao **grupo** de cada um — o jogador é quem age no turno, o
   grupo é quem acumula. Se acertador e leitor forem do mesmo grupo, os dois
@@ -99,8 +152,21 @@ código deve estar registrada aqui.
   espírito da antiga "Livre" sobrevive como "selecionar todos os baralhos".
 - **União determinística**: os cards da união são ordenados por chave
   estável — id do baralho, depois id do card — **antes** do embaralhamento
-  por seed. Mesma seleção + mesmo código → mesmo monte, em qualquer aparelho
-  e em qualquer ordem de download/instalação dos baralhos.
+  por seed. A preparação filtra respostas sem dez dicas inéditas e evita a
+  mesma resposta duas vezes na partida. Mesma seleção, conteúdo, histórico e
+  código produzem o mesmo monte; aparelhos com históricos diferentes podem
+  receber cartas diferentes. O snapshot local preserva a restauração.
+- **Rotação de respostas**: inéditas primeiro, depois a menor ordem de última
+  aparição. Empates mantêm o embaralhamento pela seed. A aparição é registrada
+  uma única vez quando a rodada abre; preparar/restaurar não avança o rodízio.
+  O histórico usado para ordenar o monte fica congelado com a sessão.
+- Com 40 respostas elegíveis e partidas completas de dez rodadas, as quatro
+  primeiras percorrem as 40 antes de repetir; o ciclo seguinte começa pelas
+  ausentes há mais tempo. Com acervo pequeno, a frequência possível depende
+  da quantidade de respostas elegíveis; não existe intervalo fixo artificial.
+- Se houver menos respostas distintas elegíveis que rodadas, bloquear a
+  partida e orientar reduzir rodadas ou escolher mais baralhos. Nunca completar
+  o monte repetindo uma resposta na mesma partida.
 - A partida tem um número configurável de rodadas (`RegrasPartida.numeroDeRodadas`,
   padrão 5).
 - O monte é embaralhado de forma determinística a partir do código da partida

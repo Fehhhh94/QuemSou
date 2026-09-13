@@ -1,6 +1,7 @@
 package com.quemsou.app.data.local
 
 import androidx.room.Entity
+import androidx.room.ColumnInfo
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -41,4 +42,6 @@ data class CardEntity(
     val answer: String,
     val clues: List<String>,
     val baralhoId: String,
+    @ColumnInfo(defaultValue = "''") val respostaId: String = "",
+    @ColumnInfo(defaultValue = "'[]'") val bancoDeDicasJson: String = "[]",
 )

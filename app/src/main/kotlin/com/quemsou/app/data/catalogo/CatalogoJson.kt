@@ -74,7 +74,12 @@ data class CardDoBaralhoJson(
     val type: String,
     val answer: String,
     val clues: List<String>,
+    val respostaId: String = "",
+    val bancoDeDicas: List<DicaJson> = emptyList(),
 )
+
+@Serializable
+data class DicaJson(val id: String, val texto: String)
 
 /**
  * Uma entrada do índice já validada pelo [ParserDoCatalogo] — enums reais,

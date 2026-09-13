@@ -1,6 +1,7 @@
 package com.quemsou.app.data.local
 
 import androidx.room.Entity
+import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
 
 /**
@@ -38,4 +39,5 @@ data class FeedbackDeCardEntity(
     val resultadoDoTurno: String,
     val numeroDaDicaDoAcerto: Int?,
     val criadoEm: Long,
+    @ColumnInfo(defaultValue = "''") val contextoJson: String = "",
 )

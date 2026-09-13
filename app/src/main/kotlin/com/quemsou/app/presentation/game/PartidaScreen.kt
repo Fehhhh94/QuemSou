@@ -6,6 +6,8 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,6 +32,7 @@ import com.quemsou.app.presentation.ui.components.ConfirmDialog
 fun PartidaScreen(
     onAbandonarPartida: () -> Unit,
     onVoltarAoInicio: () -> Unit,
+    onVoltarAoSetup: () -> Unit = onVoltarAoInicio,
     viewModel: PartidaViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -37,16 +40,31 @@ fun PartidaScreen(
     val abandonoSolicitado by viewModel.abandonoSolicitado.collectAsState()
     var confirmarQueimar by remember { mutableStateOf(false) }
 
-    BackHandler { viewModel.abandonarPartida() }
+    // Voltar só pede confirmação enquanto há partida para abandonar. No
+    // placar final ela já acabou — confirmar "abandonar" uma partida
+    // encerrada é uma pergunta sem sentido; a tela só libera a sessão e sai.
+    BackHandler {
+        if (uiState is PartidaUiState.PlacarFinal) {
+            viewModel.confirmarAbandono(onVoltarAoInicio)
+        } else {
+            viewModel.abandonarPartida()
+        }
+    }
 
     Scaffold { innerPadding ->
         Box(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            AnimatedContent(targetState = uiState, label = "partida-fase") { estado ->
+            AnimatedContent(targetState = uiState, label = "partida-fase", modifier = Modifier.widthIn(max = 640.dp).fillMaxSize()) { estado ->
                 when (estado) {
+                    is PartidaUiState.Indisponivel -> IndisponivelContent(
+                        onTentarNovamente = viewModel::tentarNovamente,
+                        onVoltarAoSetup = { viewModel.confirmarAbandono(onVoltarAoSetup) },
+                        onVoltarAoInicio = { viewModel.confirmarAbandono(onVoltarAoInicio) },
+                    )
                     is PartidaUiState.Carregando -> CarregandoContent()
 
                     is PartidaUiState.VezDeJogar -> VezDeJogarContent(
@@ -111,7 +129,7 @@ fun PartidaScreen(
             texto = stringResource(R.string.partida_abandonar_corpo),
             textoConfirmar = stringResource(R.string.partida_abandonar_confirmar),
             textoCancelar = stringResource(R.string.partida_abandonar_cancelar),
-            onConfirmar = onAbandonarPartida,
+            onConfirmar = { viewModel.confirmarAbandono(onAbandonarPartida) },
             onCancelar = viewModel::continuarPartida,
         )
     }

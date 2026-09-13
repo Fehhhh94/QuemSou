@@ -102,6 +102,33 @@ Campos do card (todos obrigatórios):
 
 ## Regras de conteúdo (validadas pelo app e pela fábrica interna)
 
+### Acervo de dicas por resposta (2026-09-12)
+
+O card aceita dois campos adicionais opcionais: `respostaId` (identidade
+canônica compartilhada entre baralhos) e `bancoDeDicas` (lista de objetos
+`{ "id": "fato-estavel", "texto": "Uma dica autossuficiente." }`).
+
+Quando presente, o banco exige `respostaId`, 10 a 500 dicas, ids únicos,
+textos distintos após normalização, até 500 caracteres por dica, nenhuma
+dica nomeando a resposta e todas as dez `clues` pertencentes ao banco.
+A fábrica solicita pelo menos 60 dicas. Cards legados continuam aceitos:
+suas dez dicas viram um acervo inicial que se esgota após o uso.
+
+Novos resultados da fábrica são `EM_DESENVOLVIMENTO`; ampliação incrementa
+`versao` preservando ids. Conteúdo `FINALIZADO` continua imutável. Apps antigos
+ignoram os campos extras e só utilizam `clues`; o controle de não repetição
+exige esta versão do aplicativo.
+
+O histórico local nunca usa a versão ou o id do baralho para reciclar dicas.
+O formato de download continua compatível: `cards` representa referências
+editoriais de respostas na coleção; `clues` mantém dez dicas de compatibilidade.
+No jogo, o app reúne os acervos da mesma resposta entre os baralhos instalados
+e monta a carta da rodada. A união pode exceder 500 dicas; esse teto continua
+valendo para cada item recebido, não para o snapshot interno da partida.
+Reservas e aliases locais não são campos novos do contrato da fábrica.
+O serviço conserva um acervo canônico por dono/resposta. Contrato operacional
+e ativação: `DECK_STUDIO.md`.
+
 - **Teto de 100 cards por baralho** (`Baralho.MAXIMO_DE_CARDS`): crescimento
   além disso vira baralho novo (ex.: "Harry Potter 2"), preferindo
   subtítulos temáticos quando fizer sentido.

@@ -28,7 +28,7 @@ class ExportadorDeFeedbackTest {
     )
 
     @Test
-    fun `mapeia entidade e resposta do join para o formato quemsou-feedback v1`() {
+    fun `mapeia entidade e resposta do join para o formato quemsou-feedback v2`() {
         val itens = listOf(
             FeedbackComResposta(
                 feedback = feedback(id = 1, cardId = "cc1-01", voto = "BOM", comentario = "dica 3 entrega"),
@@ -53,7 +53,7 @@ class ExportadorDeFeedbackTest {
             """
             {
                 "formato": "quemsou-feedback",
-                "versao": 1,
+                "versao": 2,
                 "exportadoEm": "2026-07-11T12:00:00Z",
                 "itens": [
                     {
@@ -93,7 +93,7 @@ class ExportadorDeFeedbackTest {
             """
             {
                 "formato": "quemsou-feedback",
-                "versao": 1,
+                "versao": 2,
                 "exportadoEm": "2026-07-11T12:00:00Z",
                 "itens": []
             }

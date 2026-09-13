@@ -13,6 +13,8 @@ import com.quemsou.app.domain.model.CardCategory
 import com.quemsou.app.domain.model.CardType
 import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
+import com.quemsou.app.domain.model.ProgressoDaPartida
+import kotlinx.coroutines.CompletableDeferred
 import com.quemsou.app.domain.repository.RepositorioDeCards
 import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.navigation.JogadorConfigurado
@@ -33,6 +35,20 @@ class PartidaViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private class RepositorioFake(private val baralhos: List<Baralho>) : RepositorioDeCards {
+        val progressos = mutableMapOf<String, ProgressoDaPartida>()
+        val vistas = mutableSetOf<String>()
+        var falhar = false
+        var aguardar: CompletableDeferred<Unit>? = null
+        var encerrada = false
+        override suspend fun progressoDaSessao(sessao: String) = progressos[sessao]
+        override suspend fun salvarProgresso(sessao: String, progresso: ProgressoDaPartida,
+            dicasReveladas: List<String>, encerrarTurno: Boolean) {
+            aguardar?.await()
+            check(!falhar)
+            vistas.addAll(dicasReveladas)
+            progressos[sessao] = progresso
+        }
+        override suspend fun encerrarSessao(sessao: String) { encerrada = true }
         override suspend fun buscarPorIds(ids: List<String>) = baralhos.filter { it.id in ids }
 
         override suspend fun buscarTodos() = baralhos
@@ -119,7 +135,90 @@ class PartidaViewModelTest {
         handle: SavedStateHandle = handleDe(configuracao),
         modoDev: Boolean = false,
         registro: RegistroDeFeedback = RegistroDeFeedbackFake(),
-    ) = PartidaViewModel(handle, RepositorioFake(baralhos()), ModoDevFake(modoDev), registro)
+        repositorio: RepositorioDeCards = RepositorioFake(baralhos()),
+    ) = PartidaViewModel(handle, repositorio, ModoDevFake(modoDev), registro)
+
+    @Test fun `dica so aparece depois da gravacao e toque duplicado e ignorado`() {
+        val repo = RepositorioFake(baralhos())
+        val vm = viewModel(repositorio = repo)
+        vm.iniciarTurno()
+        assertTrue(repo.vistas.isEmpty())
+        repo.aguardar = CompletableDeferred()
+        vm.revelarDica(3)
+        vm.revelarDica(7)
+        assertTrue(vm.uiState.value is PartidaUiState.Carregando)
+        assertTrue(repo.vistas.isEmpty())
+        repo.aguardar!!.complete(Unit)
+        assertTrue(vm.uiState.value is PartidaUiState.DicaRevelada)
+        assertEquals(1, repo.vistas.size)
+        assertEquals(listOf(3), repo.progressos.values.single().posicoes)
+    }
+
+    @Test fun `acerto na terceira grava so tres dicas e libera turno no anuncio`() {
+        val repo = RepositorioFake(baralhos())
+        val vm = viewModel(repositorio = repo)
+        vm.iniciarTurno()
+        listOf(3, 7, 1).forEachIndexed { i, p -> if (i > 0) vm.outraDica(); vm.revelarDica(p) }
+        vm.abrirQuemAcertou()
+        vm.registrarAcerto("j2")
+        assertEquals(3, repo.vistas.size)
+        assertEquals("ANUNCIO", repo.progressos.values.single().fase)
+        vm.proximoTurno()
+        assertEquals(3, repo.vistas.size)
+    }
+
+    @Test fun `checkpoint de banco prevalece sobre savedstate anterior a revelacao`() {
+        val repo = RepositorioFake(baralhos())
+        val handle = handleDe(configuracao())
+        val vm = viewModel(handle = handle, repositorio = repo)
+        vm.iniciarTurno()
+        val antigo = SavedStateHandle(handle.keys().associateWith { handle.get<Any?>(it) })
+        vm.revelarDica(7)
+        val restaurado = viewModel(handle = antigo, repositorio = repo)
+        assertEquals(vm.uiState.value, restaurado.uiState.value)
+        restaurado.outraDica()
+        assertEquals(listOf(7), (restaurado.uiState.value as PartidaUiState.Grid).posicoesReveladas)
+        assertEquals(1, repo.vistas.size)
+    }
+
+    @Test fun `falha de gravacao nao exibe dica e tentar novamente restaura grid salvo`() {
+        val repo = RepositorioFake(baralhos())
+        val vm = viewModel(repositorio = repo)
+        vm.iniciarTurno()
+        repo.falhar = true
+        vm.revelarDica(1)
+        assertTrue(vm.uiState.value is PartidaUiState.Indisponivel)
+        assertTrue(repo.vistas.isEmpty())
+        repo.falhar = false
+        vm.tentarNovamente()
+        assertTrue(vm.uiState.value is PartidaUiState.Grid)
+        vm.revelarDica(1)
+        assertEquals(1, repo.vistas.size)
+    }
+
+    @Test fun `checkpoint restaura placar e rodada apos savedstate atrasado`() {
+        val repo = RepositorioFake(baralhos())
+        val handle = handleDe(configuracao())
+        val vm = viewModel(handle = handle, repositorio = repo)
+        vm.jogarAteOAnuncioDeAcerto()
+        val antigo = SavedStateHandle(handle.keys().associateWith { handle.get<Any?>(it) })
+        vm.proximoTurno()
+        val restaurado = viewModel(handle = antigo, repositorio = repo)
+        assertEquals(vm.uiState.value, restaurado.uiState.value)
+        assertEquals(2, (restaurado.uiState.value as PartidaUiState.VezDeJogar).rodada)
+        assertEquals(listOf(1, 9, 0), repo.progressos.values.single().pontos)
+    }
+
+    @Test fun `abandonar confirma persistencia antes de sair sem consumir outras dicas`() {
+        val repo = RepositorioFake(baralhos())
+        val vm = viewModel(repositorio = repo)
+        vm.iniciarTurno()
+        vm.revelarDica(4)
+        var saiu = false
+        vm.confirmarAbandono { assertTrue(repo.encerrada); saiu = true }
+        assertTrue(saiu)
+        assertEquals(1, repo.vistas.size)
+    }
 
     @Test
     fun `partida completa por eventos ate o placar final`() {

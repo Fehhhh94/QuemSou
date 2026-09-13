@@ -1,6 +1,7 @@
 package com.quemsou.app.domain.repository
 
 import com.quemsou.app.domain.model.Baralho
+import com.quemsou.app.domain.model.ProgressoDaPartida
 
 /**
  * Fonte dos baralhos disponíveis no aparelho para montar o monte de uma
@@ -8,6 +9,18 @@ import com.quemsou.app.domain.model.Baralho
  * memória.
  */
 interface RepositorioDeCards {
+    suspend fun historicoDaSessao(sessao: String): Map<String, Long> = emptyMap()
+    suspend fun progressoDaSessao(sessao: String): ProgressoDaPartida? = null
+    /** Consumo e checkpoint atômicos; somente textos efetivamente revelados na carta salva. */
+    suspend fun salvarProgresso(sessao: String, progresso: ProgressoDaPartida,
+        dicasReveladas: List<String>, encerrarTurno: Boolean) {}
+    suspend fun encerrarSessao(sessao: String) {}
+    /** Congela conteúdo e rotação; montar uma partida não consome dicas nem registra aparições. */
+    suspend fun prepararSessao(sessao: String, ids: List<String>): List<Baralho> = buscarPorIds(ids)
+
+    /** Reserva dez dicas antes de exibi-las. Reabrir a mesma rodada devolve a mesma carta. */
+    suspend fun prepararTurno(sessao: String, rodada: Int, card: com.quemsou.app.domain.model.Card,
+        seed: Long): com.quemsou.app.domain.model.Card = card
 
     /**
      * Baralhos dos [ids] informados, cada um com os seus cards. Ids

@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <!-- Placeholder da Fase 0: um cartão simples representando o card de dicas do jogo. -->
-    <path
-        android:fillColor="#FFBB86FC"
-        android:pathData="M34,30 h40 a8,8 0 0 1 8,8 v32 a8,8 0 0 1 -8,8 h-40 a8,8 0 0 1 -8,-8 v-32 a8,8 0 0 1 8,-8 z" />
-    <path
-        android:fillColor="#121212"
-        android:pathData="M50,46 h8 v8 h-8 z M50,60 h8 v8 h-8 z" />
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Dado no centro seguro do ícone adaptativo da central de jogos. -->
+    <group android:pivotX="54" android:pivotY="54" android:rotation="14">
+        <path android:fillColor="#D6F58A" android:pathData="M36,31 h36 a7,7 0,0 1,7 7 v36 a7,7 0,0 1,-7 7 h-36 a7,7 0,0 1,-7 -7 v-36 a7,7 0,0 1,7 -7 z" />
+    </group>
+    <group android:pivotX="54" android:pivotY="54" android:rotation="-8">
+        <path android:fillColor="#FFFDF7" android:pathData="M36,29 h36 a7,7 0,0 1,7 7 v36 a7,7 0,0 1,-7 7 h-36 a7,7 0,0 1,-7 -7 v-36 a7,7 0,0 1,7 -7 z" />
+        <path android:fillColor="#20243A" android:pathData="M42,38 a4,4 0,1 0,0 8 a4,4 0,1 0,0 -8 M66,38 a4,4 0,1 0,0 8 a4,4 0,1 0,0 -8 M54,50 a4,4 0,1 0,0 8 a4,4 0,1 0,0 -8 M42,62 a4,4 0,1 0,0 8 a4,4 0,1 0,0 -8 M66,62 a4,4 0,1 0,0 8 a4,4 0,1 0,0 -8" />
+    </group>
 </vector>

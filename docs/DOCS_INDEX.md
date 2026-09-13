@@ -19,10 +19,12 @@ Depois, escolha a rota abaixo.
 | Continuar a entrega atual | `docs/HANDOFF_ACTIVE.md` | arquivos citados no handoff |
 | Investigar ou atender um problema | `docs/SUPPORT_RUNBOOK.md` | `docs/BUGS.md`, handoff ativo |
 | Alterar regra do jogo | `docs/GAME_RULES.md` | `domain/`, testes do domínio |
-| Alterar Setup, partida ou navegação | `docs/PROJECT_CONTEXT.md` | `docs/GAME_RULES.md` se houver regra |
+| Alterar identidade da central, Setup, partida ou navegação | `docs/PROJECT_CONTEXT.md` | `docs/GAME_RULES.md` se houver regra |
 | Alterar espelho de leitura | `docs/PROJECT_CONTEXT.md` | `data/espelho/`, `assets/espelho/` |
 | Alterar catálogo ou download | `docs/CATALOG_FORMAT.md` | `docs/PROJECT_CONTEXT.md`, `data/catalogo/` |
 | Criar ou revisar cards | `docs/CARDS_GUIDE.md` | `docs/CATALOG_FORMAT.md` |
+| Pedidos automáticos e acervo de dicas | `docs/DECK_STUDIO.md` | `docs/GAME_RULES.md`, `docs/CATALOG_FORMAT.md` |
+| Planejar validação da fábrica e dicas inéditas | `docs/DECK_STUDIO_TEST_PLAN.md` | `docs/DECK_STUDIO.md` |
 | Validar catálogo externo | `docs/CATALOG_FORMAT.md` | tarefas `validarBaralho`/`validarCatalogo` |
 | Consultar bugs conhecidos | `docs/BUGS.md` | `docs/SUPPORT_RUNBOOK.md` |
 | Planejar evolução | `docs/IMPROVEMENTS.md` | `docs/PROJECT_CONTEXT.md` |
@@ -42,6 +44,7 @@ Depois, escolha a rota abaixo.
 | Melhorias e backlog detalhado | `docs/IMPROVEMENTS.md` |
 | Criação de cards | `docs/CARDS_GUIDE.md` |
 | Contratos JSON do catálogo | `docs/CATALOG_FORMAT.md` |
+| Cenários e critérios de teste da fábrica | `docs/DECK_STUDIO_TEST_PLAN.md` |
 | Histórico datado | `docs/CHANGELOG.md` |
 | Sincronização entre documentos | `docs/DOC_SYNC.md` |
 

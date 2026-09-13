@@ -124,7 +124,7 @@ class HomeViewModelTest {
         val json = viewModel.montarJsonDeExport()
 
         assertTrue(json.contains("\"formato\": \"quemsou-feedback\""))
-        assertTrue(json.contains("\"versao\": 1"))
+        assertTrue(json.contains("\"versao\": 2"))
         assertTrue(json.contains("\"cardId\": \"cc1-01\""))
         assertTrue(json.contains("\"resposta\": \"CHAPLIN\""))
     }

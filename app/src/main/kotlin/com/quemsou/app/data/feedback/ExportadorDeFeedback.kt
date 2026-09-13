@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
 object ExportadorDeFeedback {
 
     const val FORMATO = "quemsou-feedback"
-    const val VERSAO = 1
+    const val VERSAO = 2
 
     private val json = Json { prettyPrint = true }
 
@@ -38,6 +38,7 @@ object ExportadorDeFeedback {
                         resultadoDoTurno = item.feedback.resultadoDoTurno,
                         numeroDaDicaDoAcerto = item.feedback.numeroDaDicaDoAcerto,
                         criadoEm = Instant.ofEpochMilli(item.feedback.criadoEm).toString(),
+                        contextoJson = item.feedback.contextoJson,
                     )
                 },
             ),
@@ -65,4 +66,5 @@ data class ItemDeFeedbackJson(
     val resultadoDoTurno: String,
     val numeroDaDicaDoAcerto: Int?,
     val criadoEm: String,
+    val contextoJson: String = "",
 )

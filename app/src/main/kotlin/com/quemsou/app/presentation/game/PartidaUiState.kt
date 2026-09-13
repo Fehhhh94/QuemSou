@@ -11,6 +11,7 @@ sealed interface PartidaUiState {
 
     /** A partida ainda está sendo montada (cards vindo do banco). */
     data object Carregando : PartidaUiState
+    data object Indisponivel : PartidaUiState
 
     /** Anúncio de início de rodada: passar o celular ao leitor. */
     data class VezDeJogar(

@@ -209,12 +209,29 @@ class ParserDoCatalogo @Inject constructor() {
             }
         }
         if (violacoes.size > antes || categoria == null) return null
+        if (cardJson.bancoDeDicas.isNotEmpty()) {
+            val banco = cardJson.bancoDeDicas
+            val normalizar = com.quemsou.app.domain.rules.SelecionadorDeDicas::normalizar
+            if (cardJson.respostaId.isBlank() || banco.size !in 10..500 ||
+                banco.any { it.id.isBlank() || it.texto.isBlank() || it.texto.length > 500 } ||
+                banco.map { it.id }.distinct().size != banco.size ||
+                banco.map { normalizar(it.texto) }.distinct().size != banco.size ||
+                banco.any { normalizar(it.texto).contains(normalizar(cardJson.answer)) } ||
+                cardJson.clues.any { texto -> banco.none { it.texto == texto } }
+            ) {
+                violacoes += ViolacaoDeFormato("$caminho.bancoDeDicas",
+                    "Banco inválido: use respostaId, 10 a 500 dicas distintas com ids estáveis, sem nomear a resposta; clues deve pertencer ao banco.")
+                return null
+            }
+        }
         return Card(
             id = id,
             type = checkNotNull(type),
             category = categoria,
             answer = cardJson.answer,
             clues = cardJson.clues,
+            respostaId = cardJson.respostaId,
+            bancoDeDicas = cardJson.bancoDeDicas.map { com.quemsou.app.domain.model.DicaDoBanco(it.id, it.texto) },
         )
     }
 

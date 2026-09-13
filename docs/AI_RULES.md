@@ -14,9 +14,10 @@ ativa e histórico não vivem aqui: use `docs/DOCS_INDEX.md`.
 
 ## Produto em uma frase
 
-QuemSou é um party game Android presencial: um leitor revela até 10 dicas e os
-demais tentam adivinhar a resposta. A partida funciona offline; catálogo e
-espelho de leitura são recursos acessórios, nunca requisitos para jogar.
+O app é uma central pessoal de party games Android presenciais; QuemSou é o
+primeiro jogo, com um leitor e até dez dicas. A partida funciona offline;
+catálogo e espelho são acessórios, nunca requisitos para jogar. A visão atual
+e o escopo de distribuição estão em `docs/PROJECT_CONTEXT.md`.
 
 ## Invariantes do jogo
 
@@ -24,7 +25,8 @@ espelho de leitura são recursos acessórios, nunca requisitos para jogar.
   de `docs/GAME_RULES.md`.
 - Determinismo é sagrado: nunca usar `hashCode()`, `kotlin.random.Random` ou
   `java.util.Random` no fluxo determinístico. Usar `domain/rules/`.
-- Mesma seleção de baralhos + mesma seed produz o mesmo monte.
+- Mesma seleção, conteúdo e históricos de dicas/respostas + mesma seed produzem o mesmo
+  monte; a regra de não repetição por celular está em `GAME_RULES.md`.
 - Todo turno distribui exatamente 10 pontos; empate final não tem desempate.
 - O espelho de leitura apenas apresenta dados. Nunca vira fonte da verdade da
   partida nem altera `ConfiguracaoDaPartida` por estado de pareamento.

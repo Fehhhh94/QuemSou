@@ -3,6 +3,29 @@ package com.quemsou.app.data.local
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+/** Mantém o histórico v5 conservador: não há evidência para devolver dicas antigas ao banco. */
+val MIGRACAO_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE sessoes_de_dicas ADD COLUMN historicoJson TEXT NOT NULL DEFAULT '{}'")
+        db.execSQL("ALTER TABLE sessoes_de_dicas ADD COLUMN progressoJson TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE sessoes_de_dicas ADD COLUMN encerrada INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("CREATE TABLE IF NOT EXISTS respostas_jogadas (chave TEXT NOT NULL PRIMARY KEY, ordem INTEGER NOT NULL)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS dicas_reservadas (chave TEXT NOT NULL PRIMARY KEY, sessao TEXT NOT NULL, rodada INTEGER NOT NULL)")
+    }
+}
+
+/** Expansão aditiva: preserva baralhos, feedback e preferências das instalações existentes. */
+val MIGRACAO_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE cards ADD COLUMN respostaId TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE cards ADD COLUMN bancoDeDicasJson TEXT NOT NULL DEFAULT '[]'")
+        db.execSQL("ALTER TABLE feedback_de_cards ADD COLUMN contextoJson TEXT NOT NULL DEFAULT ''")
+        db.execSQL("CREATE TABLE IF NOT EXISTS dicas_utilizadas (chave TEXT NOT NULL PRIMARY KEY)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS sessoes_de_dicas (id TEXT NOT NULL PRIMARY KEY, baralhosJson TEXT NOT NULL)")
+        db.execSQL("CREATE TABLE IF NOT EXISTS turnos_de_dicas (sessao TEXT NOT NULL, rodada INTEGER NOT NULL, cardJson TEXT NOT NULL, PRIMARY KEY(sessao, rodada))")
+    }
+}
+
 /**
  * Migração 1 → 2 (Fase 5A): cria a tabela `baralhos` e adiciona `baralhoId`
  * (FK) em `cards`, preservando os dados existentes — os 60 cards da versão 1

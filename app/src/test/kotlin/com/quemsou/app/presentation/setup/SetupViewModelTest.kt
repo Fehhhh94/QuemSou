@@ -110,6 +110,13 @@ class SetupViewModelTest {
         )
     }
 
+    /**
+     * Baralho esgotado como `RepositorioDeCardsLocal.buscarTodos` o entrega:
+     * o baralho continua existindo, mas todas as suas respostas ficaram sem
+     * dez dicas disponíveis e foram filtradas — lista de cartas vazia.
+     */
+    private fun baralhoEsgotado(id: String) = baralho(id, quantidadeDeCards = 0)
+
     private fun baralho(id: String, quantidadeDeCards: Int = 10) = Baralho(
         id = id,
         nome = "Baralho $id",
@@ -135,11 +142,12 @@ class SetupViewModelTest {
     // region Baralhos da partida
 
     @Test
-    fun `todos os baralhos do aparelho nascem selecionados com o contador da uniao`() {
+    fun `todos os baralhos nascem selecionados contando respostas distintas entre edicoes`() {
         val estado = viewModelComNomes().uiState.value
 
         assertEquals(setOf("b1", "b2"), estado.baralhosSelecionados)
-        assertEquals(15, estado.cardsNoMonte)
+        // Os dois baralhos de teste compartilham cinco respostas.
+        assertEquals(10, estado.cardsNoMonte)
         assertTrue(estado.podeComecar)
     }
 
@@ -155,6 +163,136 @@ class SetupViewModelTest {
         assertEquals(MotivoDoBloqueio.NENHUM_BARALHO, estado.motivoDoBloqueioVisivel)
         assertFalse(estado.podeComecar)
     }
+
+    @Test
+    fun `aparelho sem nenhum baralho instalado bloqueia com motivo proprio`() {
+        repositorio.baralhos = emptyList()
+        val viewModel = viewModelComNomes()
+
+        val estado = viewModel.uiState.value
+        assertTrue(estado.semRespostasNoAparelho)
+        assertEquals(MotivoDoBloqueio.SEM_RESPOSTAS_NO_APARELHO, estado.motivoDoBloqueio)
+        assertEquals(MotivoDoBloqueio.SEM_RESPOSTAS_NO_APARELHO, estado.motivoDoBloqueioVisivel)
+        assertFalse(estado.podeComecar)
+    }
+
+    /**
+     * O contrato real do repositório: `buscarTodos` **mantém** o baralho e
+     * filtra as cartas dentro dele, então um acervo esgotado chega como lista
+     * cheia de baralhos vazios. Olhar só `isEmpty()` deixava esse caso cair em
+     * "faltam respostas — reduza as rodadas", conselho inútil para um monte de
+     * zero.
+     */
+    @Test
+    fun `baralhos instalados mas todos sem resposta elegivel contam como aparelho sem respostas`() {
+        repositorio.baralhos = listOf(baralhoEsgotado("b1"), baralhoEsgotado("b2"))
+        val viewModel = viewModelComNomes()
+
+        val estado = viewModel.uiState.value
+        assertEquals(listOf("b1", "b2"), estado.baralhosDisponiveis.map { it.id })
+        assertTrue(estado.semRespostasNoAparelho)
+        assertEquals(MotivoDoBloqueio.SEM_RESPOSTAS_NO_APARELHO, estado.motivoDoBloqueio)
+        assertFalse(estado.podeComecar)
+    }
+
+    @Test
+    fun `um baralho esgotado e outro com respostas nao declara o acervo esgotado`() {
+        repositorio.baralhos = listOf(baralhoEsgotado("b1"), baralho("b2"))
+        val viewModel = viewModelComNomes()
+
+        val estado = viewModel.uiState.value
+        assertFalse(estado.semRespostasNoAparelho)
+        // Os dois nascem marcados; o esgotado não contribui com nada.
+        assertEquals(10, estado.cardsNoMonte)
+        assertTrue(estado.podeComecar)
+    }
+
+    @Test
+    fun `selecionar apenas o baralho esgotado manda trocar a selecao, nao reduzir rodadas`() {
+        repositorio.baralhos = listOf(baralhoEsgotado("b1"), baralho("b2"))
+        val viewModel = viewModelComNomes()
+
+        viewModel.alternarBaralho("b2") // sobra só o esgotado marcado
+
+        val estado = viewModel.uiState.value
+        assertEquals(setOf("b1"), estado.baralhosSelecionados)
+        assertEquals(0, estado.cardsNoMonte)
+        assertFalse(estado.semRespostasNoAparelho)
+        assertEquals(MotivoDoBloqueio.SELECAO_SEM_RESPOSTAS, estado.motivoDoBloqueio)
+        assertEquals(MotivoDoBloqueio.SELECAO_SEM_RESPOSTAS, estado.motivoDoBloqueioVisivel)
+        assertFalse(estado.podeComecar)
+    }
+
+    @Test
+    fun `com respostas elegiveis e nenhum baralho marcado o motivo continua sendo a selecao vazia`() {
+        repositorio.baralhos = listOf(baralhoEsgotado("b1"), baralho("b2"))
+        val viewModel = viewModelComNomes()
+
+        viewModel.alternarBaralho("b1")
+        viewModel.alternarBaralho("b2")
+
+        val estado = viewModel.uiState.value
+        assertFalse(estado.semRespostasNoAparelho)
+        assertEquals(MotivoDoBloqueio.NENHUM_BARALHO, estado.motivoDoBloqueio)
+    }
+
+    @Test
+    fun `baralho volta a existir e o bloqueio de aparelho vazio some`() {
+        repositorio.baralhos = emptyList()
+        val viewModel = viewModelComNomes()
+
+        repositorio.baralhos = listOf(baralho("b1"))
+        viewModel.recarregarBaralhos()
+
+        val estado = viewModel.uiState.value
+        assertFalse(estado.semRespostasNoAparelho)
+        // Baralho novo após a primeira carga entra desmarcado: o bloqueio
+        // honesto passa a ser "nenhum baralho selecionado".
+        assertEquals(MotivoDoBloqueio.NENHUM_BARALHO, estado.motivoDoBloqueio)
+    }
+
+    // endregion
+
+    // region Resumo das opções recolhidas
+
+    @Test
+    fun `sem nada fora do padrao o resumo de opcoes fica vazio`() {
+        assertEquals(emptyList<OpcaoAtiva>(), viewModelComNomes().uiState.value.opcoesAtivas)
+    }
+
+    @Test
+    fun `regra secundaria ativa aparece no resumo mesmo com as opcoes recolhidas`() {
+        val viewModel = viewModelComNomes()
+
+        viewModel.alternarModoShot()
+        assertEquals(listOf(OpcaoAtiva.MODO_SHOT), viewModel.uiState.value.opcoesAtivas)
+
+        viewModel.alternarLeitorPontua()
+        assertEquals(
+            listOf(OpcaoAtiva.LEITOR_NAO_PONTUA, OpcaoAtiva.MODO_SHOT),
+            viewModel.uiState.value.opcoesAtivas,
+        )
+
+        viewModel.alternarModoShot()
+        assertEquals(listOf(OpcaoAtiva.LEITOR_NAO_PONTUA), viewModel.uiState.value.opcoesAtivas)
+    }
+
+    @Test
+    fun `espelho no ar entra no resumo e sai ao desligar`() = runTest {
+        val viewModel = viewModelComNomes()
+
+        viewModel.alternarEspelho()
+        advanceUntilIdle()
+        assertEquals(listOf(OpcaoAtiva.ESPELHO), viewModel.uiState.value.opcoesAtivas)
+
+        viewModel.alternarEspelho()
+        advanceUntilIdle()
+        assertEquals(emptyList<OpcaoAtiva>(), viewModel.uiState.value.opcoesAtivas)
+    }
+
+    // endregion
+
+    // region Baralhos da partida (continuação)
 
     @Test
     fun `selecionar todos volta a marcar tudo`() {

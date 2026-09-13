@@ -28,6 +28,8 @@ import com.quemsou.app.data.local.FeedbackDeCardDao
 import com.quemsou.app.data.local.MIGRACAO_1_2
 import com.quemsou.app.data.local.MIGRACAO_2_3
 import com.quemsou.app.data.local.MIGRACAO_3_4
+import com.quemsou.app.data.local.MIGRACAO_4_5
+import com.quemsou.app.data.local.MIGRACAO_5_6
 import com.quemsou.app.domain.repository.RepositorioDeCards
 import dagger.Binds
 import dagger.Module
@@ -44,6 +46,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
+
+    @Binds
+    abstract fun bindConexaoDaFabrica(impl: com.quemsou.app.data.fabrica.ServicoDaFabrica): com.quemsou.app.data.fabrica.ConexaoDaFabrica
+
+    @Binds
+    abstract fun bindDestinoDeBaralhos(impl: com.quemsou.app.data.catalogo.InstaladorDeBaralhos): com.quemsou.app.data.catalogo.DestinoDeBaralhos
 
     @Binds
     abstract fun bindFonteDeCardsJson(impl: AssetsFonteDeCardsJson): FonteDeCardsJson
@@ -77,7 +85,7 @@ abstract class DataModule {
         @Singleton
         fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "quemsou.db")
-                .addMigrations(MIGRACAO_1_2, MIGRACAO_2_3, MIGRACAO_3_4)
+                .addMigrations(MIGRACAO_1_2, MIGRACAO_2_3, MIGRACAO_3_4, MIGRACAO_4_5, MIGRACAO_5_6)
                 .build()
 
         @Provides

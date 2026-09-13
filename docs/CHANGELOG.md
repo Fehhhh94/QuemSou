@@ -2,6 +2,148 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-09-12 — fábrica automática com pedidos recuperáveis
+
+- Felipe abriu a etapa da fábrica e escolheu usar este computador ligado.
+  Pedidos no app agora persistem antes do envio, incluindo avaliações opcionais;
+  reenvio após falha mantém o mesmo id/conteúdo e evita geração duplicada.
+- Cache de pedidos, recuperação individual de recebimentos e ação de jogar
+  condicionada à instalação validada. Interface explica conexão, pendência,
+  falha e ampliação; teclado e fonte ampliada acomodados.
+- Serviço com admissão transacional, conflito de id explícito, histórico sem
+  corte em vinte pedidos e validação preservada em Python otimizado. Ampliação
+  respeita 500 dicas por resposta e não altera a carta em andamento.
+- Novo operador prepara configuração privada e inicia o serviço loopback.
+  Conta executora, HTTPS privado e autenticação continuam pendentes de ativação.
+- 270 testes JVM por variante, 23 Android no emulador e 17 Python sem falhas;
+  Python também validado com `-O`. Build e lint passam, zero erros de lint.
+- APK pessoal 0.5.0-dev-0912.2315. Sem geração real, publicação ou teste físico.
+  Commit e push autorizados por Felipe; evidência em `HANDOFF_ACTIVE.md`.
+
+### 2026-09-12 — retomada pelo Codex e validação das correções de UX
+
+- Felipe transferiu a execução ao Codex após a interrupção do Claude. As
+  correções R1/R2 já estavam no código e foram preservadas após conferência.
+- Acrescentado teste de integração entre Room, repositório real e Setup:
+  revelar uma das dez dicas torna a resposta inelegível, mantém as nove
+  inéditas e o baralho, e permite trocar a seleção após obter outro conteúdo.
+- Suíte Android executada com 21 testes sem falhas no Pixel_1/API 35.
+  Relatórios JVM mantêm 261 testes por variante; Debug executado na retomada,
+  Release reutilizado pelo Gradle sem alteração das fontes.
+- Leitura de dica curta conferida em retrato/paisagem a 100%, 130% e 150%,
+  além do tema escuro em paisagem a 150%. Dica longa coberta pelos testes.
+- APK 0.5.0-dev-0912.2207 preparado para teste pessoal. Sem alteração adicional
+  no código de produção, sem ativar fábrica, sem commit, push ou teste físico.
+  Evidência atual e limites em `HANDOFF_ACTIVE.md`.
+
+### 2026-09-12 — correções R1 e R2 da revisão do Codex
+
+- **R1 — dica ilegível em janela baixa.** Em paisagem (e em retrato com fonte
+  muito ampliada) as três ações empilhadas com margens de retrato deixavam
+  para a dica uma faixa de uma linha, cortada. A tela agora se reorganiza
+  abaixo de 560 dp de altura: ações principais lado a lado, margens e
+  espaçamentos menores e corpo de texto proporcional à janela. Retrato normal
+  fica idêntico ao que era.
+- **R2 — acervo esgotado não era detectado.** `semBaralhosNoAparelho` olhava
+  só `baralhosDisponiveis.isEmpty()`, mas `buscarTodos` **mantém** o baralho e
+  filtra as cartas dentro dele: com tudo esgotado a lista continua cheia de
+  baralhos vazios e o app caía em "faltam respostas — reduza as rodadas".
+  O predicado passou a ser `semRespostasNoAparelho`, baseado na existência de
+  respostas elegíveis, e ganhou um motivo irmão `SELECAO_SEM_RESPOSTAS` para
+  quando só os baralhos esgotados estão marcados — reduzir rodadas não resolve
+  um monte de zero.
+- Regras do domínio, contrato do repositório, histórico de dicas e as demais
+  correções da unidade anterior preservados. Nenhum baralho ou histórico é
+  apagado para resolver apresentação.
+- Build 0.5.0-dev-0912.2144: 261 testes JVM por variante (+4) e 20
+  instrumentados (+5), sem falhas; lint segue com zero erros e 79 avisos.
+  Os testes novos da área de leitura foram verificados contra o layout antigo:
+  falham com a caixa de leitura em 0,0 dp.
+- Entrega local; nenhum commit, push ou publicação.
+
+### 2026-09-12 — consolidação de UX da central (executor Claude Code)
+
+- Unidade de consolidação sobre o redesign anterior: sem reconstruir o
+  conceito nem tocar em domínio, Room, catálogo ou fábrica. Delta restrito a
+  `presentation/`, `navigation/`, `strings.xml` e testes.
+- Corrigido o teclado cobrindo a barra "Começar partida" e o campo em foco no
+  Setup (edge-to-edge sem `imePadding`). Antes/depois reproduzido no emulador.
+- "Mais opções" recolhido passa a resumir as regras secundárias já valendo
+  (leitor não pontua, Modo Shot, espelho) — recolher esconde controle, não fato.
+- Aparelho sem baralho elegível ganhou motivo de bloqueio próprio e estado
+  vazio; antes o Setup mandava "selecione pelo menos um baralho" sem ter o quê.
+- Estado indisponível da partida virou tela completa, com saída para o Setup
+  (é lá que se reduz rodadas ou se escolhe mais baralhos).
+- Acessibilidade: alturas de ação passam a mínimas (fonte a 150% não corta
+  rótulo), grid anuncia posição disponível/revelada, a área da resposta ganhou
+  rótulo fixo (sem conter a resposta) e o chip de tipo deixou de se anunciar
+  como botão sem ação.
+- Ergonomia: grid desce para a zona do polegar com teto de largura, placar
+  final rola e centra, arte decorativa da Home sai em janela baixa para não
+  esconder "Jogar QuemSou".
+- Regras inalteradas: pontuação, seed, ordem determinística, dez posições às
+  cegas, reserva/consumo de dicas, rotação e restauração.
+- Build 0.5.0-dev-0912.2053: 257 testes JVM por variante (+5) e 15
+  instrumentados no emulador API 35 (+5), sem falhas; lint sem erros e 79
+  avisos (um a menos que a unidade anterior). Evidência e limites em
+  `HANDOFF_ACTIVE.md`.
+- Entrega local; nenhum commit, push, publicação ou instalação em aparelho
+  físico. Revisão independente do Codex ainda não aconteceu.
+
+### 2026-09-12 — central pessoal de party games e nova identidade
+
+- Escopo definido pelo Felipe: app para encontros com amigos, sem Google
+  Play nesta versão. Bora Jogar é o nome provisório da central; QuemSou é
+  o primeiro jogo, com entrada própria para jogar, baralhos e instruções.
+- Nova Home com destaque ilustrado, paleta azul/lima/papel, tipografia forte,
+  tema escuro, ícone de dado e identificação do build sempre visível.
+- Setup prioriza nomes, grupos e rodadas; baralhos ganham seção própria com
+  linha inteira selecionável. Opções secundárias ficam recolhíveis e há
+  retorno explícito à central. Dicas recebem apresentação de carta.
+- Preservados applicationId, acervo, históricos, dez posições às cegas,
+  pontuação e regras de consumo/rotação. Fábrica permanece na etapa seguinte.
+- Build 0.5.0-dev-0912.1952 (ajuste final de texto); regressão no 1945:
+  252 testes JVM por variante e dez Android, sem falhas; lint sem
+  erros e 80 avisos (três recursos antigos ficaram sem uso com a nova Home).
+  Evidência visual/instrumentada final e limites em `HANDOFF_ACTIVE.md`.
+- Entrega local; nenhum commit, push ou publicação nesta unidade.
+
+### 2026-09-12 — conceito de partidas antes da fábrica (entrega local)
+
+- Felipe aprovou baralho como coleção de respostas, carta como seleção de
+  dez dicas e tema como organização do acervo. Banco compartilhado entre
+  referências da mesma resposta nos baralhos instalados.
+- Substituído o consumo das dez dicas ao abrir: agora reserva dez e consome
+  somente as reveladas; acerto na terceira preserva as outras sete.
+- Respostas inéditas e ausentes há mais tempo têm prioridade. A resposta
+  entra no histórico ao abrir sua rodada, sem repetir na mesma partida.
+- Room 5→6 aditivo: reservas, aparições e checkpoint transacional antes da
+  exibição. Restauração mantém o monte histórico, a carta, grid, fase e placar.
+- Setup usa “respostas disponíveis” e explica variedade/aproveitamento;
+  falha de persistência permite retomar o último checkpoint.
+- Código anterior da fábrica preservado para a próxima etapa, sem ativação,
+  publicação ou geração real. Evidência da unidade no handoff ativo.
+- Validação: 252 testes JVM por variante, dez testes Android no emulador
+  API 35 (incluindo catálogo real e migrações), APK e lint sem erros. Home e
+  Setup conferidos no emulador; validação física do fluxo ainda pendente.
+
+### 2026-09-12 — criação automática e histórico de dicas (entrega local)
+
+- Antes, cada card guardava apenas dez dicas fixas; agora aceita um banco
+  editorial por resposta e prepara dez dicas ainda não utilizadas no celular.
+  Atualizar baralho não apaga histórico; a rodada restaurada mantém sua carta.
+- Nova tela de pedidos, acompanhamento e ampliação; geração/revisão via
+  serviço Codex com fila persistente, isolamento por dono e entrega validada.
+  Serviço ainda não ativado, sem publicação ou geração real nesta sessão.
+- Avaliação com apresentação pública e contexto da versão/dicas reveladas.
+- Room 4→5 aditivo, schema exportado, testes do seletor, parser, fila,
+  SQL de migração e teste de upgrade Android compilado.
+- O contrato determinístico passa a incluir conteúdo e histórico local;
+  pontuação, seed do grid e algoritmo de embaralhamento são preservados.
+- Evidência: 237 testes JVM por variante, 8 testes Python, lint Debug e
+  APKs de app/teste montados. Sem aparelho conectado, execução real de Codex
+  ou serviço publicado. Detalhes e próxima ação no handoff ativo.
+
 ### 2026-08-20 — documentação operacional compartilhada
 
 - **Entrada rápida para agentes**: `AGENTS.md` e `CLAUDE.md` na raiz passam a

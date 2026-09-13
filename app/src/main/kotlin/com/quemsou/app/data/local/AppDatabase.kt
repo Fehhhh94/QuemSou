@@ -18,12 +18,15 @@ import androidx.room.TypeConverters
  * precisam preservá-la.
  */
 @Database(
-    entities = [BaralhoEntity::class, CardEntity::class, FeedbackDeCardEntity::class],
-    version = 4,
+    entities = [BaralhoEntity::class, CardEntity::class, FeedbackDeCardEntity::class,
+        DicaUtilizadaEntity::class, SessaoDeDicasEntity::class, TurnoDeDicasEntity::class,
+        RespostaJogadaEntity::class, DicaReservadaEntity::class],
+    version = 6,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
+    abstract fun historicoDeDicasDao(): HistoricoDeDicasDao
 
     abstract fun baralhoDao(): BaralhoDao
 

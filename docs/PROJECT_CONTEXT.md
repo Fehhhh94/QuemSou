@@ -1,20 +1,71 @@
-# Contexto atual do QuemSou
+# Contexto atual — central de jogos e QuemSou
 
-> Atualizado em 2026-08-20. Este é o dono da visão atual de produto,
+> Atualizado em 2026-09-12. Este é o dono da visão atual de produto,
 > arquitetura e estágio. Regras completas e história ficam nos documentos
 > apontados.
 
 ## Produto
 
-QuemSou é um jogo Android presencial de adivinhação por dicas. Em cada turno,
-um jogador lê e os demais tentam descobrir a resposta usando até dez dicas. O
-app suporta jogo individual ou grupos, Modo Shot opcional e baralhos locais.
+O app passa a ser uma central de party games presenciais, com **Bora Jogar**
+como nome provisório e **QuemSou** como primeiro jogo disponível. Esta versão
+é pessoal, para encontros na casa dos amigos, distribuída por APK. Não há
+publicação na Google Play nesta etapa. Outros jogos serão definidos depois;
+a Home oferece somente ações que já existem.
 
-A partida principal é offline. A internet é usada apenas para consultar e
-baixar baralhos no catálogo. O espelho de leitura usa HTTP somente dentro da
-rede local do anfitrião.
+No QuemSou, um jogador lê e os demais tentam descobrir a resposta usando até
+dez dicas. O jogo suporta 2–4 jogadores, grupos, Modo Shot opcional e baralhos
+locais. Tema, resposta, baralho e carta são conceitos do QuemSou, não contratos
+obrigatórios dos futuros jogos.
+
+A partida principal é offline. A internet atende ao catálogo e, futuramente,
+à geração automática solicitada dentro do app. A fábrica permanece sem
+ativação nesta unidade. O pareamento do espelho usa a rede local; transmitir
+as dicas durante a partida continua pendente.
+
+### Identidade e navegação
+
+- Home é a central; o bloco QuemSou leva à sua preparação, aos seus baralhos
+  e às suas instruções. Próximos jogos deverão ter entrada e fluxo próprios,
+  reaproveitando tema e navegação sem compartilhar o histórico por acidente.
+- Paleta azul, verde-lima, papel quente e tinta escura, com variante noturna.
+  Tipografia forte, formas arredondadas e ilustração vetorial de cartas.
+  Dentro da partida, âmbar continua reservado ao Modo Shot.
+- Setup começa pelos nomes e grupos, seguido de rodadas e baralhos. Leitor
+  pontua, Shot e pareamento ficam em Mais opções. Recolher preserva valores
+  e resume as regras secundárias que já estão valendo.
+- Falta de conteúdo tem três estados distintos, porque levam a saídas
+  diferentes: sem nenhuma resposta elegível no aparelho (baixar baralho),
+  nenhum baralho marcado (marcar) e seleção só com baralhos esgotados (trocar
+  a seleção). A disponibilidade olha respostas elegíveis, não a lista de
+  baralhos: o repositório mantém o baralho e filtra as cartas dentro dele.
+  Baralho esgotado continua listado com "0 respostas disponíveis".
+- Avaliar cartas continua acessível na Home; exportar/limpar mantêm seus
+  controles e confirmação. Criação de baralhos fica recolhida; a tela da fábrica
+  apresenta a conexão quando necessária. Identificação do build permanece no rodapé.
+- Home e Setup têm conteúdo limitado em largura; conteúdo longo pode rolar.
+  As dicas ganham apresentação de carta, sem alterar a escolha às cegas.
+  A arte decorativa da Home sai em janela baixa para não empurrar a chamada
+  de jogar; o grid tem teto de largura e fica na zona do polegar; ações usam
+  altura mínima, não fixa, para não cortar rótulo em fonte ampliada.
+- A tela da dica se reorganiza abaixo de 560 dp de altura disponível (como em
+  paisagem de celular): ações principais lado a lado
+  e corpo de texto proporcional, para que a área de leitura continue sendo uma
+  janela e não uma faixa. Acima do limiar, o layout de retrato é o mesmo.
+- Partida sem conteúdo elegível apresenta uma tela de estado com saída para
+  o Setup — é lá que se reduz rodadas ou se escolhem mais baralhos.
+- Nome exibido e ícone podem evoluir, mas `applicationId = com.quemsou.app`
+  permanece para preservar a instalação, o acervo e os históricos locais.
 
 ## Estado atual
+
+- Conceito de partidas implementado localmente: baralhos como coleções de
+  respostas, acervo compartilhado entre temas/edições, cartas de dez dicas,
+  consumo só das reveladas e rotação por última aparição. Regras e exemplos:
+  `docs/GAME_RULES.md`. Evidência atual e pendências: `docs/HANDOFF_ACTIVE.md`.
+- Fábrica automática: Felipe autorizou sua implementação e escolheu este computador ligado como
+  host. Pedidos persistentes, recuperação, instalação e ampliação foram
+  implementados; HTTPS e geração real seguem sem ativação. Operação:
+  `docs/DECK_STUDIO.md`.
 
 - Fases 0–3 concluídas e validadas em partida completa no Samsung Z Fold,
   Android 16.
@@ -26,7 +77,8 @@ rede local do anfitrião.
   ainda pendente e nenhum push realizado.
 - Fase 4A partes 2 e 3 pendentes. Fase 4 Nearby continua no backlog e é outra
   iniciativa.
-- Nome definitivo do produto ainda está em aberto; `QuemSou` é provisório.
+- Nome definitivo da central em aberto; `Bora Jogar` é provisório. QuemSou
+  identifica o primeiro jogo.
 
 O estado operacional e a próxima ação estão em `docs/HANDOFF_ACTIVE.md`.
 
@@ -57,8 +109,8 @@ Compose → ViewModel → repositório/serviço → fonte local ou rede
 
 ## Fluxo principal
 
-1. Home abre uma nova partida ou o catálogo.
-2. Setup seleciona baralhos, jogadores, grupos e regras opcionais.
+1. A central apresenta QuemSou: jogar, baralhos e como jogar.
+2. Preparar QuemSou reúne jogadores, grupos, rodadas, baralhos e opções.
 3. `ConfiguracaoDaPartida` atravessa uma rota tipada até a partida.
 4. Um único `PartidaViewModel` traduz o domínio em fases de UI.
 5. O jogo alterna leitor, grid, dica, acerto/queima e anúncio.
@@ -80,7 +132,9 @@ A fonte completa é `docs/GAME_RULES.md`. Contratos que afetam arquitetura:
 
 ## Persistência e conteúdo
 
-- Room guarda baralhos, cards e histórico de feedback.
+- Room v6 separa conteúdo editorial, reservas, dicas utilizadas, últimas
+  aparições de respostas e checkpoints de sessões/rodadas. Migrações 4→5→6
+  aditivas; o histórico conservador da v5 é preservado.
 - `CardsImporter` atualiza somente conteúdo embarcado quando a versão de
   `assets/cards.json` aumenta; downloads não são apagados.
 - O catálogo cruza índice remoto/cache com Room e nunca persiste baralho que
@@ -91,6 +145,10 @@ A fonte completa é `docs/GAME_RULES.md`. Contratos que afetam arquitetura:
   `docs/CARDS_GUIDE.md`; JSON: `docs/CATALOG_FORMAT.md`.
 
 ## Catálogo
+
+A criação sob pedido é um serviço separado do catálogo estático, com HTTPS
+autenticado. O app recebe o resultado e instala o conteúdo validado numa
+transação. O servidor ainda não está ativado; ver `DECK_STUDIO.md`.
 
 O catálogo é estático, sem Firebase nem backend próprio. A única URL remota do
 app fica em `HttpFonteDoCatalogo.URL_DO_INDICE`. O último índice válido fica em
@@ -135,8 +193,9 @@ Ktor está fixado em 3.2.4 por compatibilidade com Kotlin 2.1.x. Consulte
 
 ## Restauração e limites Android
 
-`PartidaViewModel` persiste chaves mínimas no `SavedStateHandle` e recria a
-partida deterministicamente. Isso cobre recriação e morte de processo com a
+`PartidaViewModel` persiste chaves mínimas e id da sessão no `SavedStateHandle`;
+Room preserva o conteúdo da sessão e as cartas preparadas. A restauração
+recupera as mesmas dicas sem novo consumo. Isso cobre morte de processo com a
 task preservada; não cobre swipe nos recentes, que remove a task por semântica
 do Android.
 
@@ -146,15 +205,18 @@ Detalhes: `docs/BUGS.md`, seção 7.
 
 ## Evidência vigente
 
-- Baseline automatizada atual: 230 testes JVM, zero falhas/ignorados.
-- `assembleDebug` concluído após o endurecimento do servidor local.
-- Sintaxe do cliente web validada com `node --check`.
-- Pareamento 4A ainda não possui evidência física registrada.
-
-Não extrapolar essa evidência para Wi-Fi real, QR, visual, TalkBack, tamanho de
-fonte ou diferentes fabricantes.
+A base atual tem 270 testes JVM por variante, 23 instrumentados no emulador
+Pixel_1/API 35 e 17 testes Python (também em modo otimizado), além de build e
+lint sem erros. A fábrica tem testes de reabertura do pedido persistido,
+instalação/ampliação com partida ativa e HTTP local com geração simulada.
+O resultado, o APK e os limites visuais estão em `docs/HANDOFF_ACTIVE.md`.
+Não confundir esses números com validação física no aparelho, TalkBack ou
+operação real da fábrica — todos seguem pendentes.
 
 ## Roadmap resumido
+
+- Validar a versão pessoal com a turma e escolher o próximo jogo.
+- Evoluir a fábrica conforme o conceito aprovado, com geração dentro do app.
 
 - Fase 4A partes 2 e 3.
 - Primeiro ciclo de geração/publicação de conteúdo na fábrica de baralhos.

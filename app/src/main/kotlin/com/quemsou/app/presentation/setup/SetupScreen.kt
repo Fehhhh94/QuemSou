@@ -4,12 +4,20 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -47,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -73,6 +82,7 @@ import com.quemsou.app.presentation.ui.theme.ShotAmbar
 fun SetupScreen(
     onComecarPartida: (ConfiguracaoDaPartida) -> Unit,
     onAbrirCatalogo: () -> Unit,
+    onVoltar: () -> Unit,
     viewModel: SetupViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -95,95 +105,117 @@ fun SetupScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observador) }
     }
 
+    var mostrarOpcoes by rememberSaveable { mutableStateOf(false) }
+    // Edge-to-edge (`enableEdgeToEdge` na MainActivity) desliga o resize da
+    // janela: sem `imePadding` o teclado do nome cobre a barra de ação e o
+    // próprio campo em foco. O Scaffold inteiro sobe com o teclado.
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.setup_title)) }) },
+        modifier = Modifier.imePadding(),
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.setup_title)) },
+                navigationIcon = { IconButton(onClick = onVoltar) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.party_back)) } },
+            )
+        },
         bottomBar = {
-            BarraDeAcaoInferior {
-                uiState.motivoDoBloqueioVisivel?.let { motivo ->
-                    Text(
-                        text = textoDoBloqueio(motivo),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                    )
-                }
-                Button(
-                    onClick = viewModel::confirmar,
-                    enabled = uiState.podeComecar,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                ) {
-                    Text(stringResource(R.string.setup_comecar_partida))
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                BarraDeAcaoInferior(modifier = Modifier.widthIn(max = 640.dp)) {
+                    uiState.motivoDoBloqueioVisivel?.let { motivo ->
+                        Text(
+                            text = textoDoBloqueio(motivo),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+                    }
+                    Button(
+                        onClick = viewModel::confirmar,
+                        enabled = uiState.podeComecar,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 52.dp),
+                    ) {
+                        Text(stringResource(R.string.setup_comecar_partida))
+                    }
                 }
             }
         },
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            item {
-                SecaoBaralhos(
-                    uiState = uiState,
-                    onAlternarBaralho = viewModel::alternarBaralho,
-                    onSelecionarTodos = viewModel::selecionarTodosBaralhos,
-                    onAbrirCatalogo = onAbrirCatalogo,
-                    modifier = Modifier.padding(top = 24.dp),
-                )
-            }
-            item {
-                SecaoEspelho(
-                    uiState = uiState,
-                    onAlternar = viewModel::alternarEspelho,
-                    onTocarNaLinha = viewModel::tocarNaLinhaDoEspelho,
-                )
-            }
-            item {
-                SecaoJogarEmTimes(ativo = uiState.jogarEmTimes, onAlternar = viewModel::alternarJogarEmTimes)
-            }
-            item {
-                Text(stringResource(R.string.setup_jogadores_titulo), style = MaterialTheme.typography.titleMedium)
-            }
-            itemsIndexed(uiState.jogadores) { indice, jogador ->
-                LinhaDeJogador(
-                    indice = indice,
-                    jogador = jogador,
-                    jogarEmTimes = uiState.jogarEmTimes,
-                    podeRemover = uiState.jogadores.size > Partida.MINIMO_DE_JOGADORES,
-                    onNomeAlterado = { viewModel.renomearJogador(indice, it) },
-                    onNomeCampoPerdeuFoco = { viewModel.marcarJogadorTocado(indice) },
-                    onCiclarGrupo = { viewModel.ciclarGrupo(indice) },
-                    onRemover = { viewModel.removerJogador(indice) },
-                )
-            }
-            if (uiState.jogadores.size < Partida.MAXIMO_DE_JOGADORES) {
+        Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.TopCenter) {
+            LazyColumn(
+                modifier = Modifier
+                    .widthIn(max = 640.dp)
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+            ) {
                 item {
-                    OutlinedButton(onClick = viewModel::adicionarJogador, modifier = Modifier.fillMaxWidth()) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Text(
-                            text = stringResource(R.string.setup_adicionar_jogador),
-                            modifier = Modifier.padding(start = 8.dp),
+                    Column(Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(R.string.party_setup_intro), style = MaterialTheme.typography.headlineLarge)
+                        Text(stringResource(R.string.party_setup_subtitle), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                item {
+                    SecaoJogarEmTimes(ativo = uiState.jogarEmTimes, onAlternar = viewModel::alternarJogarEmTimes)
+                }
+                itemsIndexed(uiState.jogadores) { indice, jogador ->
+                    LinhaDeJogador(
+                        indice = indice,
+                        jogador = jogador,
+                        jogarEmTimes = uiState.jogarEmTimes,
+                        podeRemover = uiState.jogadores.size > Partida.MINIMO_DE_JOGADORES,
+                        onNomeAlterado = { viewModel.renomearJogador(indice, it) },
+                        onNomeCampoPerdeuFoco = { viewModel.marcarJogadorTocado(indice) },
+                        onCiclarGrupo = { viewModel.ciclarGrupo(indice) },
+                        onRemover = { viewModel.removerJogador(indice) },
+                    )
+                }
+                if (uiState.jogadores.size < Partida.MAXIMO_DE_JOGADORES) {
+                    item {
+                        OutlinedButton(onClick = viewModel::adicionarJogador, modifier = Modifier.fillMaxWidth()) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Text(
+                                text = stringResource(R.string.setup_adicionar_jogador),
+                                modifier = Modifier.padding(start = 8.dp),
+                            )
+                        }
+                    }
+                }
+                item {
+                    SecaoRodadas(rodadas = uiState.numeroDeRodadas, onDefinir = viewModel::definirRodadas)
+                }
+                item {
+                    Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface) {
+                        SecaoBaralhos(
+                            uiState = uiState,
+                            onAlternarBaralho = viewModel::alternarBaralho,
+                            onSelecionarTodos = viewModel::selecionarTodosBaralhos,
+                            onAbrirCatalogo = onAbrirCatalogo,
+                            modifier = Modifier.padding(16.dp),
                         )
                     }
                 }
-            }
-            item {
-                SecaoRodadas(rodadas = uiState.numeroDeRodadas, onDefinir = viewModel::definirRodadas)
-            }
-            item {
-                SecaoLeitorPontua(ativo = uiState.leitorPontua, onAlternar = viewModel::alternarLeitorPontua)
-            }
-            item {
-                SecaoModoShot(
-                    ativo = uiState.modoShot,
-                    quantidade = uiState.quantidadeDeShots,
-                    onAlternar = viewModel::alternarModoShot,
-                    onDefinirQuantidade = viewModel::definirQuantidadeDeShots,
-                )
+                item {
+                    BotaoDeOpcoes(
+                        aberto = mostrarOpcoes,
+                        opcoesAtivas = uiState.opcoesAtivas,
+                        onAlternar = { mostrarOpcoes = !mostrarOpcoes },
+                    )
+                }
+                if (mostrarOpcoes) {
+                    item { SecaoLeitorPontua(ativo = uiState.leitorPontua, onAlternar = viewModel::alternarLeitorPontua) }
+                    item {
+                        SecaoModoShot(
+                            ativo = uiState.modoShot,
+                            quantidade = uiState.quantidadeDeShots,
+                            onAlternar = viewModel::alternarModoShot,
+                            onDefinirQuantidade = viewModel::definirQuantidadeDeShots,
+                        )
+                    }
+                    item {
+                        SecaoEspelho(uiState = uiState, onAlternar = viewModel::alternarEspelho, onTocarNaLinha = viewModel::tocarNaLinhaDoEspelho)
+                    }
+                }
             }
         }
     }
@@ -208,6 +240,7 @@ fun SetupScreen(
  * coleção, checkbox e mini-selo por baralho, atalhos "Selecionar todos" e
  * "Catálogo →", e o contador vivo da união.
  */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun SecaoBaralhos(
     uiState: SetupUiState,
@@ -217,20 +250,33 @@ private fun SecaoBaralhos(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(stringResource(R.string.setup_baralhos_titulo), style = MaterialTheme.typography.titleMedium)
-            Row {
-                TextButton(onClick = onSelecionarTodos) {
-                    Text(stringResource(R.string.setup_baralhos_selecionar_todos))
+        Column {
+            Text(stringResource(R.string.setup_baralhos_titulo), style = MaterialTheme.typography.titleLarge)
+            androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (!uiState.semRespostasNoAparelho) {
+                    TextButton(onClick = onSelecionarTodos) {
+                        Text(stringResource(R.string.setup_baralhos_selecionar_todos))
+                    }
                 }
                 TextButton(onClick = onAbrirCatalogo) {
                     Text(stringResource(R.string.setup_baralhos_abrir_catalogo))
                 }
             }
+        }
+        if (uiState.semRespostasNoAparelho) {
+            // Não há o que selecionar: a seção diz o que aconteceu e para
+            // onde ir, em vez de oferecer um "Selecionar todos" sobre nada.
+            // Os baralhos esgotados continuam listados abaixo, com "0
+            // respostas disponíveis" — some a oferta, não o acervo.
+            Text(
+                text = stringResource(R.string.setup_sem_respostas_titulo),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResource(R.string.setup_sem_respostas_corpo),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         uiState.baralhosDisponiveis
             .groupBy { it.colecaoId }
@@ -242,34 +288,56 @@ private fun SecaoBaralhos(
                 )
                 baralhosDaColecao.forEach { baralho ->
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).toggleable(
+                            value = baralho.id in uiState.baralhosSelecionados,
+                            role = Role.Checkbox,
+                            onValueChange = { onAlternarBaralho(baralho.id) },
+                        ).padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Checkbox(
-                            checked = baralho.id in uiState.baralhosSelecionados,
-                            onCheckedChange = { onAlternarBaralho(baralho.id) },
-                        )
+                        Checkbox(checked = baralho.id in uiState.baralhosSelecionados, onCheckedChange = null)
                         Column(Modifier.weight(1f)) {
-                            Text(baralho.nome, style = MaterialTheme.typography.bodyLarge)
+                            Text(baralho.nome, style = MaterialTheme.typography.titleMedium)
                             Text(
                                 text = stringResource(R.string.setup_baralho_cards, baralho.quantidadeDeCards),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            SeloDeEstado(estado = baralho.estado, compacto = true)
                         }
-                        SeloDeEstado(estado = baralho.estado, compacto = true)
                     }
                 }
             }
-        Text(
-            text = stringResource(
-                R.string.setup_baralhos_contador,
-                uiState.baralhosSelecionados.size,
-                uiState.cardsNoMonte,
-            ),
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        if (!uiState.semRespostasNoAparelho) {
+            Text(
+                text = if (!uiState.baralhosCarregados) {
+                    stringResource(R.string.setup_carregando_respostas)
+                } else {
+                    // Plural de verdade nas duas metades: "1 baralho · 1
+                    // resposta disponível" em vez de "1 baralhos · 1 respostas".
+                    stringResource(
+                        R.string.setup_baralhos_contador_composto,
+                        pluralStringResource(
+                            R.plurals.setup_baralhos_selecionados,
+                            uiState.baralhosSelecionados.size,
+                            uiState.baralhosSelecionados.size,
+                        ),
+                        pluralStringResource(
+                            R.plurals.setup_respostas_disponiveis,
+                            uiState.cardsNoMonte,
+                            uiState.cardsNoMonte,
+                        ),
+                    )
+                },
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = stringResource(R.string.setup_variedade),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -277,9 +345,8 @@ private fun SecaoBaralhos(
  * Espelho de leitura (4A parte 1): o anfitrião liga o servidor local, mostra
  * o QR e o endereço, e acompanha quem já entrou pelo navegador.
  *
- * Fica **abaixo dos baralhos e antes dos jogadores** de propósito: quem lê o
- * QR precisa dos nomes já digitados. Começar a partida NÃO depende disto —
- * ninguém conectado é um estado perfeitamente válido.
+ * Acesso em Mais opções, depois dos jogadores e baralhos. Começar a partida
+ * não depende do espelho: ninguém conectado é um estado válido.
  *
  * Cada linha da lista é tocável e o toque significa uma coisa diferente
  * conforme o estado ([SetupUiState.estadoNoEspelho]); a dica de uso acima da
@@ -418,7 +485,7 @@ private fun LinhaDeJogador(
                 singleLine = true,
                 modifier = Modifier
                     .weight(1f)
-                    .height(56.dp)
+                    .heightIn(min = 56.dp)
                     .onFocusChanged { estadoDoFoco ->
                         if (estadoDoFoco.isFocused) {
                             campoRecebeuFoco = true
@@ -434,6 +501,8 @@ private fun LinhaDeJogador(
             }
         }
         if (jogarEmTimes) {
+            val nome = jogador.nome.trim().ifBlank { stringResource(R.string.setup_jogador_nome_placeholder, indice + 1) }
+            val descricao = stringResource(R.string.setup_grupo_toque, nome)
             FilterChip(
                 selected = jogador.grupo != null,
                 onClick = onCiclarGrupo,
@@ -443,20 +512,72 @@ private fun LinhaDeJogador(
                             ?: stringResource(R.string.setup_sem_grupo),
                     )
                 },
+                // O ciclo "sem grupo → 1 → 2 → 3" não se explica sozinho:
+                // a semântica diz de quem é o grupo que o toque muda.
+                modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = descricao },
             )
         }
     }
 }
 
+/**
+ * Agrupar jogadores é a única decisão do Setup cujo efeito não é óbvio pelo
+ * rótulo: a descrição existe para o convidado entender o que muda no placar
+ * antes de ligar o switch.
+ */
 @Composable
 private fun SecaoJogarEmTimes(ativo: Boolean, onAlternar: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(stringResource(R.string.setup_jogar_em_times_titulo), style = MaterialTheme.typography.titleMedium)
-        Switch(checked = ativo, onCheckedChange = { onAlternar() })
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(stringResource(R.string.setup_jogar_em_times_titulo), style = MaterialTheme.typography.titleMedium)
+            Switch(checked = ativo, onCheckedChange = { onAlternar() })
+        }
+        Text(
+            text = stringResource(R.string.setup_jogar_em_times_descricao),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/**
+ * Entrada de "Mais opções". Recolhido, resume as regras secundárias que já
+ * saíram do padrão ([OpcaoAtiva]) — recolher esconde os controles, nunca o
+ * fato de o Modo Shot, o espelho ou o leitor sem pontos estarem valendo.
+ */
+@Composable
+private fun BotaoDeOpcoes(
+    aberto: Boolean,
+    opcoesAtivas: List<OpcaoAtiva>,
+    onAlternar: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        OutlinedButton(onClick = onAlternar, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            Text(stringResource(if (aberto) R.string.party_setup_close_options else R.string.party_setup_options))
+        }
+        if (!aberto && opcoesAtivas.isNotEmpty()) {
+            // `stringResource` não pode ser chamado dentro do lambda do
+            // joinToString: os rótulos são resolvidos antes e só depois unidos.
+            val rotulos = opcoesAtivas.map { opcao ->
+                stringResource(
+                    when (opcao) {
+                        OpcaoAtiva.LEITOR_NAO_PONTUA -> R.string.setup_opcao_leitor_nao_pontua
+                        OpcaoAtiva.MODO_SHOT -> R.string.setup_opcao_modo_shot
+                        OpcaoAtiva.ESPELHO -> R.string.setup_opcao_espelho
+                    },
+                )
+            }
+            val nomes = rotulos.joinToString(" · ")
+            Text(
+                text = stringResource(R.string.setup_opcoes_ativas, nomes),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -570,7 +691,9 @@ private fun textoDoBloqueio(motivo: MotivoDoBloqueio): String = stringResource(
     when (motivo) {
         MotivoDoBloqueio.POUCOS_JOGADORES -> R.string.setup_bloqueio_poucos_jogadores
         MotivoDoBloqueio.NOMES_VAZIOS -> R.string.setup_bloqueio_nomes_vazios
+        MotivoDoBloqueio.SEM_RESPOSTAS_NO_APARELHO -> R.string.setup_bloqueio_sem_respostas
         MotivoDoBloqueio.NENHUM_BARALHO -> R.string.setup_bloqueio_nenhum_baralho
+        MotivoDoBloqueio.SELECAO_SEM_RESPOSTAS -> R.string.setup_bloqueio_selecao_sem_respostas
         MotivoDoBloqueio.CARDS_INSUFICIENTES -> R.string.setup_bloqueio_cards_insuficientes
     },
 )

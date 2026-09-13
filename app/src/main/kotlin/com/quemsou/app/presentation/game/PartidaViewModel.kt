@@ -14,6 +14,7 @@ import com.quemsou.app.domain.model.EstadoDoTurno
 import com.quemsou.app.domain.model.Grupo
 import com.quemsou.app.domain.model.Jogador
 import com.quemsou.app.domain.model.Partida
+import com.quemsou.app.domain.model.ProgressoDaPartida
 import com.quemsou.app.domain.model.RegrasPartida
 import com.quemsou.app.domain.model.Turno
 import com.quemsou.app.domain.repository.RepositorioDeCards
@@ -29,6 +30,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import java.util.UUID
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import com.quemsou.app.data.catalogo.paraJsonModelo
 
 /**
  * Um único ViewModel para a partida inteira (decisão da 3.2): traduz
@@ -42,11 +48,16 @@ import kotlinx.coroutines.launch
  * que só chamadas válidas cheguem ao domínio.
  *
  * ## Morte de processo (SavedStateHandle)
+ * O id de sessão aponta para o conteúdo congelado no Room. Cada rodada
+ * recupera a carta persistida antes da primeira exibição, inclusive após
+ * atualizar um baralho; restaurar não consome dicas novamente. O código
+ * sorteado em "Jogar de novo" também é preservado no SavedStateHandle.
+ *
  * Persiste apenas o **mínimo não derivável**: rodada atual, pontos acumulados
  * por grupo, fase da UI, posições reveladas na ordem, o acertador do anúncio e
  * a posição de shot pendente (Modo Shot — a posição tocada ainda não foi
  * revelada, então não é derivável das revelações salvas). Todo o
- * resto é reconstruído por determinismo: o monte (união determinística dos
+ * restante das fases é reconstruído por determinismo: o monte (união dos
  * baralhos selecionados), o grid e as posições com shot de cada turno derivam
  * da seed do código ([ConfiguracaoDaPartida], que
  * chega pelo argumento da rota e já sobrevive no `SavedStateHandle`), e o
@@ -106,7 +117,7 @@ class PartidaViewModel @Inject constructor(
     private var baralhoIdPorCardId: Map<String, String> = emptyMap()
 
     init {
-        viewModelScope.launch { inicializar() }
+        viewModelScope.launch { comFalhaVisivel { inicializar() } }
     }
 
     // region Eventos
@@ -114,9 +125,13 @@ class PartidaViewModel @Inject constructor(
     /** Começa o turno da rodada atual (fase VezDeJogar → Grid). */
     fun iniciarTurno() {
         if (_uiState.value !is PartidaUiState.VezDeJogar) return
-        turno = partida.iniciarTurno()
-        savedStateHandle[CHAVE_POSICOES] = intArrayOf()
-        mudarFase(FASE_GRID, estadoGrid())
+        _uiState.value = PartidaUiState.Carregando
+        viewModelScope.launch { comFalhaVisivel {
+            prepararCardDaRodada()
+            turno = partida.iniciarTurno()
+            savedStateHandle[CHAVE_POSICOES] = intArrayOf()
+            mudarFase(FASE_GRID, estadoGrid())
+        } }
     }
 
     /**
@@ -130,10 +145,12 @@ class PartidaViewModel @Inject constructor(
         if (posicao !in 1..Card.QUANTIDADE_DE_DICAS) return
         if (posicao in turnoAtual.posicoesReveladas) return
         if (turnoAtual.temShot(posicao)) {
-            savedStateHandle[CHAVE_SHOT_PENDENTE] = posicao
-            mudarFase(FASE_SHOT, estadoShot(posicao))
+            executarTransicao {
+                savedStateHandle[CHAVE_SHOT_PENDENTE] = posicao
+                mudarFase(FASE_SHOT, estadoShot(posicao))
+            }
         } else {
-            revelarDicaInterna(turnoAtual, posicao)
+            executarTransicao { revelarDicaInterna(turnoAtual, posicao) }
         }
     }
 
@@ -146,8 +163,10 @@ class PartidaViewModel @Inject constructor(
         val fase = _uiState.value
         if (fase !is PartidaUiState.Shot) return
         val turnoAtual = turno ?: return
-        savedStateHandle[CHAVE_SHOT_PENDENTE] = null
-        revelarDicaInterna(turnoAtual, fase.posicao)
+        executarTransicao {
+            savedStateHandle[CHAVE_SHOT_PENDENTE] = null
+            revelarDicaInterna(turnoAtual, fase.posicao)
+        }
     }
 
     /**
@@ -157,13 +176,15 @@ class PartidaViewModel @Inject constructor(
     fun outraDica() {
         val turnoAtual = turno ?: return
         if (_uiState.value !is PartidaUiState.DicaRevelada) return
-        val avancado = turnoAtual.outraDica()
-        turno = avancado
-        if (avancado.estado is EstadoDoTurno.TurnoEncerrado) {
-            savedStateHandle[CHAVE_ACERTADOR] = null
-            mudarFase(FASE_ANUNCIO, estadoAnuncio())
-        } else {
-            mudarFase(FASE_GRID, estadoGrid())
+        executarTransicao {
+            val avancado = turnoAtual.outraDica()
+            turno = avancado
+            if (avancado.estado is EstadoDoTurno.TurnoEncerrado) {
+                savedStateHandle[CHAVE_ACERTADOR] = null
+                mudarFase(FASE_ANUNCIO, estadoAnuncio())
+            } else {
+                mudarFase(FASE_GRID, estadoGrid())
+            }
         }
     }
 
@@ -175,18 +196,21 @@ class PartidaViewModel @Inject constructor(
     fun abrirQuemAcertou() {
         val turnoAtual = turno ?: return
         if (_uiState.value !is PartidaUiState.DicaRevelada) return
-        val unico = turnoAtual.adivinhadores.singleOrNull()
-        if (unico != null) {
-            registrarAcertoInterno(unico.id)
-        } else {
-            mudarFase(FASE_QUEM_ACERTOU, estadoQuemAcertou())
+        executarTransicao {
+            val unico = turnoAtual.adivinhadores.singleOrNull()
+            if (unico != null) {
+                registrarAcertoInterno(unico.id)
+            } else {
+                mudarFase(FASE_QUEM_ACERTOU, estadoQuemAcertou())
+            }
         }
     }
 
     /** Registra o acerto do adivinhador [jogadorId] (fase QuemAcertou → Anuncio). */
     fun registrarAcerto(jogadorId: String) {
         if (_uiState.value !is PartidaUiState.QuemAcertou) return
-        registrarAcertoInterno(jogadorId)
+        if (turno?.adivinhadores?.none { it.id == jogadorId } != false) return
+        executarTransicao { registrarAcertoInterno(jogadorId) }
     }
 
     /** Os adivinhadores desistem: card queimado (fases ativas do turno → Anuncio). */
@@ -197,9 +221,11 @@ class PartidaViewModel @Inject constructor(
             fase is PartidaUiState.DicaRevelada ||
             fase is PartidaUiState.QuemAcertou
         if (!faseComTurnoAtivo) return
-        turno = turnoAtual.queimarCard()
-        savedStateHandle[CHAVE_ACERTADOR] = null
-        mudarFase(FASE_ANUNCIO, estadoAnuncio())
+        executarTransicao {
+            turno = turnoAtual.queimarCard()
+            savedStateHandle[CHAVE_ACERTADOR] = null
+            mudarFase(FASE_ANUNCIO, estadoAnuncio())
+        }
     }
 
     /**
@@ -210,17 +236,22 @@ class PartidaViewModel @Inject constructor(
     fun proximoTurno() {
         val turnoAtual = turno ?: return
         if (_uiState.value !is PartidaUiState.Anuncio) return
-        gravarFeedbackPendente(turnoAtual)
-        partida = partida.encerrarTurno(turnoAtual)
-        turno = null
-        savedStateHandle[CHAVE_RODADA] = partida.rodadaAtual
-        savedStateHandle[CHAVE_PLACAR] = partida.grupos.map { it.pontos }.toIntArray()
-        savedStateHandle[CHAVE_POSICOES] = intArrayOf()
-        savedStateHandle[CHAVE_ACERTADOR] = null
-        if (partida.encerrada) {
-            mudarFase(FASE_PLACAR_FINAL, estadoPlacarFinal())
-        } else {
-            mudarFase(FASE_VEZ_DE_JOGAR, estadoVezDeJogar())
+        _uiState.value = PartidaUiState.Carregando
+        viewModelScope.launch {
+            comFalhaVisivel {
+                gravarFeedbackPendente(turnoAtual)
+                partida = partida.encerrarTurno(turnoAtual)
+                turno = null
+                savedStateHandle[CHAVE_RODADA] = partida.rodadaAtual
+                savedStateHandle[CHAVE_PLACAR] = partida.grupos.map { it.pontos }.toIntArray()
+                savedStateHandle[CHAVE_POSICOES] = intArrayOf()
+                savedStateHandle[CHAVE_ACERTADOR] = null
+                if (partida.encerrada) {
+                    mudarFase(FASE_PLACAR_FINAL, estadoPlacarFinal())
+                } else {
+                    mudarFase(FASE_VEZ_DE_JOGAR, estadoVezDeJogar())
+                }
+            }
         }
     }
 
@@ -258,24 +289,18 @@ class PartidaViewModel @Inject constructor(
      */
     fun reiniciarPartida() {
         if (_uiState.value !is PartidaUiState.PlacarFinal) return
-        partida = CriarPartida.executar(
-            codigo = gerarCodigo(),
-            jogadores = jogadoresBase,
-            regras = RegrasPartida(
-                leitorPontua = configuracao.leitorPontua,
-                numeroDeRodadas = configuracao.numeroDeRodadas,
-                modoShot = configuracao.modoShot,
-                quantidadeDeShots = configuracao.quantidadeDeShots,
-            ),
-            baralhosSelecionados = baralhosSelecionados,
-            grupos = gruposBase,
-        )
-        turno = null
+        _uiState.value = PartidaUiState.Carregando
+        savedStateHandle[CHAVE_SESSAO] = UUID.randomUUID().toString()
+        val novoCodigo = gerarCodigo()
+        savedStateHandle[CHAVE_CODIGO] = novoCodigo
+        savedStateHandle[CHAVE_FASE] = FASE_VEZ_DE_JOGAR
         savedStateHandle[CHAVE_RODADA] = 1
         savedStateHandle[CHAVE_PLACAR] = null
         savedStateHandle[CHAVE_POSICOES] = intArrayOf()
         savedStateHandle[CHAVE_ACERTADOR] = null
-        mudarFase(FASE_VEZ_DE_JOGAR, estadoVezDeJogar())
+        turno = null
+        savedStateHandle[CHAVE_SHOT_PENDENTE] = null
+        viewModelScope.launch { comFalhaVisivel { inicializar() } }
     }
 
     // endregion
@@ -294,13 +319,22 @@ class PartidaViewModel @Inject constructor(
             Jogador(id = "j${indice + 1}", nome = jogador.nome)
         }
         gruposBase = montarGrupos()
-        baralhosSelecionados = repositorioDeCards.buscarPorIds(configuracao.baralhos)
+        baralhosSelecionados = repositorioDeCards.prepararSessao(sessaoId(), configuracao.baralhos)
+        val progresso = repositorioDeCards.progressoDaSessao(sessaoId())
+        progresso?.let {
+            savedStateHandle[CHAVE_RODADA] = it.rodada
+            savedStateHandle[CHAVE_FASE] = it.fase
+            savedStateHandle[CHAVE_PLACAR] = it.pontos.toIntArray()
+            savedStateHandle[CHAVE_POSICOES] = it.posicoes.toIntArray()
+            savedStateHandle[CHAVE_ACERTADOR] = it.acertador
+            savedStateHandle[CHAVE_SHOT_PENDENTE] = it.shotPendente
+        }
         modoDevFeedbackAtivo = modoDevFeedbackStore.modoDevFeedback.first()
         baralhoIdPorCardId = baralhosSelecionados
             .flatMap { baralho -> baralho.cards.map { card -> card.id to baralho.id } }
             .toMap()
         val base = CriarPartida.executar(
-            codigo = configuracao.codigo,
+            codigo = savedStateHandle.get<String>(CHAVE_CODIGO) ?: configuracao.codigo,
             jogadores = jogadoresBase,
             regras = RegrasPartida(
                 leitorPontua = configuracao.leitorPontua,
@@ -310,8 +344,10 @@ class PartidaViewModel @Inject constructor(
             ),
             baralhosSelecionados = baralhosSelecionados,
             grupos = gruposBase,
+            ultimasAparicoes = repositorioDeCards.historicoDaSessao(sessaoId()),
         )
         restaurar(base)
+        if (progresso == null) mudarFase(savedStateHandle.get<String>(CHAVE_FASE) ?: FASE_VEZ_DE_JOGAR, _uiState.value)
     }
 
     /**
@@ -338,7 +374,7 @@ class PartidaViewModel @Inject constructor(
      * reexecutando as revelações na ordem salva (mesmo grid, mesmo
      * escolhedor, mesma fase).
      */
-    private fun restaurar(base: Partida) {
+    private suspend fun restaurar(base: Partida) {
         val fase = savedStateHandle.get<String>(CHAVE_FASE) ?: FASE_VEZ_DE_JOGAR
         val rodada = savedStateHandle.get<Int>(CHAVE_RODADA) ?: 1
         val pontos = savedStateHandle.get<IntArray>(CHAVE_PLACAR)
@@ -360,6 +396,7 @@ class PartidaViewModel @Inject constructor(
             FASE_VEZ_DE_JOGAR -> _uiState.value = estadoVezDeJogar()
             FASE_PLACAR_FINAL -> _uiState.value = estadoPlacarFinal()
             else -> {
+                prepararCardDaRodada()
                 var restaurado = partida.iniciarTurno()
                 posicoes.forEachIndexed { indice, posicao ->
                     restaurado = restaurado.revelarDica(posicao)
@@ -402,7 +439,7 @@ class PartidaViewModel @Inject constructor(
 
     // region Tradução domínio → PartidaUiState
 
-    private fun registrarAcertoInterno(jogadorId: String) {
+    private suspend fun registrarAcertoInterno(jogadorId: String) {
         val turnoAtual = turno ?: return
         if (turnoAtual.adivinhadores.none { it.id == jogadorId }) return
         turno = turnoAtual.registrarAcerto(jogadorId)
@@ -411,14 +448,20 @@ class PartidaViewModel @Inject constructor(
     }
 
     /** Revelação de fato da dica — comum ao toque sem shot e ao pós-"Bebi!". */
-    private fun revelarDicaInterna(turnoAtual: Turno, posicao: Int) {
+    private suspend fun revelarDicaInterna(turnoAtual: Turno, posicao: Int) {
         val avancado = turnoAtual.revelarDica(posicao)
         turno = avancado
         savedStateHandle[CHAVE_POSICOES] = avancado.posicoesReveladas.toIntArray()
         mudarFase(FASE_DICA_REVELADA, estadoDicaRevelada())
     }
 
-    private fun mudarFase(fase: String, estado: PartidaUiState) {
+    private suspend fun mudarFase(fase: String, estado: PartidaUiState) {
+        val posicoes = turno?.posicoesReveladas.orEmpty()
+        repositorioDeCards.salvarProgresso(sessaoId(), ProgressoDaPartida(
+            rodada = partida.rodadaAtual, fase = fase, pontos = partida.grupos.map { it.pontos },
+            posicoes = posicoes, acertador = savedStateHandle.get(CHAVE_ACERTADOR),
+            shotPendente = savedStateHandle.get(CHAVE_SHOT_PENDENTE),
+        ), posicoes.map { checkNotNull(turno).dicaNaPosicao(it) }, encerrarTurno = fase == FASE_ANUNCIO)
         savedStateHandle[CHAVE_FASE] = fase
         // O widget dev de feedback existe apenas durante o Anúncio com o modo
         // dev ligado; qualquer outra fase o descarta (voto não confirmado se
@@ -533,7 +576,7 @@ class PartidaViewModel @Inject constructor(
      * card avaliado). Sem voto, nada é gravado: pular é legítimo. Comentário
      * em branco vira `null` (comentário sem conteúdo não existe).
      */
-    private fun gravarFeedbackPendente(turnoAtual: Turno) {
+    private suspend fun gravarFeedbackPendente(turnoAtual: Turno) {
         val pendente = _feedbackDev.value ?: return
         val voto = pendente.voto ?: return
         val fim = turnoAtual.estado as? EstadoDoTurno.TurnoEncerrado ?: return
@@ -549,13 +592,20 @@ class PartidaViewModel @Inject constructor(
             },
             numeroDaDicaDoAcerto =
                 (fim as? EstadoDoTurno.TurnoEncerrado.Acerto)?.dicasUsadas,
+            contextoJson = Json.encodeToString(com.quemsou.app.data.feedback.ContextoDeFeedback(
+                card = turnoAtual.card.paraJsonModelo(),
+                versaoDoBaralho = baralhosSelecionados.first { it.id == baralhoIdPorCardId[turnoAtual.card.id] }.versao,
+                dicasReveladas = turnoAtual.posicoesReveladas.map { turnoAtual.dicaNaPosicao(it) },
+            )),
         )
-        viewModelScope.launch { registroDeFeedback.registrar(novo) }
+        registroDeFeedback.registrar(novo)
     }
 
     // endregion
 
     private companion object {
+        const val CHAVE_SESSAO = "sessao_dicas"
+        const val CHAVE_CODIGO = "codigo_atual"
         /** Nome do campo da [PartidaRoute] — a navegação tipada o grava no SavedStateHandle. */
         const val ARGUMENTO_CONFIGURACAO = "configuracao"
 
@@ -579,5 +629,41 @@ class PartidaViewModel @Inject constructor(
 
     private fun gerarCodigo(): String = buildString {
         repeat(TAMANHO_DO_CODIGO) { append(('A'..'Z').random()) }
+    }
+
+    private fun sessaoId(): String = savedStateHandle.get<String>(CHAVE_SESSAO)
+        ?: UUID.randomUUID().toString().also { savedStateHandle[CHAVE_SESSAO] = it }
+
+    private suspend fun prepararCardDaRodada() {
+        val indice = partida.rodadaAtual - 1
+        val card = repositorioDeCards.prepararTurno(sessaoId(), partida.rodadaAtual,
+            partida.monte[indice], partida.seed + partida.rodadaAtual)
+        partida = partida.copy(monte = partida.monte.toMutableList().also { it[indice] = card })
+    }
+
+    private suspend fun comFalhaVisivel(bloco: suspend () -> Unit) {
+        try { bloco() } catch (e: CancellationException) { throw e }
+        catch (e: Exception) { _uiState.value = PartidaUiState.Indisponivel }
+    }
+
+    private fun executarTransicao(bloco: suspend () -> Unit) {
+        _uiState.value = PartidaUiState.Carregando
+        viewModelScope.launch { comFalhaVisivel(bloco) }
+    }
+
+    fun tentarNovamente() {
+        if (_uiState.value !is PartidaUiState.Indisponivel) return
+        turno = null
+        executarTransicao { inicializar() }
+    }
+
+    /** A UI só sai após liberar as reservas; dicas já vistas continuam no histórico. */
+    fun confirmarAbandono(aoConcluir: () -> Unit) {
+        if (_uiState.value is PartidaUiState.Carregando) return
+        _abandonoSolicitado.value = false
+        executarTransicao {
+            repositorioDeCards.encerrarSessao(sessaoId())
+            aoConcluir()
+        }
     }
 }

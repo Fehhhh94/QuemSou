@@ -1,17 +1,24 @@
 package com.quemsou.app.presentation.game
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +48,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -55,13 +66,90 @@ import com.quemsou.app.presentation.ui.theme.ShotAmbar
 import com.quemsou.app.presentation.ui.theme.ShotAmbarEscuro
 import com.quemsou.app.presentation.ui.theme.ShotOnAmbar
 
+/**
+ * Espera da partida. O checkpoint é gravado **antes** de exibir cada dica, e
+ * essa gravação passa por aqui a cada toque do grid: mostrar o indicador na
+ * hora transformava uma transição de milissegundos num pisca-pisca. O
+ * indicador só entra depois de [ESPERA_ATE_O_INDICADOR] — a persistência não
+ * muda, só o que se vê enquanto ela acontece.
+ */
 @Composable
 internal fun CarregandoContent() {
+    var visivel by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(ESPERA_ATE_O_INDICADOR)
+        visivel = true
+    }
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
+        if (visivel) CircularProgressIndicator()
     }
 }
 
+private const val ESPERA_ATE_O_INDICADOR = 250L
+
+/** Acima disso, a dica passa a ser lida como parágrafo, não como manchete. */
+private const val LIMITE_DA_DICA_CURTA = 90
+
+/** Teto de largura do grid; acima disso as cartas ficam altas demais. */
+private val LARGURA_MAXIMA_DO_GRID = 420.dp
+
+/**
+ * Abaixo desta altura de janela a tela da dica se reorganiza para preservar a
+ * área de leitura (paisagem de celular, retrato com fonte muito ampliada).
+ */
+private val ALTURA_PARA_LEITURA_FOLGADA = 560.dp
+
+/**
+ * Partida que não pôde ser preparada — quase sempre conteúdo insuficiente:
+ * faltam respostas distintas com dez dicas disponíveis para as rodadas
+ * pedidas. Estado de tela inteiro (com respiro, rolagem e saída), não um
+ * texto solto: é aqui que o jogador descobre que precisa reduzir rodadas ou
+ * escolher mais baralhos.
+ */
+@Composable
+internal fun IndisponivelContent(
+    onTentarNovamente: () -> Unit,
+    onVoltarAoSetup: () -> Unit,
+    onVoltarAoInicio: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+    ) {
+        Text(
+            text = stringResource(R.string.partida_indisponivel_titulo),
+            style = MaterialTheme.typography.headlineSmall,
+        )
+        Text(
+            text = stringResource(R.string.dicas_partida_indisponivel),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Button(
+            onClick = onVoltarAoSetup,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+        ) {
+            Text(stringResource(R.string.partida_indisponivel_voltar_ao_setup))
+        }
+        OutlinedButton(
+            onClick = onTentarNovamente,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+        ) {
+            Text(stringResource(R.string.partida_tentar_novamente))
+        }
+        TextButton(
+            onClick = onVoltarAoInicio,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        ) {
+            Text(stringResource(R.string.dicas_voltar))
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun VezDeJogarContent(
     estado: PartidaUiState.VezDeJogar,
@@ -70,6 +158,7 @@ internal fun VezDeJogarContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,32 +178,49 @@ internal fun VezDeJogarContent(
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = stringResource(R.string.partida_vez_adivinham),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             estado.nomesDosAdivinhadores.forEach { nome -> ChipDeJogador(nome = nome) }
         }
         Button(
             onClick = onEstouComOCelular,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
+                .heightIn(min = 52.dp),
         ) {
             Text(stringResource(R.string.partida_vez_estou_com_celular))
         }
     }
 }
 
+/**
+ * Grid da rodada. O conteúdo de contexto fica em cima e os dez números
+ * descem para junto do rodapé: num celular grande, o grid encostado no topo
+ * deixava a área de toque principal fora do alcance do polegar de quem está
+ * com o aparelho na mão. `heightIn(min = maxHeight)` + `SpaceBetween` só
+ * distribui a sobra — quando o conteúdo passa da tela (fonte ampliada,
+ * paisagem), a rolagem volta a valer e nada é empurrado para fora.
+ */
 @Composable
 internal fun GridContent(
     estado: PartidaUiState.Grid,
     onRevelarDica: (Int) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
+        BoxWithConstraints(Modifier.weight(1f)) {
+        val alturaDaTela = this@BoxWithConstraints.maxHeight
         Column(
             modifier = Modifier
-                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = alturaDaTela)
                 .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
+          Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -123,6 +229,7 @@ internal fun GridContent(
                 Text(
                     text = stringResource(R.string.partida_grid_rodada_leitor, estado.rodada, estado.nomeDoLeitor),
                     style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
                 )
                 ChipTipoDeCard(tipo = estado.tipo)
             }
@@ -142,7 +249,25 @@ internal fun GridContent(
                         .padding(16.dp),
                 )
             }
-            GradeDeNumeros(posicoesReveladas = estado.posicoesReveladas, onTocar = onRevelarDica)
+          }
+          // A instrução desce junto com o grid: é o rótulo dele, e ficar
+          // colada ao bloco de cima deixaria uma frase solta no meio da tela.
+          Column(
+              verticalArrangement = Arrangement.spacedBy(12.dp),
+              modifier = Modifier.padding(top = 16.dp),
+          ) {
+              Text(
+                  text = stringResource(R.string.party_grid_instruction),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+              GradeDeNumeros(
+                  posicoesReveladas = estado.posicoesReveladas,
+                  onTocar = onRevelarDica,
+                  modifier = Modifier.align(Alignment.CenterHorizontally),
+              )
+          }
+        }
         }
         RodapeDePontos(
             texto = stringResource(
@@ -154,16 +279,23 @@ internal fun GridContent(
     }
 }
 
-/** A resposta só aparece enquanto pressionada — nunca fica fixa na tela. */
+/**
+ * A resposta só aparece enquanto pressionada — nunca fica fixa na tela.
+ *
+ * O alvo recebe um rótulo fixo: era uma área tocável sem nome nenhum, e o
+ * rótulo não pode conter a resposta (é justamente o que se está escondendo).
+ */
 @Composable
 private fun AreaDaResposta(resposta: String) {
     var pressionada by remember { mutableStateOf(false) }
+    val rotulo = stringResource(R.string.partida_grid_area_da_resposta)
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp)
+            .heightIn(min = 88.dp)
+            .semantics { contentDescription = rotulo }
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
@@ -174,7 +306,7 @@ private fun AreaDaResposta(resposta: String) {
                 )
             },
     ) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(Modifier.padding(vertical = 20.dp), contentAlignment = Alignment.Center) {
             Text(
                 text = if (pressionada) resposta else stringResource(R.string.partida_grid_segure_para_ver),
                 style = MaterialTheme.typography.titleLarge,
@@ -186,13 +318,31 @@ private fun AreaDaResposta(resposta: String) {
     }
 }
 
+/**
+ * As dez posições. A largura tem teto: sem ele, numa tela larga e baixa
+ * (paisagem, Fold aberto, tablet) o `aspectRatio` esticava cada carta até
+ * o grid não caber mais em pé. O teto não muda nada no retrato de um celular
+ * comum, que já é mais estreito que ele.
+ */
 @Composable
-private fun GradeDeNumeros(posicoesReveladas: List<Int>, onTocar: (Int) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun GradeDeNumeros(
+    posicoesReveladas: List<Int>,
+    onTocar: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier.widthIn(max = LARGURA_MAXIMA_DO_GRID), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         (1..10).chunked(5).forEach { linha ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 linha.forEach { posicao ->
                     val revelada = posicao in posicoesReveladas
+                    // O número sozinho não diz o estado da posição: a
+                    // descrição carrega "disponível"/"já revelada". A posição
+                    // continua sem qualquer pista de dificuldade — nem visual,
+                    // nem semântica.
+                    val descricao = stringResource(
+                        if (revelada) R.string.partida_grid_posicao_revelada else R.string.partida_grid_posicao_disponivel,
+                        posicao,
+                    )
                     Surface(
                         onClick = { if (!revelada) onTocar(posicao) },
                         enabled = !revelada,
@@ -204,15 +354,20 @@ private fun GradeDeNumeros(posicoesReveladas: List<Int>, onTocar: (Int) -> Unit)
                         },
                         modifier = Modifier
                             .weight(1f)
-                            .aspectRatio(1f),
+                            .aspectRatio(.72f)
+                            .heightIn(min = 64.dp)
+                            .semantics {
+                                contentDescription = descricao
+                                if (revelada) disabled()
+                            },
                     ) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             if (revelada) {
-                                Icon(Icons.Default.Check, contentDescription = "$posicao")
+                                Icon(Icons.Default.Check, contentDescription = null)
                             } else {
                                 Text(
                                     text = "$posicao",
-                                    style = MaterialTheme.typography.headlineSmall,
+                                    style = MaterialTheme.typography.headlineMedium,
                                 )
                             }
                         }
@@ -289,7 +444,7 @@ internal fun ShotContent(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp),
+                            .heightIn(min = 52.dp),
                     ) {
                         Text(stringResource(R.string.partida_shot_bebi))
                     }
@@ -306,51 +461,138 @@ internal fun DicaReveladaContent(
     onOutraDica: () -> Unit,
     onPedirQueimar: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        // Três ações empilhadas com as margens do retrato consumiam quase toda a
+        // altura em paisagem: sobrava uma faixa de uma linha para a dica, que
+        // é o único conteúdo que alguém precisa ler em voz alta. Abaixo deste
+        // limiar a tela se reorganiza — ações lado a lado, margens menores e
+        // corpo proporcional à janela — em vez de espremer a leitura.
+        val janelaBaixa = this@BoxWithConstraints.maxHeight < ALTURA_PARA_LEITURA_FOLGADA
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp, vertical = if (janelaBaixa) 12.dp else 24.dp),
+            verticalArrangement = Arrangement.spacedBy(if (janelaBaixa) 8.dp else 16.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.partida_dica_titulo, estado.posicao, estado.valor),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                )
+                ChipTipoDeCard(tipo = estado.tipo)
+            }
+            CorpoDaDica(
+                texto = estado.texto,
+                janelaBaixa = janelaBaixa,
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+            )
+            AcoesDaDica(
+                janelaBaixa = janelaBaixa,
+                onAlguemAcertou = onAlguemAcertou,
+                onOutraDica = onOutraDica,
+                onPedirQueimar = onPedirQueimar,
+            )
+        }
+    }
+}
+
+/**
+ * Superfície de leitura da dica. O corpo responde à **altura da janela** e ao
+ * comprimento do texto: numa janela baixa, manchete de 28 sp com a fonte do
+ * sistema a 150% não cabe nem em uma linha, e insistir nela troca
+ * legibilidade por corte. A rolagem interna segue como rede de segurança da
+ * dica muito longa, nunca como resposta padrão.
+ */
+@Composable
+private fun CorpoDaDica(
+    texto: String,
+    janelaBaixa: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val curta = texto.length <= LIMITE_DA_DICA_CURTA
+    val estilo = when {
+        !janelaBaixa && curta -> MaterialTheme.typography.headlineMedium
+        !janelaBaixa -> MaterialTheme.typography.headlineSmall
+        curta -> MaterialTheme.typography.titleLarge
+        else -> MaterialTheme.typography.bodyLarge
+    }
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = if (janelaBaixa) 8.dp else 24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(R.string.partida_dica_titulo, estado.posicao, estado.valor),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            ChipTipoDeCard(tipo = estado.tipo)
+            Text(text = texto, style = estilo, textAlign = TextAlign.Center)
         }
-        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            Text(
-                text = estado.texto,
-                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp),
-                textAlign = TextAlign.Center,
-            )
+    }
+}
+
+/**
+ * Acerto, outra dica e queima. Em janela baixa as duas ações principais vão
+ * lado a lado: empilhadas, elas sozinhas ocupavam mais da metade da tela em
+ * paisagem. Alvo mínimo de 48 dp e ordem de importância não mudam.
+ */
+@Composable
+private fun AcoesDaDica(
+    janelaBaixa: Boolean,
+    onAlguemAcertou: () -> Unit,
+    onOutraDica: () -> Unit,
+    onPedirQueimar: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(if (janelaBaixa) 4.dp else 16.dp)) {
+        if (janelaBaixa) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                OutlinedButton(
+                    onClick = onOutraDica,
+                    modifier = Modifier.weight(1f).heightIn(min = 52.dp),
+                ) {
+                    Text(stringResource(R.string.partida_dica_outra_dica))
+                }
+                Button(
+                    onClick = onAlguemAcertou,
+                    modifier = Modifier.weight(1f).heightIn(min = 52.dp),
+                ) {
+                    Text(stringResource(R.string.partida_dica_alguem_acertou))
+                }
+            }
+        } else {
+            Button(
+                onClick = onAlguemAcertou,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+            ) {
+                Text(stringResource(R.string.partida_dica_alguem_acertou))
+            }
+            OutlinedButton(
+                onClick = onOutraDica,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+            ) {
+                Text(stringResource(R.string.partida_dica_outra_dica))
+            }
         }
-        Button(
-            onClick = onAlguemAcertou,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
+        TextButton(
+            onClick = onPedirQueimar,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
         ) {
-            Text(stringResource(R.string.partida_dica_alguem_acertou))
-        }
-        OutlinedButton(
-            onClick = onOutraDica,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-        ) {
-            Text(stringResource(R.string.partida_dica_outra_dica))
-        }
-        TextButton(onClick = onPedirQueimar, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.partida_dica_queimar_link))
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -372,7 +614,7 @@ internal fun QuemAcertouSheet(
                     onClick = { onRegistrarAcerto(adivinhador.id) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
+                        .heightIn(min = 52.dp),
                 ) {
                     Text(adivinhador.nome)
                 }
@@ -401,6 +643,7 @@ internal fun QuemAcertouSheet(
  * composição. O `imePadding` + scroll deixam o bloco da resposta encolher com
  * o teclado do comentário aberto, mantendo a resposta visível.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun AnuncioContent(
     estado: PartidaUiState.Anuncio,
@@ -449,7 +692,7 @@ internal fun AnuncioContent(
                 Text(estado.resposta, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (estado is PartidaUiState.Anuncio.Acerto) {
                 AssistChipDePontos(stringResource(R.string.partida_anuncio_pontos_acertador, estado.pontosDoAcertador))
             }
@@ -470,7 +713,7 @@ internal fun AnuncioContent(
             onClick = onProximoTurno,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
+                .heightIn(min = 52.dp),
         ) {
             Text(
                 stringResource(
@@ -503,11 +746,18 @@ internal fun PlacarFinalContent(
     onVoltarAoInicio: () -> Unit,
 ) {
     val maiorPontuacao = estado.ranking.maxOf { it.pontos }
+    // Com quatro grupos, fonte a 150% ou tela em paisagem, o ranking e os
+    // dois botões não cabem: a tela inteira rola em vez de cortar a última
+    // linha ou deixar "Voltar ao início" fora do alcance.
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    val alturaDaTela = this@BoxWithConstraints.maxHeight
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .heightIn(min = alturaDaTela)
+            .navigationBarsPadding()
             .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
     ) {
         Text(stringResource(R.string.placar_titulo), style = MaterialTheme.typography.titleMedium)
         Text(
@@ -519,7 +769,7 @@ internal fun PlacarFinalContent(
             style = MaterialTheme.typography.headlineSmall,
         )
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             estado.ranking.forEach { linha ->
@@ -545,7 +795,7 @@ internal fun PlacarFinalContent(
             onClick = onJogarDeNovo,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
+                .heightIn(min = 52.dp),
         ) {
             Text(stringResource(R.string.placar_jogar_de_novo))
         }
@@ -553,9 +803,10 @@ internal fun PlacarFinalContent(
             onClick = onVoltarAoInicio,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
+                .heightIn(min = 52.dp),
         ) {
             Text(stringResource(R.string.placar_voltar_ao_inicio))
         }
+    }
     }
 }

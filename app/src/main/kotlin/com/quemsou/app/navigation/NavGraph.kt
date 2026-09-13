@@ -24,12 +24,12 @@ fun QuemSouNavGraph(navController: NavHostController = rememberNavController()) 
             HomeScreen(
                 onCreateMatch = { navController.navigate(SetupRoute) },
                 onAbrirCatalogo = { navController.navigate(CatalogoRoute) },
-                // Entrar com código é multiplayer (Fase 4); por ora leva ao Setup.
-                onJoinWithCode = { navController.navigate(SetupRoute) },
+                onCriarBaralho = { navController.navigate(FabricaRoute) },
             )
         }
         composable<SetupRoute> {
             SetupScreen(
+                onVoltar = { navController.popBackStack() },
                 onComecarPartida = { configuracao ->
                     navController.navigate(PartidaRoute(configuracao.paraJson()))
                 },
@@ -40,6 +40,10 @@ fun QuemSouNavGraph(navController: NavHostController = rememberNavController()) 
             PartidaScreen(
                 onAbandonarPartida = { navController.popBackStack(HomeRoute, inclusive = false) },
                 onVoltarAoInicio = { navController.popBackStack(HomeRoute, inclusive = false) },
+                // Conteúdo insuficiente se resolve no Setup (menos rodadas ou
+                // mais baralhos), não na Home: a saída do estado indisponível
+                // volta um passo, para a tela que pode corrigir a causa.
+                onVoltarAoSetup = { navController.popBackStack() },
             )
         }
         composable<CatalogoRoute> {
@@ -51,5 +55,14 @@ fun QuemSouNavGraph(navController: NavHostController = rememberNavController()) 
         composable<ColecaoRoute> {
             ColecaoScreen(onVoltar = { navController.popBackStack() })
         }
+        composable<FabricaRoute> {
+            com.quemsou.app.presentation.fabrica.FabricaScreen(
+                onVoltar = { navController.popBackStack() },
+                onJogar = { navController.navigate(SetupRoute) },
+            )
+        }
     }
 }
+
+@kotlinx.serialization.Serializable
+data object FabricaRoute

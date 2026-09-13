@@ -61,16 +61,71 @@ data class SetupUiState(
     }
     /** Total de cards do monte da união dos baralhos selecionados. */
     val cardsNoMonte: Int
-        get() = baralhosDisponiveis
+        get() {
+            val selecionados = baralhosDisponiveis.filter { it.id in baralhosSelecionados }
+            if (selecionados.all { it.chavesDasRespostas.isNotEmpty() || it.quantidadeDeCards == 0 }) {
+                return com.quemsou.app.domain.rules.AcervoDeRespostas.contarIdentidades(selecionados.flatMap { it.chavesDasRespostas })
+            }
+            val respostas = mutableSetOf<String>()
+            val nomes = mutableSetOf<String>()
+            return baralhosDisponiveis
             .filter { it.id in baralhosSelecionados }
-            .sumOf { it.quantidadeDeCards }
+            .sortedBy { it.id }
+            .sumOf { baralho ->
+                if (baralho.identidades.isEmpty()) baralho.quantidadeDeCards
+                else baralho.identidades.count { (id, nome) ->
+                    val incluir = id !in respostas && nome !in nomes
+                    if (incluir) { respostas.add(id); nomes.add(nome) }
+                    incluir
+                }
+            }
+        }
+
+    /**
+     * Respostas elegíveis de um baralho já carregado — é o que
+     * `RepositorioDeCardsLocal.buscarTodos` deixou passar pelo filtro de dez
+     * dicas disponíveis.
+     */
+    private val BaralhoParaSelecao.temRespostas: Boolean
+        get() = quantidadeDeCards > 0
+
+    /**
+     * `true` quando o aparelho inteiro não oferece **nenhuma resposta
+     * elegível** — nada instalado, ou tudo instalado sem dez dicas
+     * disponíveis. Nesse estado, mandar "selecione pelo menos um baralho"
+     * seria desonesto: não há o que selecionar.
+     *
+     * Olhar só `baralhosDisponiveis.isEmpty()` não serve: `buscarTodos`
+     * **mantém o baralho** na lista e filtra as cartas dentro dele, então uma
+     * lista cheia pode estar inteiramente esgotada. `all {}` numa lista vazia
+     * também é `true`, o que cobre o aparelho sem baralho nenhum.
+     */
+    val semRespostasNoAparelho: Boolean
+        get() = baralhosCarregados && baralhosDisponiveis.none { it.temRespostas }
+
+    /**
+     * Regras secundárias que saíram do padrão. Existe para que **recolher**
+     * "Mais opções" não esconda que uma regra relevante já está valendo — a
+     * UI recolhida mostra este resumo. Ordem estável: a mesma configuração
+     * produz sempre a mesma lista.
+     */
+    val opcoesAtivas: List<OpcaoAtiva>
+        get() = buildList {
+            if (!leitorPontua) add(OpcaoAtiva.LEITOR_NAO_PONTUA)
+            if (modoShot) add(OpcaoAtiva.MODO_SHOT)
+            if (espelhoLigado) add(OpcaoAtiva.ESPELHO)
+        }
 
     /** Primeiro motivo que impede a partida de começar; `null` se está tudo certo. */
     val motivoDoBloqueio: MotivoDoBloqueio?
         get() = when {
             jogadores.size < Partida.MINIMO_DE_JOGADORES -> MotivoDoBloqueio.POUCOS_JOGADORES
             jogadores.any { it.nome.isBlank() } -> MotivoDoBloqueio.NOMES_VAZIOS
+            semRespostasNoAparelho -> MotivoDoBloqueio.SEM_RESPOSTAS_NO_APARELHO
             baralhosCarregados && baralhosSelecionados.isEmpty() -> MotivoDoBloqueio.NENHUM_BARALHO
+            // Seleção só com baralhos esgotados: reduzir rodadas não resolve
+            // um monte de zero, e existe resposta elegível em outro baralho.
+            baralhosCarregados && cardsNoMonte == 0 -> MotivoDoBloqueio.SELECAO_SEM_RESPOSTAS
             baralhosCarregados && cardsNoMonte < numeroDeRodadas -> MotivoDoBloqueio.CARDS_INSUFICIENTES
             else -> null
         }
@@ -111,6 +166,8 @@ data class BaralhoParaSelecao(
     val colecaoNome: String,
     val colecaoIcone: String,
     val quantidadeDeCards: Int,
+    val identidades: List<Pair<String, String>> = emptyList(),
+    val chavesDasRespostas: List<Set<String>> = emptyList(),
 )
 
 /**
@@ -129,12 +186,41 @@ data class JogadorEmEdicao(
     val grupo: Int? = null,
 )
 
-/** Por que o botão de começar está bloqueado. */
+/**
+ * Por que o botão de começar está bloqueado. Os três motivos de conteúdo são
+ * distintos de propósito: cada um leva a uma saída diferente — baixar baralho,
+ * marcar um baralho, trocar a seleção ou reduzir rodadas.
+ */
 enum class MotivoDoBloqueio {
     POUCOS_JOGADORES,
     NOMES_VAZIOS,
+
+    /** Nenhuma resposta elegível no aparelho inteiro. */
+    SEM_RESPOSTAS_NO_APARELHO,
+
+    /** Existem respostas elegíveis, mas nenhum baralho está marcado. */
     NENHUM_BARALHO,
+
+    /** Os baralhos marcados estão esgotados, mas há respostas em outros. */
+    SELECAO_SEM_RESPOSTAS,
+
+    /** Há respostas na seleção, só que menos do que as rodadas pedidas. */
     CARDS_INSUFICIENTES,
+}
+
+/**
+ * Regra secundária fora do padrão, resumida quando "Mais opções" está
+ * recolhido. Recolher esconde os controles, nunca o fato de a regra valer.
+ */
+enum class OpcaoAtiva {
+    /** `leitorPontua` desligado — o leitor não ganha nada no turno. */
+    LEITOR_NAO_PONTUA,
+
+    /** Modo Shot ligado (18+). */
+    MODO_SHOT,
+
+    /** Espelho de leitura no ar nesta tela. */
+    ESPELHO,
 }
 
 /**
@@ -241,6 +327,11 @@ class SetupViewModel @Inject constructor(
                         colecaoNome = baralho.colecao.nome,
                         colecaoIcone = baralho.colecao.icone,
                         quantidadeDeCards = baralho.quantidadeDeCards,
+                        chavesDasRespostas = baralho.cards.map { com.quemsou.app.domain.rules.AcervoDeRespostas.chaves(it) },
+                        identidades = baralho.cards.map { card ->
+                            com.quemsou.app.domain.rules.SelecionadorDeDicas.resposta(card) to
+                                com.quemsou.app.domain.rules.SelecionadorDeDicas.normalizar(card.answer)
+                        },
                     )
                 }
                 .sortedWith(compareBy({ it.colecaoNome }, { it.nome }))

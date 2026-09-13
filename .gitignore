@@ -25,3 +25,9 @@ app/.cxx/
 
 # Arquivos-semente do catálogo (pertencem ao repositório QuemSou-Baralhos)
 /catalogo-seed/
+
+# Estado privado do gerador (pedidos, avaliações e credenciais de conexão)
+fabrica/*.local.*
+fabrica/__pycache__/
+*.sqlite3
+*.sqlite3-journal
