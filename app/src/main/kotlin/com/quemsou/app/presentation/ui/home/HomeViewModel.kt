@@ -17,9 +17,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel da Home — existe só pelo **modo dev de feedback** (5B parte 2):
- * alternância pelo Switch "Modo dev" do rodapé e, com o modo ligado, o
- * export/limpeza dos registros. Nada aqui toca o fluxo normal do jogador.
+ * Preferência da avaliação adicional de cartas e export/limpeza das avaliações
+ * locais. Feedback de dica independe da preferência de avaliar a rodada.
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -36,12 +35,10 @@ class HomeViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     /**
-     * `true` quando o item "Exportar feedback (N)" deve aparecer: modo dev
-     * ligado **e** pelo menos um registro — oculto para o jogador comum e
-     * oculto vazio.
+     * Exportação disponível sempre que há registros, mesmo com cartas desativadas.
      */
     val exportarVisivel: StateFlow<Boolean> =
-        combine(modoDev, quantidadeDeFeedback) { dev, quantidade -> dev && quantidade > 0 }
+        combine(modoDev, quantidadeDeFeedback) { _, quantidade -> quantidade > 0 }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val _avisoDeModoDev = MutableStateFlow<Boolean?>(null)
@@ -66,7 +63,7 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Monta o JSON de export (formato `quemsou-feedback` v1) com todos os
+     * Monta o JSON de export (formato `quemsou-feedback` v3) com todos os
      * registros e a resposta de cada card via join. Exportar **não** apaga —
      * a limpeza é a ação separada [limparFeedback].
      */

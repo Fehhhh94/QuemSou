@@ -106,9 +106,8 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `exportar so e visivel com modo dev ligado e registros presentes`() {
-        // Modo desligado esconde o item mesmo com registros no Room.
-        assertFalse(viewModel(modoDev = false, registro = RegistroFake(mutableListOf(umRegistro()))).exportarVisivel.value)
+    fun `exportar e visivel com registros mesmo sem avaliar cards`() {
+        assertTrue(viewModel(modoDev = false, registro = RegistroFake(mutableListOf(umRegistro()))).exportarVisivel.value)
         // Modo ligado sem registro nenhum também esconde (N == 0).
         assertFalse(viewModel(modoDev = true).exportarVisivel.value)
 
@@ -124,7 +123,7 @@ class HomeViewModelTest {
         val json = viewModel.montarJsonDeExport()
 
         assertTrue(json.contains("\"formato\": \"quemsou-feedback\""))
-        assertTrue(json.contains("\"versao\": 2"))
+        assertTrue(json.contains("\"versao\": 3"))
         assertTrue(json.contains("\"cardId\": \"cc1-01\""))
         assertTrue(json.contains("\"resposta\": \"CHAPLIN\""))
     }

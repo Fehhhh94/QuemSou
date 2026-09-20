@@ -25,9 +25,10 @@ import kotlinx.coroutines.launch
  * Estado da tela de configuração da partida, com validação viva:
  * [podeComecar] e [motivoDoBloqueio] são recalculados a cada mudança.
  *
- * A partida é montada por **baralhos** (5A parte 2): a seleção começa com
- * todos os baralhos do aparelho marcados (equivalente ao antigo "Livre") e o
- * contador de união mostra o monte vivo. Não existe mais "modo de jogo"
+ * A partida é montada por **baralhos** (5A parte 2): a seleção começa vazia e
+ * o contador de união mostra o monte vivo. O total de rodadas representa
+ * ciclos completos de leitores, para todo jogador ler a mesma quantidade.
+ * Não existe mais "modo de jogo"
  * (especificação v4): [jogarEmTimes] só liga a UI de agrupamento.
  */
 data class SetupUiState(
@@ -38,7 +39,7 @@ data class SetupUiState(
     val jogadores: List<JogadorEmEdicao> = List(Partida.MINIMO_DE_JOGADORES) {
         JogadorEmEdicao(id = "j${it + 1}")
     },
-    val numeroDeRodadas: Int = 5,
+    val numeroDeRodadas: Int = Partida.MINIMO_DE_JOGADORES * 2,
     val leitorPontua: Boolean = true,
     val modoShot: Boolean = false,
     val quantidadeDeShots: Int = RegrasPartida.QUANTIDADE_PADRAO_DE_SHOTS,
@@ -52,6 +53,10 @@ data class SetupUiState(
     val espelhoEsteAparelho: String? = null,
     val espelhoLugarALiberar: String? = null,
 ) {
+
+    /** Quantas vezes cada jogador será leitor; [numeroDeRodadas] mantém ciclos completos. */
+    val rodadasPorJogador: Int
+        get() = numeroDeRodadas / jogadores.size
 
     /** Em que estado de pareamento está a linha do jogador [id] no espelho. */
     fun estadoNoEspelho(id: String): EstadoNoEspelho = when {
@@ -168,7 +173,10 @@ data class BaralhoParaSelecao(
     val quantidadeDeCards: Int,
     val identidades: List<Pair<String, String>> = emptyList(),
     val chavesDasRespostas: List<Set<String>> = emptyList(),
-)
+) {
+    /** Agrupamento visual estável, independente do nome traduzido da coleção. */
+    val especial: Boolean get() = colecaoId == "especiais"
+}
 
 /**
  * Um jogador em edição no Setup.
@@ -255,10 +263,9 @@ enum class FalhaDoEspelho {
  * e as regras; ao [confirmar], monta a [ConfiguracaoDaPartida] e a expõe em
  * [configuracaoPronta] para a UI navegar até a rota Partida.
  *
- * Também é o dono do **espelho de leitura** (4A parte 1): o servidor sobe e
- * cai com esta tela ([onCleared] o derruba). Na parte 2 ele passa a
- * sobreviver até o fim da partida. O espelho **nunca** bloqueia o jogo —
- * [podeComecar] não olha para ele.
+ * Também inicia o **espelho de leitura** no Setup. Ao confirmar, transfere sua
+ * vida útil à partida; ao sair sem jogar, [onCleared] o derruba. O espelho
+ * **nunca** bloqueia o jogo — [podeComecar] não olha para ele.
  */
 @HiltViewModel
 class SetupViewModel @Inject constructor(
@@ -276,6 +283,9 @@ class SetupViewModel @Inject constructor(
 
     /** Sequência dos ids de linha; nunca reaproveitada dentro desta tela. */
     private var ultimoIdDeJogador = _uiState.value.jogadores.size
+
+    /** Evita que o Setup derrube o servidor depois de entregá-lo à partida. */
+    private var espelhoEntregueAPartida = false
 
     init {
         recarregarBaralhos()
@@ -302,6 +312,21 @@ class SetupViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            servidorDoEspelho.endereco.collect { endereco ->
+                if (endereco == null && !_uiState.value.espelhoIniciando) {
+                    espelhoEntregueAPartida = false
+                }
+                _uiState.update { estado ->
+                    if (endereco != null || estado.espelhoIniciando || !estado.espelhoLigado) estado
+                    else estado.copy(
+                        espelhoLigado = false,
+                        espelhoEndereco = null,
+                        espelhoLugarALiberar = null,
+                    )
+                }
+            }
+        }
+        viewModelScope.launch {
             _uiState
                 .map { estado -> estado.jogadores.map { JogadorDoEspelho(it.id, it.nome.trim()) } }
                 .distinctUntilChanged()
@@ -311,9 +336,9 @@ class SetupViewModel @Inject constructor(
 
     /**
      * (Re)carrega os baralhos do aparelho — chamada no início e ao voltar da
-     * tela de catálogo (pode ter baralho novo). Na primeira carga, todos
-     * nascem selecionados (equivalente ao antigo "Livre"); nas seguintes, a
-     * seleção do usuário é preservada e baralhos novos entram desmarcados.
+     * tela de catálogo (pode ter baralho novo). Na primeira carga, nenhum
+     * baralho nasce selecionado; nas seguintes, a seleção do usuário é
+     * preservada e baralhos novos entram desmarcados.
      */
     fun recarregarBaralhos() {
         viewModelScope.launch {
@@ -334,7 +359,7 @@ class SetupViewModel @Inject constructor(
                         },
                     )
                 }
-                .sortedWith(compareBy({ it.colecaoNome }, { it.nome }))
+                .sortedWith(compareBy({ it.especial }, { it.colecaoNome }, { it.nome }))
             _uiState.update { estado ->
                 val idsDisponiveis = baralhos.map { it.id }.toSet()
                 estado.copy(
@@ -342,7 +367,7 @@ class SetupViewModel @Inject constructor(
                     baralhosSelecionados = if (estado.baralhosCarregados) {
                         estado.baralhosSelecionados intersect idsDisponiveis
                     } else {
-                        idsDisponiveis
+                        emptySet()
                     },
                     baralhosCarregados = true,
                 )
@@ -384,7 +409,11 @@ class SetupViewModel @Inject constructor(
     fun adicionarJogador() {
         _uiState.update { estado ->
             if (estado.jogadores.size >= Partida.MAXIMO_DE_JOGADORES) return@update estado
-            estado.copy(jogadores = estado.jogadores + JogadorEmEdicao(id = "j${++ultimoIdDeJogador}"))
+            val jogadores = estado.jogadores + JogadorEmEdicao(id = "j${++ultimoIdDeJogador}")
+            estado.copy(
+                jogadores = jogadores,
+                numeroDeRodadas = estado.rodadasPorJogador * jogadores.size,
+            )
         }
     }
 
@@ -393,8 +422,10 @@ class SetupViewModel @Inject constructor(
         _uiState.update { estado ->
             if (estado.jogadores.size <= Partida.MINIMO_DE_JOGADORES) return@update estado
             if (indice !in estado.jogadores.indices) return@update estado
+            val jogadores = estado.jogadores.filterIndexed { i, _ -> i != indice }
             estado.copy(
-                jogadores = estado.jogadores.filterIndexed { i, _ -> i != indice },
+                jogadores = jogadores,
+                numeroDeRodadas = estado.rodadasPorJogador * jogadores.size,
                 // Os índices tocados após o removido deslizam uma posição para trás,
                 // acompanhando o mesmo deslocamento da lista de jogadores.
                 jogadoresTocados = estado.jogadoresTocados
@@ -427,10 +458,13 @@ class SetupViewModel @Inject constructor(
         }
     }
 
-    /** Define o total de rodadas; ignorado se menor que 1. */
+    /** Define ciclos completos: uma ou mais rodadas por jogador. */
     fun definirRodadas(rodadas: Int) {
-        if (rodadas < 1) return
-        _uiState.update { it.copy(numeroDeRodadas = rodadas) }
+        _uiState.update { estado ->
+            val jogadores = estado.jogadores.size
+            if (rodadas < jogadores || rodadas % jogadores != 0) estado
+            else estado.copy(numeroDeRodadas = rodadas)
+        }
     }
 
     fun alternarLeitorPontua() {
@@ -479,9 +513,11 @@ class SetupViewModel @Inject constructor(
                 JogadorConfigurado(
                     nome = jogador.nome.trim(),
                     grupoId = jogador.grupo?.let { "g$it" }.takeIf { estado.jogarEmTimes },
+                    espelhoId = jogador.id,
                 )
             },
         )
+        espelhoEntregueAPartida = estado.espelhoLigado
     }
 
     /** A UI chama após navegar, para não repetir a navegação em recomposição. */
@@ -522,6 +558,7 @@ class SetupViewModel @Inject constructor(
             }
         }
         if (!deveIniciar) return
+        espelhoEntregueAPartida = false
         viewModelScope.launch {
             try {
                 val elenco = _uiState.value.jogadores.map { JogadorDoEspelho(it.id, it.nome.trim()) }
@@ -586,9 +623,9 @@ class SetupViewModel @Inject constructor(
         _uiState.update { it.copy(espelhoLugarALiberar = null) }
     }
 
-    /** Nesta parte 1 o espelho é escopado à tela: sair do Setup o derruba. */
+    /** Sair do Setup sem iniciar uma partida não pode deixar um servidor órfão. */
     override fun onCleared() {
-        servidorDoEspelho.parar()
+        if (!espelhoEntregueAPartida) servidorDoEspelho.parar()
         super.onCleared()
     }
 

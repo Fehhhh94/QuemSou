@@ -115,7 +115,7 @@ clareza e condições de borda. Casos pendentes não contam como aprovados.
 | S01 | P0 · HTTP + ViewModel | POST aceito no servidor, resposta perdida; reenviar e recriar a tela | Mesmo id de tentativa, apenas um trabalho na fila; pedido continua consultável |
 | S02 | P0 · HTTP | Sem token, token inválido, dono B consultando pedido/resultado/base de A | Negação sem conteúdo privado; não confiar em dono declarado no corpo |
 | S03 | P0 · transporte | HTTP simples, certificado inválido e redirecionamento para outro host | Conexão recusada; credencial não enviada ao destino do redirecionamento |
-| S04 | P0 · integração | JSON inválido, ids em conflito, versão divergente/antiga e edição finalizada | Conteúdo não autorizado não entra no Room; nenhuma gravação parcial ou downgrade |
+| S04 | P0 · integração | JSON inválido, ids em conflito, versão divergente/antiga e estado técnico desconhecido | Conteúdo não autorizado não entra no Room; nenhuma gravação parcial ou downgrade |
 | S05 | P1 · fila | Limite de três pendentes, corpo excessivo/malformado e valores fora do contrato | Recusa controlada; serviço continua atendendo pedidos válidos |
 | S06 | P0 · subprocesso simulado | Codex ausente, timeout, saída inválida, revisão reprovada e serviço interrompido | Pedido falha sem entrega; sem reexecutar silenciosamente; fila seguinte consegue avançar |
 | S07 | P1 · ViewModel + HTTP | Um resultado inválido junto com outro válido | Falha identificável e possibilidade de obter o válido; verificar bloqueio global de sincronização |

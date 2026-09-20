@@ -21,7 +21,7 @@ import androidx.room.TypeConverters
     entities = [BaralhoEntity::class, CardEntity::class, FeedbackDeCardEntity::class,
         DicaUtilizadaEntity::class, SessaoDeDicasEntity::class, TurnoDeDicasEntity::class,
         RespostaJogadaEntity::class, DicaReservadaEntity::class],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

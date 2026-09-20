@@ -4,19 +4,56 @@ import androidx.room.Dao
 import androidx.room.Embedded
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Acesso à tabela `feedback_de_cards` (modo dev de feedback). Só inserção,
- * contagem, leitura para export e limpeza total — não existe edição de
- * feedback: cada avaliação é uma linha nova.
+ * Avaliações de cartas e de dicas. Cartas inserem histórico; dicas permitem
+ * editar o voto da mesma ocorrência identificada pelo snapshot de contexto.
  */
 @Dao
 interface FeedbackDeCardDao {
 
     /** Insere um feedback novo — sempre uma linha própria, nunca substitui. */
     @Insert
-    suspend fun inserir(feedback: FeedbackDeCardEntity)
+    suspend fun inserir(feedback: FeedbackDeCardEntity): Long
+
+    @Update
+    suspend fun atualizar(feedback: FeedbackDeCardEntity)
+
+    @Query("SELECT * FROM feedback_de_cards WHERE resultadoDoTurno = 'DICA_REVELADA' AND contextoJson = :contextoJson LIMIT 1")
+    suspend fun buscarDica(contextoJson: String): FeedbackDeCardEntity?
+
+    /** Voto repetido na mesma dica/rodada/sessão é uma edição, em transação. */
+    @Transaction
+    suspend fun registrar(feedback: FeedbackDeCardEntity): FeedbackDeCardEntity {
+        val anterior = if (feedback.resultadoDoTurno == "DICA_REVELADA") buscarDica(feedback.contextoJson) else null
+        if (anterior == null) {
+            return feedback.copy(id = inserir(feedback))
+        }
+        val atualizado = feedback.copy(
+            id = anterior.id,
+            criadoEm = anterior.criadoEm,
+            revisaoLocal = anterior.revisaoLocal + 1,
+            sincronizadoEm = null,
+        )
+        atualizar(atualizado)
+        return atualizado
+    }
+
+    @Query(
+        "SELECT * FROM feedback_de_cards " +
+            "WHERE resultadoDoTurno = 'DICA_REVELADA' AND sincronizadoEm IS NULL " +
+            "ORDER BY criadoEm, id LIMIT :limite",
+    )
+    suspend fun buscarDicasPendentes(limite: Int): List<FeedbackDeCardEntity>
+
+    @Query(
+        "UPDATE feedback_de_cards SET sincronizadoEm = :sincronizadoEm " +
+            "WHERE id = :id AND revisaoLocal = :revisaoLocal",
+    )
+    suspend fun marcarSincronizado(id: Long, revisaoLocal: Int, sincronizadoEm: Long): Int
 
     /** Contagem viva de registros — dirige o "Exportar feedback (N)" da Home. */
     @Query("SELECT COUNT(*) FROM feedback_de_cards")

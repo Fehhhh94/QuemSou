@@ -122,11 +122,10 @@ class RegistroDeSessoes(
      * Devolve o lugar de [jogadorId] à mesa, esquecendo a sessão de rede que
      * o ocupava.
      *
-     * Existe porque a parte 1 não tem como perceber sessão morta: se alguém
+     * Ainda não há presença automática: se alguém
      * fecha a aba anônima, limpa o navegador ou troca de celular, o token
-     * some do lado de lá e o lugar fica preso do lado de cá. A parte 2, com
-     * o SSE acompanhando presença, resolve isso sozinha — até lá, o
-     * anfitrião libera na mão.
+     * some do lado de lá e o lugar fica preso do lado de cá. Até a parte 3
+     * acompanhar presença, o anfitrião libera na mão.
      */
     @Synchronized
     fun liberarLugar(jogadorId: String) {

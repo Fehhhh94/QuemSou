@@ -8,6 +8,10 @@ import com.quemsou.app.data.feedback.NovoFeedback
 import com.quemsou.app.data.feedback.RegistroDeFeedback
 import com.quemsou.app.data.feedback.ResultadoDoTurnoRegistrado
 import com.quemsou.app.data.feedback.VotoDeCard
+import com.quemsou.app.data.espelho.EstadoDaPartidaNoEspelho
+import com.quemsou.app.data.espelho.FaseDoEspelho
+import com.quemsou.app.data.espelho.LinhaDoPlacarNoEspelho
+import com.quemsou.app.data.espelho.ServidorDoEspelho
 import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
 import com.quemsou.app.domain.model.EstadoDoTurno
@@ -71,6 +75,7 @@ class PartidaViewModel @Inject constructor(
     private val repositorioDeCards: RepositorioDeCards,
     private val modoDevFeedbackStore: ModoDevFeedbackStore,
     private val registroDeFeedback: RegistroDeFeedback,
+    private val servidorDoEspelho: ServidorDoEspelho,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PartidaUiState>(PartidaUiState.Carregando)
@@ -93,6 +98,62 @@ class PartidaViewModel @Inject constructor(
      * não vale um `SavedStateHandle` próprio.
      */
     val feedbackDev: StateFlow<FeedbackDevUiState?> = _feedbackDev.asStateFlow()
+
+    private val _feedbackDaDica = MutableStateFlow<FeedbackDaDicaUiState?>(null)
+    val feedbackDaDica = _feedbackDaDica.asStateFlow()
+
+    /** Feedback é independente do checkpoint: uma falha aqui nunca bloqueia a partida. */
+    fun avaliarDica(chave: String, voto: VotoDeCard, comentario: String = "") {
+        val atual = _feedbackDaDica.value ?: return
+        if (_uiState.value !is PartidaUiState.DicaRevelada || atual.chave != chave || atual.salvando || atual.carregando) return
+        val card = turno?.card ?: return
+        val novo = NovoFeedback(
+            baralhoId = baralhoIdPorCardId.getValue(card.id), cardId = card.id,
+            voto = voto, comentario = comentario.trim().take(1000).ifBlank { null },
+            rodada = partida.rodadaAtual, resultadoDoTurno = ResultadoDoTurnoRegistrado.DICA_REVELADA,
+            numeroDaDicaDoAcerto = null, contextoJson = chave,
+        )
+        _feedbackDaDica.value = atual.copy(voto = voto, comentario = comentario.take(1000), salvando = true, salvo = false, erro = false)
+        viewModelScope.launch {
+            try {
+                registroDeFeedback.registrar(novo)
+                _feedbackDaDica.update { if (it?.chave == chave) it.copy(salvando = false, salvo = true) else it }
+            } catch (e: CancellationException) { throw e }
+            catch (_: Exception) {
+                _feedbackDaDica.update { if (it?.chave == chave) it.copy(salvando = false, erro = true) else it }
+            }
+        }
+    }
+
+    private fun prepararFeedbackDaDica(estado: PartidaUiState) {
+        if (estado !is PartidaUiState.DicaRevelada) {
+            _feedbackDaDica.value = null
+            return
+        }
+        val card = checkNotNull(turno).card
+        val dica = com.quemsou.app.domain.rules.SelecionadorDeDicas.banco(card).first { it.texto == estado.texto }
+        val chave = Json.encodeToString(com.quemsou.app.data.feedback.ContextoDeFeedbackDaDica(
+            sessaoId = sessaoId(), rodada = partida.rodadaAtual, posicao = estado.posicao,
+            respostaId = com.quemsou.app.domain.rules.SelecionadorDeDicas.resposta(card),
+            resposta = card.answer, dicaId = dica.id, texto = dica.texto,
+            versaoDoBaralho = baralhosSelecionados.first { it.id == baralhoIdPorCardId[card.id] }.versao,
+        ))
+        _feedbackDaDica.value = FeedbackDaDicaUiState(chave)
+        viewModelScope.launch {
+            try {
+                val salvo = registroDeFeedback.buscarDica(chave)
+                _feedbackDaDica.update { atual ->
+                    if (atual?.chave != chave) atual else atual.copy(
+                        carregando = false, salvo = salvo != null,
+                        voto = salvo?.let { VotoDeCard.valueOf(it.voto) }, comentario = salvo?.comentario.orEmpty(),
+                    )
+                }
+            } catch (e: CancellationException) { throw e }
+            catch (_: Exception) {
+                _feedbackDaDica.update { if (it?.chave == chave) it.copy(carregando = false, erro = true) else it }
+            }
+        }
+    }
 
     private val _abandonoSolicitado = MutableStateFlow(false)
 
@@ -316,7 +377,7 @@ class PartidaViewModel @Inject constructor(
         // Ids determinísticos por índice: a restauração pós-morte de processo
         // reconstrói os mesmos ids a partir da mesma configuração.
         jogadoresBase = configuracao.jogadores.mapIndexed { indice, jogador ->
-            Jogador(id = "j${indice + 1}", nome = jogador.nome)
+            Jogador(id = jogador.espelhoId ?: "j${indice + 1}", nome = jogador.nome)
         }
         gruposBase = montarGrupos()
         baralhosSelecionados = repositorioDeCards.prepararSessao(sessaoId(), configuracao.baralhos)
@@ -347,7 +408,12 @@ class PartidaViewModel @Inject constructor(
             ultimasAparicoes = repositorioDeCards.historicoDaSessao(sessaoId()),
         )
         restaurar(base)
-        if (progresso == null) mudarFase(savedStateHandle.get<String>(CHAVE_FASE) ?: FASE_VEZ_DE_JOGAR, _uiState.value)
+        if (progresso == null) {
+            mudarFase(savedStateHandle.get<String>(CHAVE_FASE) ?: FASE_VEZ_DE_JOGAR, _uiState.value)
+        } else {
+            prepararFeedbackDaDica(_uiState.value)
+            publicarNoEspelho(_uiState.value)
+        }
     }
 
     /**
@@ -469,6 +535,81 @@ class PartidaViewModel @Inject constructor(
         _feedbackDev.value =
             if (fase == FASE_ANUNCIO && modoDevFeedbackAtivo) FeedbackDevUiState() else null
         _uiState.value = estado
+        prepararFeedbackDaDica(estado)
+        publicarNoEspelho(estado)
+    }
+
+    /** Traduz a fase visual para o contrato local, sem colocar regra no cliente web. */
+    private fun publicarNoEspelho(estado: PartidaUiState) {
+        val turnoAtual = turno
+        val refletido = when (estado) {
+            PartidaUiState.Carregando -> return
+            PartidaUiState.Indisponivel -> EstadoDaPartidaNoEspelho(FaseDoEspelho.INDISPONIVEL)
+            is PartidaUiState.VezDeJogar -> EstadoDaPartidaNoEspelho(
+                fase = FaseDoEspelho.VEZ_DE_JOGAR,
+                rodada = estado.rodada,
+                totalDeRodadas = estado.totalDeRodadas,
+                leitorId = partida.leitorDaVez.id,
+                leitorNome = estado.nomeDoLeitor,
+            )
+            is PartidaUiState.Grid -> EstadoDaPartidaNoEspelho(
+                fase = FaseDoEspelho.GRID,
+                rodada = estado.rodada,
+                totalDeRodadas = partida.totalDeRodadas,
+                leitorId = turnoAtual?.leitor?.id,
+                leitorNome = estado.nomeDoLeitor,
+                escolhedorNome = estado.nomeDoEscolhedor,
+                resposta = estado.respostaParaOLeitor,
+                valor = estado.pontosEmJogo,
+            )
+            is PartidaUiState.Shot -> EstadoDaPartidaNoEspelho(
+                fase = FaseDoEspelho.SHOT,
+                rodada = estado.grid.rodada,
+                totalDeRodadas = partida.totalDeRodadas,
+                leitorId = turnoAtual?.leitor?.id,
+                leitorNome = estado.grid.nomeDoLeitor,
+                escolhedorNome = estado.nomeDoBebedor,
+                resposta = estado.grid.respostaParaOLeitor,
+                mensagem = "${estado.nomeDoBebedor} paga o shot antes da dica.",
+            )
+            is PartidaUiState.DicaRevelada -> EstadoDaPartidaNoEspelho(
+                fase = FaseDoEspelho.DICA_REVELADA,
+                rodada = partida.rodadaAtual,
+                totalDeRodadas = partida.totalDeRodadas,
+                leitorId = turnoAtual?.leitor?.id,
+                leitorNome = turnoAtual?.leitor?.nome,
+                resposta = turnoAtual?.card?.answer,
+                dica = estado.texto,
+                valor = estado.valor,
+            )
+            is PartidaUiState.QuemAcertou -> EstadoDaPartidaNoEspelho(
+                fase = FaseDoEspelho.QUEM_ACERTOU,
+                rodada = partida.rodadaAtual,
+                totalDeRodadas = partida.totalDeRodadas,
+                leitorId = turnoAtual?.leitor?.id,
+                leitorNome = estado.nomeDoLeitor,
+                resposta = turnoAtual?.card?.answer,
+            )
+            is PartidaUiState.Anuncio -> EstadoDaPartidaNoEspelho(
+                fase = FaseDoEspelho.ANUNCIO,
+                rodada = partida.rodadaAtual,
+                totalDeRodadas = partida.totalDeRodadas,
+                leitorId = turnoAtual?.leitor?.id,
+                leitorNome = estado.nomeDoLeitor,
+                resposta = estado.resposta,
+                mensagem = when (estado) {
+                    is PartidaUiState.Anuncio.Acerto ->
+                        "${estado.nomeDoAcertador} acertou e ganhou ${estado.pontosDoAcertador} pontos."
+                    is PartidaUiState.Anuncio.Queimado -> "A carta queimou."
+                },
+            )
+            is PartidaUiState.PlacarFinal -> EstadoDaPartidaNoEspelho(
+                fase = FaseDoEspelho.PLACAR_FINAL,
+                mensagem = if (estado.empate) "A partida terminou empatada." else "${estado.vencedores.single()} venceu!",
+                ranking = estado.ranking.map { LinhaDoPlacarNoEspelho(it.nome, it.pontos) },
+            )
+        }
+        servidorDoEspelho.publicarEstado(refletido)
     }
 
     private fun estadoVezDeJogar() = PartidaUiState.VezDeJogar(
@@ -643,7 +784,10 @@ class PartidaViewModel @Inject constructor(
 
     private suspend fun comFalhaVisivel(bloco: suspend () -> Unit) {
         try { bloco() } catch (e: CancellationException) { throw e }
-        catch (e: Exception) { _uiState.value = PartidaUiState.Indisponivel }
+        catch (e: Exception) {
+            _uiState.value = PartidaUiState.Indisponivel
+            publicarNoEspelho(PartidaUiState.Indisponivel)
+        }
     }
 
     private fun executarTransicao(bloco: suspend () -> Unit) {
@@ -665,5 +809,10 @@ class PartidaViewModel @Inject constructor(
             repositorioDeCards.encerrarSessao(sessaoId())
             aoConcluir()
         }
+    }
+
+    override fun onCleared() {
+        servidorDoEspelho.parar()
+        super.onCleared()
     }
 }

@@ -6,4 +6,6 @@ package com.quemsou.app.domain.model
 enum class CardCategory {
     PERSONAGEM_FILME,
     MUNDO_DA_MUSICA,
+    /** Conteúdo personalizado, separado dos temas gerais na seleção. */
+    ESPECIAIS,
 }

@@ -15,6 +15,9 @@ import javax.inject.Inject
  * A importação é **cirúrgica**: substitui cada baralho embarcado (linha +
  * cards dele), sem tocar nos baralhos baixados do catálogo — um update do
  * app nunca apaga downloads do usuário.
+ * Desde a versão 8, o envelope distribuído está vazio: apenas avança o
+ * marcador, sem escrever/remover cards ou tocar em históricos e feedbacks.
+ * Instalações novas obtêm conteúdo pelo catálogo Firebase.
  *
  * Cada baralho passa pela validação do [ParserDoCatalogo] (estrutura +
  * `ValidadorDeBaralho`); um baralho inválido interrompe a importação com

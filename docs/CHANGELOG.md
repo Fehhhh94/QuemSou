@@ -2,6 +2,258 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-09-20 — separação do conteúdo editorial e do Git
+
+- Felipe aprovou manter todos os baralhos, respostas e dicas no Firebase e em
+  cópias privadas fora do Git, não apenas o especial.
+- O asset v7 com 98 referências/980 dicas foi preservado fora do código e
+  substituído por envelope v8 vazio. Upgrade não remove Room, históricos ou
+  feedback; instalações novas precisam do primeiro download com internet.
+- Central passou a usar origens privadas, preservando chaves/bytes e recusando
+  diretórios Git. Migração explícita copia sete arquivos com backup SHA-256,
+  sem sobrescrever destinos divergentes. Aplicar não altera mais o APK.
+- Catálogo GitHub estático descontinuado: seis JSONs deixam de ser rastreados,
+  preservados no disco/backup. Não foi reescrito o histórico publicado.
+- Removido transporte HTTP/GitHub sem uso; testes agora usam conteúdo sintético.
+  Varredura das 1.980 dicas sem ocorrências no conjunto candidato do app.
+- Gradle test/build/compilação de instrumentação e catálogo privado aprovados:
+  288 Debug + 288 Release; Python 207 (quatro skips); Node 33/33.
+  Central em 8766 conferida com acervo e feedback preservados.
+- APK novo não instalado nesta unidade; nenhum dado/regra Firebase alterado.
+  Felipe confirmou commit e push dos dois repositórios como exceção pontual.
+
+### 2026-09-20 — validação física do catálogo e das dicas no Fold
+
+- Após liberar o aparelho, Felipe autorizou encerrar a partida existente.
+  APK 0.5.0-dev-0920.0045 instalado como atualização, sem limpar dados;
+  292 testes JVM e assembleDebug passaram. Nenhum código de produto alterado.
+- No Samsung SM-F966B/API 36, a UI atualizou Mundo dos Bruxos v2→v3 e
+  Mundo Pop v1→v2 pelo Firebase; exibiu o especial privado e completou uma
+  partida Kimberly-Clark de quatro rodadas, com placar 20/20.
+- Instrumentos confirmou dez dicas reservadas sem consumo antecipado,
+  consumo de somente uma revelada, liberação das ocultas e bloqueio de nova
+  partida sem respostas elegíveis suficientes. Históricos e 121 feedbacks
+  anteriores preservados; cinco dicas efetivamente reveladas no teste.
+- Diagnóstico documentado, não corrigido: botão “Voltar ao início” do placar
+  não fecha a flag da sessão Room, embora não restem reservas (BUGS, seção 9).
+- Download privado da mesma versão e sorteio físico de uma resposta com banco
+  ampliado continuam não comprovados. Sem publicação, commit ou push.
+
+### 2026-09-19 — acervo editorial ativado em produção
+
+- Felipe autorizou publicar as novas Rules e migrar o acervo no `borajogar-app`.
+  Firebase CLI publicou somente `firestore:rules`; leitura da release confirmou
+  correspondência com o arquivo local validado, sem mudar catálogo/feedback.
+- Central reiniciada na porta 8766, sem edição aberta e com dados privados
+  preservados. Migração pela interface: 195 respostas criadas, zero erros.
+- Auditoria remota completa: 1.980 dicas (1.680 PUBLICO/300 PRIVADO), zero
+  bancos incompletos e zero diferenças de texto/escopo/status contra a prévia.
+  Acervo editorial inteiro continua admin-only; técnicos não foram migrados.
+- Sete manifestos preservaram versões/hashes/visibilidades, e o feedback
+  anterior continuou visível sob a dica de Shakira na Central automaticamente.
+- Não republicou baralhos, não alterou conteúdo das origens nem telefone,
+  não gerou cards/APK e não fez commit/push. Alterações editoriais futuras
+  ainda exigem incorporação e publicação explícitas no baralho consumidor.
+
+### 2026-09-19 — conclusão local do acervo editorial após transferência para Codex
+
+- Felipe autorizou Codex a continuar após o limite de sessão do Claude Code.
+  Corrigidos os bloqueios registrados no handoff, sem descartar trabalho anterior.
+- Codec UTF-8/base64url elimina colisões de IDs e distingue caminhos HTTP de
+  identidades lógicas. Migração agora é atômica por resposta, retomável e
+  criar-apenas; banco de 500 é salvo, e 501 é recusado antes da rede.
+- Formulário parte do banco remoto, envia só diferenças e conserva rascunhos
+  em falhas/conflitos. Rules restringem o índice de dicas e exigem revisão
+  atômica do pai. Feedback legado aceita referência exata baralho/card.
+- Botão real de projeção na Biblioteca, com certificado de identidades no
+  servidor, alias legado preservado e guarda de privacidade também após
+  aplicar/reabrir. Edição manual não pode renomear IDs nem ampliar banco.
+- Testes integrados em staging passaram pelo Gradle real (banco de 500,
+  legado/editorial, aplicar e preparar publicação). Emulador validou sete
+  cenários REST/Rules; smoke visual confirmou paginação, feedback e rascunhos.
+  Resultados finais e limites são donos do handoff e ADMINISTRADOR_LOCAL.
+- Não publicou Rules/dados, não gerou conteúdo real, não alterou telefone,
+  não fez commit/push. A entrada parcial abaixo descreve a rodada anterior;
+  suas pendências de código/testes são substituídas por esta conclusão local.
+
+### 2026-09-19 — acervo editorial: modelo de resposta + banco de dicas (implementação parcial)
+
+- Desenhado e implementado o modelo `acervoEditorial/{respostaId}` +
+  `acervoEditorial/{respostaId}/dicas/{dicaId}`, admin-only, upstream de
+  `catalogo/**`: `docs/CATALOG_FORMAT.md`, seção "Acervo editorial".
+- Cards legados (sem `respostaId`/`bancoDeDicas`) ganham alias usando a MESMA
+  identidade que o app já usa em jogo (`SelecionadorDeDicas`), preservando a
+  ligação com feedback real já sincronizado (ex.: `mm_028`/Shakira).
+- Central ganhou uma prévia de migração local (dry-run, idempotente, com
+  conflitos relatados e nunca sobrescritos silenciosamente) e um editor de
+  resposta/banco de dicas: acrescentar, corrigir texto preservando o id,
+  marcar escopo `PUBLICO`/`PRIVADO`, desativar (recuperável) e reativar, com
+  feedback direto sob a dica e pedido de reescrita para o Codex por dica.
+  Novo: `administrador/acervo_editorial.py`, `administrador/estaticos/acervo.js`
+  e `acervo-ui.js`, rotas `/api/acervo/*`.
+- `firestore.rules` ganhou validação admin-only para as duas coleções novas,
+  garantindo que uma dica `PRIVADO` nunca seja aceita como se fosse `PUBLICO`.
+  **Não publicado** no projeto Firebase nesta unidade.
+- **Pendente**, sem escrita real de rede nesta unidade: salvar rascunho
+  remoto e publicar o acervo no Firestore (o rascunho do editor hoje só existe
+  localmente); "atualizar baralhos consumidores" de uma resposta
+  compartilhada; teste de regras em emulador (infraestrutura não existe no
+  projeto ainda). Detalhe completo: `docs/ADMINISTRADOR_LOCAL.md`.
+- **Execução de teste bloqueada nesta sessão** pela permissão do ambiente
+  (recusou `python -m unittest`, `python -c`, `node -e`/`node --test`); só
+  `node --check` rodou. Suítes novas escritas e revisadas, mas não executadas:
+  `administrador/test_acervo_editorial.py`, `administrador/test_acervo_servidor.py`,
+  `administrador/estaticos/acervo.test.js`.
+
+### 2026-09-19 — catálogo versionado publicado no Firestore
+
+- O app passou a usar manifestos do Firestore como fonte remota do catálogo;
+  Room, cache do último índice válido e validação editorial continuam garantindo
+  o funcionamento offline-first.
+- Cada publicação usa versão e blocos imutáveis, commit atômico e hashes SHA-256
+  por bloco e pelo JSON completo. O limite continua em 500 cards.
+- Baralhos comuns são públicos para usuários anônimos autenticados. `ESPECIAIS`
+  são privados e exigem `leitoresCatalogo/{uid}.ativo == true`.
+- A Central ganhou publicação explícita somente após salvar/validar e retirada
+  não destrutiva do catálogo. Não há publicação automática, commit ou push.
+- `:app:testDebugUnitTest`, `:app:assembleDebug`, 138 testes do administrador,
+  `node --check` e o catálogo externo completo passaram. As regras ampliadas
+  foram publicadas no `borajogar-app`, o índice composto ficou ativo e sete
+  baralhos distintos foram migrados: seis `PUBLICO` e Kimberly-Clark — Finanças
+  `PRIVADO`. O UID anônimo do aparelho físico foi autorizado para leitura
+  privada. O baralho técnico e as cópias locais repetidas ficaram de fora.
+
+### 2026-09-19 — feedback de dicas automático pelo Firestore
+
+- O Room continua como fonte de verdade e passou à versão 7 com revisão local
+  e confirmação de sincronização. WorkManager tenta novamente quando houver
+  rede; falha de nuvem nunca bloqueia a partida.
+- Somente avaliações `DICA_REVELADA` são enviadas. O documento contém ids
+  editoriais, texto da dica avaliada, voto, comentário e posição; resposta,
+  sessão e dicas ocultas permanecem no aparelho.
+- A Central de Baralhos autentica sua própria sessão anônima, consulta o
+  Firestore automaticamente e mostra os registros sob a dica. A importação v3
+  permanece como contingência e o pedido para Codex continua sob revisão humana.
+- Regras locais permitem escrita apenas ao autor anônimo, leitura apenas a UIDs
+  cadastrados em `admins`, recusam exclusão e negam os demais caminhos.
+- Compilação e 286 testes JVM Debug passaram; o administrador passou em 133
+  testes, com três skips esperados, e o JavaScript passou em `node --check`.
+  O provedor Anônimo foi ativado, a configuração Android local validada e a
+  identidade do painel e seu documento `admins/{uid}` foram criados. As regras
+  foram publicadas no projeto `borajogar-app`, e o painel confirmou a leitura
+  remota vazia. O APK `0.5.0-dev-0919.1436` foi então instalado como atualização
+  no Samsung SM-F966B, preservando os dados. Uma avaliação real da dica 10 do
+  card `mm_028` sincronizou pelo WorkManager; a Central recebeu 1 registro e o
+  exibiu diretamente sob a dica como **Firestore — automático**. Sem commit ou
+  push.
+
+### 2026-09-19 — baralhos contínuos com até 500 cards
+
+- Decisão de Felipe substitui o ciclo `EM_DESENVOLVIMENTO → FINALIZADO`:
+  não existe mais edição final nem bloqueio de atualização. Os dois valores
+  antigos continuam legíveis por compatibilidade de JSON/Room.
+- O teto validado passou de 100 para 500 cards no domínio e no administrador
+  local. Testes cobrem 499/500 aceitos e 501 recusado.
+- Catálogo e Setup deixaram de exibir selo de estado; a versão técnica também
+  saiu do texto visível, mas continua dirigindo importação e download.
+- Nomes embarcados foram simplificados para o tema, sem "Edição 1" ou
+  "Pacote 1"; o envelope do asset passou para v7 e os baralhos alterados
+  receberam bump técnico sem mudar ids ou cards.
+- A cópia local `QuemSou-Baralhos` foi sincronizada: cinco nomes simplificados,
+  estados atualizáveis, bumps técnicos e índice consistente. `validarCatalogo`
+  aprovou índice e cinco arquivos. Nenhum commit, push ou publicação.
+- Painel local: 116 testes passaram, com três skips esperados. A suíte Android
+  passou com 286 testes JVM em Debug e 286 em Release; os testes instrumentados
+  compilaram. A regressão Room para atualizar um estado `FINALIZADO` legado foi
+  adicionada, ainda sem execução em emulador/aparelho.
+
+### 2026-09-18 — Administrador local de baralhos concluído
+
+- Felipe escolheu painel local no navegador, separado da fábrica. Claude Code
+  criou a primeira implementação; após o limite da sessão, Felipe autorizou o
+  Codex a corrigir, validar e concluir a unidade.
+- `Abrir-Administrador.cmd` inicia a biblioteca consolidada, editor de
+  rascunhos, validação Gradle, aplicação com backup e exportação validada.
+  Edições finais permanecem somente leitura; publicar e gerar APK continuam
+  fora do painel.
+- Revisões opacas bloqueiam abas/respostas atrasadas e mudanças externas no
+  baralho ou índice. Backups e temporários são exclusivos; links que escapem
+  da pasta do catálogo são recusados; IDs removidos não são reaproveitados.
+- 115 testes rápidos passaram, com três skips esperados; sintaxe JS aprovada.
+  Integração Gradle real validou e aplicou em uma cópia de staging, e o smoke
+  no navegador cobriu criação, card, salvamento, recuperação e reprovação.
+- Hashes confirmaram zero alteração nas fontes reais durante QA. Sem APK,
+  commit, push, publicação, instalação ou ativação da fábrica. Evidências e
+  limites em `ADMINISTRADOR_LOCAL.md`.
+
+### 2026-09-16 — Especiais e tema Kimberly-Clark — Finanças
+
+- Decisão de Felipe: fábrica em hold; conteúdo novo passa a ser solicitado
+  por tema ao assistente, sem ampliar ou ativar o serviço existente.
+- Setup usa "Temas da partida" e lista Especiais depois dos grupos comuns,
+  com descrição e escolha individual; nenhum conteúdo nasce marcado.
+- Asset v6 adiciona 30 respostas/300 dicas de Kimberly-Clark — Finanças,
+  sem alterar os quatro baralhos anteriores. Enum interno ESPECIAIS e coleção
+  especiais evitam classificar finanças como cinema/música; Room permanece v6.
+- Regressões cobrem parser/régua editorial, seleção independente, persistência
+  dos metadados no Room e interação em janela compacta com fonte ampliada.
+- Sem alteração de consumo, rotação, pontuação, fábrica, catálogo remoto ou
+  instalação física. Não há publicação ou endosso da empresa.
+
+### 2026-09-16 — avaliação por dica e primeiro lote de pacotes
+
+- Convite opcional logo após cada dica, conforme escolha de Felipe. Voto e
+  comentário são persistidos sem esperar o fim da rodada; restauração recupera
+  o registro e nova votação na mesma ocorrência o edita sem duplicar.
+- Feedback não modifica consumo/pontos nem bloqueia outra dica por falha de
+  gravação. Snapshot inclui apenas o fato avaliado, sem pistas ocultas.
+- Conferência do fluxo identificou texto antigo de queima prometendo zero
+  pontos; agora explica os dez pontos do leitor quando a opção está ligada,
+  sem alterar cálculo ou regras. Votos vêm antes do comentário no diálogo
+  para reduzir rolagem na avaliação rápida.
+- Export v3 inclui avaliações de dica e cartas; exportar/limpar não dependem
+  mais da preferência de avaliar cartas. Room permanece v6, sem migração.
+- Asset v5 acrescenta dois pacotes, 80 fatos, sete respostas inéditas e dez
+  pistas complementares de Guitarra. Originais finalizados intactos; fontes
+  editoriais em `PACOTES_EDITORIAIS.md`.
+- Regressão demonstra união de seis pacotes válidos em 600 dicas, consumo
+  parcial e carta de dez. Fábrica não alterada/ativada; seu teto operacional
+  de ampliação ainda é uma pendência distinta, registrada em `DECK_STUDIO.md`.
+- Evidências desta unidade e limitações: `HANDOFF_ACTIVE.md`.
+
+### 2026-09-13 — espelho acompanha a partida pelo navegador
+
+- Corrigido o navegador que permanecia em “Aguardando a partida começar”: o
+  servidor local agora continua ativo ao navegar do Setup para a partida e o
+  `PartidaViewModel` publica cada fase pelo canal SSE.
+- O leitor conectado recebe resposta e dica no próprio celular. Os demais
+  recebem rodada, leitor e orientação pública; a resposta só fica pública para
+  todos no anúncio. O placar final também é refletido.
+- Recarregar a página ou reconectar o EventSource entrega imediatamente a fase
+  atual. Sair da partida encerra o servidor; sair do Setup sem jogar também.
+- A identidade estável do pareamento atravessa a configuração, inclusive após
+  remover jogadores antes de começar, evitando troca de pessoa no navegador.
+- Cliente web ganhou telas responsivas para turno, resposta, dica, anúncio e
+  placar. A sintaxe JavaScript e o filtro de segredos têm verificação dedicada.
+- 278 testes JVM por variante, build do APK instrumentado, build debug e lint
+  sem falhas; não havia dispositivo ADB conectado para a repetição física.
+
+### 2026-09-13 — rodadas equilibradas pelo número de jogadores
+
+- O total de rodadas de uma partida nova passa a ser múltiplo do número de
+  jogadores: 2/4/6… para dois, 3/6/9… para três e 4/8/12… para quatro.
+- A configuração começa com duas rodadas por pessoa. Adicionar ou remover
+  alguém preserva essa quantidade individual; `+` e `−` alteram um ciclo completo.
+- A tela informa quantas rodadas cada pessoa lerá e mantém o botão de redução
+  desabilitado no mínimo de uma rodada por pessoa.
+
+### 2026-09-13 — nova partida começa sem baralho marcado
+
+- Ao abrir `Preparar QuemSou`, nenhum baralho é selecionado automaticamente.
+  A pessoa escolhe o conteúdo desejado ou usa o atalho "Selecionar todos".
+- Recargas da tela preservam a seleção feita e mantêm novos baralhos
+  desmarcados. O botão de começar continua bloqueado enquanto a seleção estiver vazia.
+
 ### 2026-09-12 — fábrica automática com pedidos recuperáveis
 
 - Felipe abriu a etapa da fábrica e escolheu usar este computador ligado.

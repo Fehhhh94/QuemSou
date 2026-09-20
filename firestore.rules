@@ -1,0 +1,332 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function painelAutorizado() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.ativo == true;
+    }
+
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function leitorPrivadoAutorizado() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/leitoresCatalogo/$(request.auth.uid))
+        && get(/databases/$(database)/documents/leitoresCatalogo/$(request.auth.uid)).data.ativo == true;
+    }
+
+    function podeLerCatalogo(dados) {
+      return autenticado()
+        && dados.publicado == true
+        && (dados.visibilidade == 'PUBLICO' || leitorPrivadoAutorizado());
+    }
+
+    function autorAnonimo() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == 'anonymous'
+        && request.resource.data.autorUid == request.auth.uid;
+    }
+
+    function textoValido(valor, maximo, aceitaVazio) {
+      return valor is string
+        && valor.size() <= maximo
+        && (aceitaVazio || valor.size() > 0);
+    }
+
+    function feedbackValido() {
+      let dados = request.resource.data;
+      return dados.keys().hasAll([
+          'schemaVersion', 'autorUid', 'baralhoId', 'cardId', 'dicaId',
+          'textoAvaliado', 'voto', 'comentario', 'rodada', 'posicao',
+          'versaoDoBaralho', 'criadoEm', 'atualizadoEm'
+        ])
+        && dados.keys().hasOnly([
+          'schemaVersion', 'autorUid', 'baralhoId', 'cardId', 'dicaId',
+          'textoAvaliado', 'voto', 'comentario', 'rodada', 'posicao',
+          'versaoDoBaralho', 'criadoEm', 'atualizadoEm'
+        ])
+        && dados.schemaVersion == 1
+        && textoValido(dados.autorUid, 128, false)
+        && textoValido(dados.baralhoId, 120, false)
+        && textoValido(dados.cardId, 120, false)
+        && textoValido(dados.dicaId, 300, false)
+        && textoValido(dados.textoAvaliado, 500, false)
+        && (dados.voto == 'BOM' || dados.voto == 'FRACO')
+        && textoValido(dados.comentario, 1000, true)
+        && dados.rodada is int && dados.rodada >= 0
+        && dados.posicao is int && dados.posicao >= 0 && dados.posicao < 10
+        && dados.versaoDoBaralho is int && dados.versaoDoBaralho >= 1
+        && dados.criadoEm is timestamp
+        && dados.atualizadoEm == request.time;
+    }
+
+    function categoriaDeBaralhoValida(valor) {
+      return valor == 'PERSONAGEM_FILME'
+        || valor == 'MUNDO_DA_MUSICA'
+        || valor == 'ESPECIAIS';
+    }
+
+    function estadoDeBaralhoValido(valor) {
+      return valor == 'EM_DESENVOLVIMENTO' || valor == 'FINALIZADO';
+    }
+
+    function manifestoDoCatalogoValido(baralhoId) {
+      let dados = request.resource.data;
+      return dados.keys().hasAll([
+          'schemaVersion', 'id', 'nome', 'categoria', 'colecaoId',
+          'colecaoNome', 'colecaoIcone', 'versao', 'versaoId', 'estado',
+          'quantidadeDeCards', 'quantidadeDeBlocos', 'descricao',
+          'tamanhoEmBytes', 'hashDoConteudo', 'visibilidade',
+          'publicado', 'atualizadoEm'
+        ])
+        && dados.keys().hasOnly([
+          'schemaVersion', 'id', 'nome', 'categoria', 'colecaoId',
+          'colecaoNome', 'colecaoIcone', 'versao', 'versaoId', 'estado',
+          'quantidadeDeCards', 'quantidadeDeBlocos', 'descricao',
+          'tamanhoEmBytes', 'hashDoConteudo', 'visibilidade',
+          'publicado', 'atualizadoEm'
+        ])
+        && dados.schemaVersion == 1
+        && dados.id == baralhoId
+        && textoValido(dados.id, 120, false)
+        && textoValido(dados.nome, 120, false)
+        && categoriaDeBaralhoValida(dados.categoria)
+        && textoValido(dados.colecaoId, 120, false)
+        && textoValido(dados.colecaoNome, 120, false)
+        && textoValido(dados.colecaoIcone, 16, false)
+        && dados.versao is int && dados.versao >= 1
+        && textoValido(dados.versaoId, 32, false)
+        && estadoDeBaralhoValido(dados.estado)
+        && dados.quantidadeDeCards is int
+        && dados.quantidadeDeCards >= 1 && dados.quantidadeDeCards <= 500
+        && dados.quantidadeDeBlocos is int
+        && dados.quantidadeDeBlocos >= 1 && dados.quantidadeDeBlocos <= 250
+        && textoValido(dados.descricao, 500, true)
+        && dados.tamanhoEmBytes is int && dados.tamanhoEmBytes >= 1
+        && dados.hashDoConteudo is string && dados.hashDoConteudo.size() == 64
+        && (dados.visibilidade == 'PUBLICO' || dados.visibilidade == 'PRIVADO')
+        && dados.publicado is bool
+        && dados.atualizadoEm == request.time;
+    }
+
+    function versaoDoCatalogoValida(baralhoId, versaoId) {
+      let dados = request.resource.data;
+      return dados.keys().hasAll([
+          'schemaVersion', 'id', 'nome', 'categoria', 'colecaoId',
+          'colecaoNome', 'colecaoIcone', 'versao', 'versaoId', 'estado',
+          'quantidadeDeCards', 'quantidadeDeBlocos', 'hashDoConteudo'
+        ])
+        && dados.keys().hasOnly([
+          'schemaVersion', 'id', 'nome', 'categoria', 'colecaoId',
+          'colecaoNome', 'colecaoIcone', 'versao', 'versaoId', 'estado',
+          'quantidadeDeCards', 'quantidadeDeBlocos', 'hashDoConteudo'
+        ])
+        && dados.schemaVersion == 1
+        && dados.id == baralhoId
+        && dados.versaoId == versaoId
+        && textoValido(dados.id, 120, false)
+        && textoValido(dados.nome, 120, false)
+        && categoriaDeBaralhoValida(dados.categoria)
+        && textoValido(dados.colecaoId, 120, false)
+        && textoValido(dados.colecaoNome, 120, false)
+        && textoValido(dados.colecaoIcone, 16, false)
+        && dados.versao is int && dados.versao >= 1
+        && textoValido(dados.versaoId, 32, false)
+        && estadoDeBaralhoValido(dados.estado)
+        && dados.quantidadeDeCards is int
+        && dados.quantidadeDeCards >= 1 && dados.quantidadeDeCards <= 500
+        && dados.quantidadeDeBlocos is int
+        && dados.quantidadeDeBlocos >= 1 && dados.quantidadeDeBlocos <= 250
+        && dados.hashDoConteudo is string && dados.hashDoConteudo.size() == 64;
+    }
+
+    function blocoDoCatalogoValido() {
+      let dados = request.resource.data;
+      return dados.keys().hasAll([
+          'schemaVersion', 'ordem', 'quantidadeDeCards',
+          'conteudoJson', 'hashDoConteudo'
+        ])
+        && dados.keys().hasOnly([
+          'schemaVersion', 'ordem', 'quantidadeDeCards',
+          'conteudoJson', 'hashDoConteudo'
+        ])
+        && dados.schemaVersion == 1
+        && dados.ordem is int && dados.ordem >= 0 && dados.ordem < 250
+        && dados.quantidadeDeCards is int
+        && dados.quantidadeDeCards >= 1 && dados.quantidadeDeCards <= 25
+        && textoValido(dados.conteudoJson, 750000, false)
+        && dados.hashDoConteudo is string && dados.hashDoConteudo.size() == 64;
+    }
+
+    function tipoDeRespostaValido(valor) {
+      return valor == 'PESSOA' || valor == 'LUGAR' || valor == 'COISA';
+    }
+
+    function origemEditorialValida(valor) {
+      return valor == 'EDITORIAL' || valor == 'ALIAS_LEGADO';
+    }
+
+    function escopoDeDicaValido(valor) {
+      return valor == 'PUBLICO' || valor == 'PRIVADO';
+    }
+
+    function statusDeDicaValido(valor) {
+      return valor == 'ATIVA' || valor == 'REMOVIDA';
+    }
+
+    // Acervo editorial: admin-only, nunca lido pelo app em jogo. O app só lê
+    // `catalogo/**`, que é montado a partir daqui pelo painel na publicação.
+    //
+    // O pai declara até 500 identidades, únicas e sem remoção. Cada dica
+    // precisa pertencer a esse conjunto e avançar o pai atomicamente.
+    function respostaEditorialValida(respostaId) {
+      let dados = request.resource.data;
+      return dados.keys().hasAll(['schemaVersion', 'respostaId', 'texto', 'tipo', 'origem', 'dicaIds', 'revisaoTecnica'])
+        && dados.keys().hasOnly([
+          'schemaVersion', 'respostaId', 'texto', 'tipo', 'origem',
+          'notasEditoriais', 'revisaoTecnica', 'referencias', 'criadoEm', 'atualizadoEm', 'dicaIds'
+        ])
+        && dados.schemaVersion == 1
+        && dados.respostaId == respostaId
+        && textoValido(dados.respostaId, 1500, false)
+        && dados.dicaIds is list && dados.dicaIds.size() <= 500
+        && dados.dicaIds.toSet().size() == dados.dicaIds.size()
+        && textoValido(dados.texto, 200, false)
+        && tipoDeRespostaValido(dados.tipo)
+        && origemEditorialValida(dados.origem)
+        && (!('notasEditoriais' in dados) || textoValido(dados.notasEditoriais, 2000, true))
+        && (!('revisaoTecnica' in dados) || (dados.revisaoTecnica is int && dados.revisaoTecnica >= 1))
+        && (!('referencias' in dados) || (dados.referencias is list && dados.referencias.size() <= 1000));
+    }
+
+    function dicaEditorialValida(dicaId) {
+      let dados = request.resource.data;
+      return dados.keys().hasAll(['schemaVersion', 'dicaId', 'texto', 'escopo', 'status', 'origem', 'revisaoTecnica'])
+        && dados.keys().hasOnly([
+          'schemaVersion', 'dicaId', 'texto', 'escopo', 'status', 'origem',
+          'revisaoTecnica', 'criadoEm', 'atualizadoEm'
+        ])
+        && dados.schemaVersion == 1
+        && dados.dicaId == dicaId
+        && textoValido(dados.dicaId, 1500, false)
+        && textoValido(dados.texto, 500, false)
+        && escopoDeDicaValido(dados.escopo)
+        && statusDeDicaValido(dados.status)
+        && origemEditorialValida(dados.origem)
+        && (!('revisaoTecnica' in dados) || (dados.revisaoTecnica is int && dados.revisaoTecnica >= 1));
+    }
+
+    // Identidade (respostaId/dicaId/origem) nunca muda numa atualização; a
+    // revisão técnica só pode crescer, quando os dois lados a declaram.
+    function identidadeEditorialPreservada() {
+      return request.resource.data.origem == resource.data.origem
+        && (
+          !('revisaoTecnica' in resource.data)
+          || request.resource.data.revisaoTecnica > resource.data.revisaoTecnica
+        );
+    }
+
+    // Um banco contém no máximo 500 identidades, sem exclusão/reaproveitamento.
+    // Toda escrita em dica exige avanço do pai no MESMO commit; isso permite
+    // leituras paginadas coerentes e CAS de todo o banco pela Central.
+    function bancoEditorialAvanca(respostaId, dicaId) {
+      let caminho = /databases/$(database)/documents/acervoEditorial/$(respostaId);
+      let depois = getAfter(caminho).data;
+      return dicaId in depois.dicaIds
+        && (!exists(caminho) || depois.revisaoTecnica > get(caminho).data.get('revisaoTecnica', 0));
+    }
+
+    function versaoPublicada(baralhoId, versaoId) {
+      return exists(/databases/$(database)/documents/catalogo/$(baralhoId))
+        && podeLerCatalogo(
+          get(/databases/$(database)/documents/catalogo/$(baralhoId)).data
+        )
+        && get(/databases/$(database)/documents/catalogo/$(baralhoId)).data.versaoId == versaoId;
+    }
+
+    match /feedbacks/{feedbackId} {
+      allow get, list: if painelAutorizado();
+      allow create: if autorAnonimo() && feedbackValido();
+      allow update: if autorAnonimo()
+        && resource.data.autorUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['voto', 'comentario', 'atualizadoEm'])
+        && feedbackValido();
+      allow delete: if false;
+    }
+
+    match /catalogo/{baralhoId} {
+      allow get, list: if painelAutorizado()
+        || podeLerCatalogo(resource.data);
+      allow create: if painelAutorizado() && manifestoDoCatalogoValido(baralhoId);
+      allow update: if painelAutorizado()
+        && manifestoDoCatalogoValido(baralhoId)
+        && request.resource.data.versao >= resource.data.versao
+        && (request.resource.data.versao > resource.data.versao
+          || request.resource.data.hashDoConteudo == resource.data.hashDoConteudo);
+      allow delete: if false;
+
+      match /versoes/{versaoId} {
+        allow get: if painelAutorizado()
+          || (autenticado() && versaoPublicada(baralhoId, versaoId));
+        allow list: if false;
+        allow create: if painelAutorizado()
+          && versaoDoCatalogoValida(baralhoId, versaoId);
+        allow update: if painelAutorizado()
+          && versaoDoCatalogoValida(baralhoId, versaoId)
+          && request.resource.data == resource.data;
+        allow delete: if false;
+
+        match /blocos/{blocoId} {
+          allow get, list: if painelAutorizado()
+            || (autenticado() && versaoPublicada(baralhoId, versaoId));
+          allow create: if painelAutorizado() && blocoDoCatalogoValido();
+          allow update: if painelAutorizado()
+            && blocoDoCatalogoValido()
+            && request.resource.data == resource.data;
+          allow delete: if false;
+        }
+      }
+    }
+
+    // Admin-only: nenhum leitor do catálogo, nem PRIVADO, enxerga esta coleção.
+    // A publicação copia só as dicas ATIVA compatíveis com a visibilidade do
+    // baralho para `catalogo/**`; PRIVADO nunca alcança um snapshot PUBLICO.
+    match /acervoEditorial/{respostaId} {
+      allow get, list: if painelAutorizado();
+      allow create: if painelAutorizado() && respostaEditorialValida(respostaId);
+      allow update: if painelAutorizado()
+        && respostaEditorialValida(respostaId)
+        && identidadeEditorialPreservada()
+        && request.resource.data.dicaIds.hasAll(resource.data.get('dicaIds', []));
+      allow delete: if false;
+
+      match /dicas/{dicaId} {
+        allow get, list: if painelAutorizado();
+        allow create: if painelAutorizado() && dicaEditorialValida(dicaId)
+          && bancoEditorialAvanca(respostaId, dicaId);
+        allow update: if painelAutorizado()
+          && dicaEditorialValida(dicaId)
+          && identidadeEditorialPreservada()
+          && bancoEditorialAvanca(respostaId, dicaId);
+        // Nunca apagar de verdade: desativar muda "status" para REMOVIDA.
+        allow delete: if false;
+      }
+    }
+
+    match /admins/{uid} {
+      allow read, write: if false;
+    }
+
+    match /leitoresCatalogo/{uid} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

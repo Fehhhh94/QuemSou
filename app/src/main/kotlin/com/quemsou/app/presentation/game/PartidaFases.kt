@@ -460,6 +460,7 @@ internal fun DicaReveladaContent(
     onAlguemAcertou: () -> Unit,
     onOutraDica: () -> Unit,
     onPedirQueimar: () -> Unit,
+    feedback: @Composable () -> Unit = {},
 ) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // Três ações empilhadas com as margens do retrato consumiam quase toda a
@@ -490,6 +491,7 @@ internal fun DicaReveladaContent(
                 texto = estado.texto,
                 janelaBaixa = janelaBaixa,
                 modifier = Modifier.weight(1f).fillMaxWidth(),
+                feedback = feedback,
             )
             AcoesDaDica(
                 janelaBaixa = janelaBaixa,
@@ -513,6 +515,7 @@ private fun CorpoDaDica(
     texto: String,
     janelaBaixa: Boolean,
     modifier: Modifier = Modifier,
+    feedback: @Composable () -> Unit = {},
 ) {
     val curta = texto.length <= LIMITE_DA_DICA_CURTA
     val estilo = when {
@@ -535,6 +538,7 @@ private fun CorpoDaDica(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(text = texto, style = estilo, textAlign = TextAlign.Center)
+            feedback()
         }
     }
 }

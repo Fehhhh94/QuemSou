@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * Estrutura de `assets/cards.json`: uma versão inteira crescente e os
- * baralhos embarcados no APK, cada um no **mesmo formato do catálogo**
+ * lista legada de baralhos (vazia desde a versão 8), no **formato do catálogo**
  * ([BaralhoJson], documentado em `docs/CATALOG_FORMAT.md`). O importador só
  * recarrega o banco quando [version] é maior que a última versão importada.
  */

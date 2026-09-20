@@ -4,7 +4,6 @@ import androidx.room.withTransaction
 import com.quemsou.app.data.local.AppDatabase
 import com.quemsou.app.data.local.paraEntidade
 import com.quemsou.app.domain.model.Baralho
-import com.quemsou.app.domain.model.EstadoDoBaralho
 import com.quemsou.app.domain.validacao.ResultadoValidacao
 import com.quemsou.app.domain.validacao.ValidadorEditorial
 import javax.inject.Inject
@@ -23,7 +22,6 @@ class InstaladorDeBaralhos @Inject constructor(private val db: AppDatabase) : De
         require(baralho.cards.all { ValidadorEditorial().validar(it) is ResultadoValidacao.Aprovado })
         val anterior = db.baralhoDao().buscarPorIds(listOf(baralho.id)).singleOrNull()
         if (anterior != null && anterior.versao >= baralho.versao) return@withTransaction
-        require(anterior?.estado != EstadoDoBaralho.FINALIZADO.name)
         val outros = db.baralhoDao().buscarTodos().filter { it.id != baralho.id }.map { it.id }
         val idsDeOutros = db.cardDao().buscarPorBaralhos(outros).map { it.id }.toSet()
         require(baralho.cards.none { it.id in idsDeOutros })

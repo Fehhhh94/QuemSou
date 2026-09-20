@@ -1,10 +1,9 @@
 /*
- * Cliente do espelho de leitura — Fase 4A, parte 1: SÓ o pareamento.
+ * Cliente do espelho de leitura — pareamento e acompanhamento da partida.
  *
  * O jogador abre o endereço anunciado pelo anfitrião, toca no próprio nome e
- * fica na tela de espera. Nenhuma dica e nenhuma resposta trafegam aqui
- * ainda: o canal /estado já está aberto e recebendo {"fase":"aguardando"},
- * mas o conteúdo da vez de ler chega só na parte 2.
+ * acompanha a partida pelo canal /estado. O servidor só envia resposta e
+ * dica ao navegador autenticado como leitor da rodada.
  *
  * Sem framework e sem dependência externa — tudo vem do aparelho da mesa.
  */
@@ -223,7 +222,89 @@
     app.appendChild(caixa);
   }
 
-  // --- Canal de eventos (a estrutura da parte 2 já nasce aqui) ---
+  function adicionarTexto(pai, classe, texto) {
+    if (!texto) return;
+    var elemento = document.createElement('p');
+    if (classe) elemento.className = classe;
+    elemento.textContent = texto;
+    pai.appendChild(elemento);
+  }
+
+  function adicionarCartao(pai, rotulo, texto, classe) {
+    if (!texto) return;
+    var cartao = document.createElement('section');
+    cartao.className = 'cartao';
+    adicionarTexto(cartao, 'cartao-rotulo', rotulo);
+    adicionarTexto(cartao, classe, texto);
+    pai.appendChild(cartao);
+  }
+
+  function tituloDaFase(estado) {
+    switch (estado.fase) {
+      case 'vez_de_jogar': return estado.suaVez ? 'Sua vez de ler' : estado.leitor + ' vai ler';
+      case 'grid': return estado.suaVez ? 'Prepare a leitura' : 'Escolhendo uma dica';
+      case 'shot': return 'Pausa para o shot';
+      case 'dica_revelada': return estado.suaVez ? 'Leia em voz alta' : 'Hora de adivinhar';
+      case 'quem_acertou': return 'Quem acertou?';
+      case 'anuncio': return 'Resposta revelada';
+      case 'placar_final': return 'Placar final';
+      case 'indisponivel': return 'Partida indisponível';
+      default: return 'Espelho de leitura';
+    }
+  }
+
+  function mensagemDaFase(estado) {
+    if (estado.mensagem) return estado.mensagem;
+    switch (estado.fase) {
+      case 'vez_de_jogar':
+        return estado.suaVez
+          ? 'Pegue este celular. A partida começa no aparelho principal.'
+          : 'Aguarde o leitor começar a rodada.';
+      case 'grid':
+        return (estado.escolhedor || 'Outro jogador') + ' escolhe uma posição no aparelho principal.';
+      case 'dica_revelada':
+        return estado.suaVez
+          ? 'Mantenha a resposta em segredo.'
+          : (estado.leitor || 'O leitor') + ' está lendo a dica.';
+      case 'quem_acertou': return 'O aparelho principal está registrando o acerto.';
+      case 'indisponivel': return 'Volte ao aparelho principal para ajustar a partida.';
+      default: return null;
+    }
+  }
+
+  function mostrarEstadoDaPartida(estado) {
+    limpar();
+    var caixa = document.createElement('section');
+    caixa.className = 'partida';
+    caixa.setAttribute('aria-live', 'polite');
+
+    if (estado.rodada && estado.totalDeRodadas) {
+      adicionarTexto(caixa, 'rodada', 'Rodada ' + estado.rodada + ' de ' + estado.totalDeRodadas);
+    }
+    adicionarTexto(caixa, 'partida-titulo', tituloDaFase(estado));
+    adicionarTexto(caixa, 'partida-texto', mensagemDaFase(estado));
+
+    adicionarCartao(caixa, 'Resposta', estado.resposta, 'resposta');
+    if (estado.dica) {
+      var rotulo = estado.valor ? 'Dica — vale ' + estado.valor + ' pontos' : 'Dica';
+      adicionarCartao(caixa, rotulo, estado.dica, 'dica');
+    }
+
+    if (estado.fase === 'placar_final' && estado.ranking) {
+      var lista = document.createElement('ol');
+      lista.className = 'placar';
+      estado.ranking.forEach(function (linha) {
+        var item = document.createElement('li');
+        adicionarTexto(item, '', linha.nome);
+        adicionarTexto(item, '', linha.pontos + ' pts');
+        lista.appendChild(item);
+      });
+      caixa.appendChild(lista);
+    }
+    app.appendChild(caixa);
+  }
+
+  // --- Canal de eventos ---
 
   function fecharCanal() {
     if (canalDeEstado) {
@@ -248,9 +329,8 @@
       } catch (erro) {
         return;
       }
-      // Parte 1: a única fase possível é "aguardando" e a tela já é essa.
-      // A parte 2 troca este ponto pelo desenho da dica e da resposta.
-      if (estado.fase !== 'aguardando') return;
+      if (estado.fase === 'aguardando') return;
+      mostrarEstadoDaPartida(estado);
     };
     canalDeEstado.onerror = function () {
       /* O EventSource reconecta sozinho com o retry anunciado pelo servidor. */

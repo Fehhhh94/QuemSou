@@ -3,6 +3,19 @@ package com.quemsou.app.data.local
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+/** Outbox do feedback: preserva as linhas existentes e as deixa pendentes para envio. */
+val MIGRACAO_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE feedback_de_cards " +
+                "ADD COLUMN revisaoLocal INTEGER NOT NULL DEFAULT 1",
+        )
+        db.execSQL(
+            "ALTER TABLE feedback_de_cards ADD COLUMN sincronizadoEm INTEGER DEFAULT NULL",
+        )
+    }
+}
+
 /** Mantém o histórico v5 conservador: não há evidência para devolver dicas antigas ao banco. */
 val MIGRACAO_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {

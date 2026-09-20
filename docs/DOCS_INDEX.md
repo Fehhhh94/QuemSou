@@ -17,12 +17,13 @@ Depois, escolha a rota abaixo.
 |---|---|---|
 | Entender produto ou arquitetura | `docs/PROJECT_CONTEXT.md` | código citado pelo documento |
 | Continuar a entrega atual | `docs/HANDOFF_ACTIVE.md` | arquivos citados no handoff |
+| Administrar baralhos nesta máquina | `docs/ADMINISTRADOR_LOCAL.md` | `administrador/README.md`; atalho `Abrir-Administrador.cmd` |
 | Investigar ou atender um problema | `docs/SUPPORT_RUNBOOK.md` | `docs/BUGS.md`, handoff ativo |
 | Alterar regra do jogo | `docs/GAME_RULES.md` | `domain/`, testes do domínio |
 | Alterar identidade da central, Setup, partida ou navegação | `docs/PROJECT_CONTEXT.md` | `docs/GAME_RULES.md` se houver regra |
 | Alterar espelho de leitura | `docs/PROJECT_CONTEXT.md` | `data/espelho/`, `assets/espelho/` |
 | Alterar catálogo ou download | `docs/CATALOG_FORMAT.md` | `docs/PROJECT_CONTEXT.md`, `data/catalogo/` |
-| Criar ou revisar cards | `docs/CARDS_GUIDE.md` | `docs/CATALOG_FORMAT.md` |
+| Criar ou revisar cards | `docs/CARDS_GUIDE.md` | `docs/CATALOG_FORMAT.md`, `docs/PACOTES_EDITORIAIS.md` para lotes/fontes |
 | Pedidos automáticos e acervo de dicas | `docs/DECK_STUDIO.md` | `docs/GAME_RULES.md`, `docs/CATALOG_FORMAT.md` |
 | Planejar validação da fábrica e dicas inéditas | `docs/DECK_STUDIO_TEST_PLAN.md` | `docs/DECK_STUDIO.md` |
 | Validar catálogo externo | `docs/CATALOG_FORMAT.md` | tarefas `validarBaralho`/`validarCatalogo` |

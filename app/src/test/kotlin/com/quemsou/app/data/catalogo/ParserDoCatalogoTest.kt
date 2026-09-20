@@ -100,12 +100,12 @@ class ParserDoCatalogoTest {
     }
 
     @Test
-    fun `baralho acima do teto de 100 reprova no parse com mensagem legivel`() {
-        val cards = List(101) { jsonDeCard(id = "c${it + 1}") }.joinToString(",\n")
+    fun `baralho acima do teto de 500 reprova no parse com mensagem legivel`() {
+        val cards = List(501) { jsonDeCard(id = "c${it + 1}") }.joinToString(",\n")
 
         val resultado = parser.parseBaralho(jsonDeBaralho(cards = cards))
 
-        assertTrue(violacoesDe(resultado).single().mensagem.contains("101"))
+        assertTrue(violacoesDe(resultado).single().mensagem.contains("501"))
     }
 
     @Test

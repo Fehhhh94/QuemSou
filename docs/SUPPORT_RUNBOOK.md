@@ -44,6 +44,7 @@ sintoma para reduzir exposição e ruído.
 | QR/URL não abre | mesma rede, isolamento de clientes, VPN, HTTP e porta | seção 4 |
 | Nome indisponível | “este aparelho” ou sessão antiga ainda ocupando | seção 4 |
 | ✓ não aparece | POST aceito, app ainda no Setup, mesma instância do servidor | seção 4 |
+| Navegador fica em “aguardando” após iniciar | fase SSE, sessão e ciclo de vida do servidor | seção 4 |
 | Modo dev/feedback não aparece | Switch “Modo dev” e contagem na Home | `PROJECT_CONTEXT.md` |
 
 ## 4. Espelho de leitura
@@ -73,18 +74,25 @@ esperado. Desmarcar no Setup deve fazê-lo voltar em até três segundos.
 Setup e confirmar “Liberar lugar”. O navegador novo poderá reivindicar depois
 da próxima atualização da lista.
 
-**A URL continua respondendo após sair do Setup:** defeito de ciclo de vida.
-Registrar passos e horário; o servidor da parte 1 deve cair no `onCleared` do
-`SetupViewModel`.
+**A URL continua respondendo durante a partida:** esperado. O servidor iniciado
+no Setup é entregue ao `PartidaViewModel` e só deve cair ao sair da partida.
+Se o anfitrião voltar sem começar a jogar, a URL deve parar de responder.
+
+**O navegador continua em “aguardando” após começar:** confirmar que o app e o
+cliente web pertencem ao mesmo APK/build. Recarregar a página deve retomar a
+fase atual com o token salvo. Se continuar parado, registrar a fase exibida no
+app anfitrião e a última mensagem recebida em `/estado`, sem publicar o token.
 
 **SSE responde 401:** o par jogador/token não pertence à sessão atual. Voltar à
 seleção ou limpar somente as chaves `quemsou.espelho.*` do site no navegador;
 não é necessário limpar dados do app anfitrião.
 
-### Limite atual
+### Conteúdo e privacidade
 
-A parte 1 transmite somente `{"fase":"aguardando"}`. Não esperar dica ou
-resposta no navegador até a parte 2 estar implementada.
+O SSE transmite a fase, rodada, leitor, anúncio e placar. Durante o turno, a
+resposta e a dica são filtradas no servidor e só entram no JSON da sessão do
+leitor. Os adivinhadores recebem apenas a orientação pública da fase. No
+anúncio, a resposta passa a ser pública para todos os navegadores conectados.
 
 ## 5. Catálogo e baralhos
 

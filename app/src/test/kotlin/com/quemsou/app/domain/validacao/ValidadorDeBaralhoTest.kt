@@ -46,15 +46,16 @@ class ValidadorDeBaralhoTest {
     }
 
     @Test
-    fun `teto de 100 - 99 e 100 passam, 101 reprova com mensagem legivel`() {
-        assertEquals(ResultadoValidacaoDeBaralho.Aprovado, validador.validar(baralho(cards(99))))
-        assertEquals(ResultadoValidacaoDeBaralho.Aprovado, validador.validar(baralho(cards(100))))
+    fun `teto de 500 - 499 e 500 passam, 501 reprova com mensagem legivel`() {
+        assertEquals(500, Baralho.MAXIMO_DE_CARDS)
+        assertEquals(ResultadoValidacaoDeBaralho.Aprovado, validador.validar(baralho(cards(499))))
+        assertEquals(ResultadoValidacaoDeBaralho.Aprovado, validador.validar(baralho(cards(500))))
 
-        val resultado = validador.validar(baralho(cards(101)))
+        val resultado = validador.validar(baralho(cards(501)))
 
         assertEquals(listOf(RegraDeBaralho.TETO_DE_CARDS_EXCEDIDO), violacoesDe(resultado))
         val mensagem = (resultado as ResultadoValidacaoDeBaralho.Reprovado).violacoes.single().mensagem
-        assertTrue(mensagem.contains("101"))
+        assertTrue(mensagem.contains("501"))
         assertTrue(mensagem.contains("${Baralho.MAXIMO_DE_CARDS}"))
     }
 
@@ -89,7 +90,7 @@ class ValidadorDeBaralhoTest {
     fun `violacoes sao acumuladas, nao para na primeira`() {
         val resultado = validador.validar(
             baralho(
-                cards = cards(99) + cards(3) + card("extra", CardCategory.MUNDO_DA_MUSICA),
+                cards = cards(499) + cards(3) + card("extra", CardCategory.MUNDO_DA_MUSICA),
             ),
         )
 

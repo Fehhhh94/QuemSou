@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * Monta o JSON de export do modo dev de feedback (formato
- * `quemsou-feedback` versão 1), disparado pela Home via Sharesheet. A
+ * `quemsou-feedback` versão 3), disparado pela Home via Sharesheet. A
  * `resposta` vem do join com o card no Room ([FeedbackComResposta]) — `null`
  * se o card não existe mais no aparelho. Puro e determinístico ([exportadoEm]
  * entra por parâmetro): testável na JVM com JSON estável.
@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
 object ExportadorDeFeedback {
 
     const val FORMATO = "quemsou-feedback"
-    const val VERSAO = 2
+    const val VERSAO = 3
 
     private val json = Json { prettyPrint = true }
 

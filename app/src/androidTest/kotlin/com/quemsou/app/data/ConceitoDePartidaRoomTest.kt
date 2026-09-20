@@ -13,6 +13,7 @@ import com.quemsou.app.data.importer.CardsJson
 import com.quemsou.app.domain.model.*
 import com.quemsou.app.domain.rules.*
 import com.quemsou.app.data.espelho.JogadorDoEspelho
+import com.quemsou.app.data.espelho.EstadoDaPartidaNoEspelho
 import com.quemsou.app.data.espelho.ResultadoDoInicio
 import com.quemsou.app.data.espelho.ServidorDoEspelho
 import com.quemsou.app.presentation.setup.MotivoDoBloqueio
@@ -53,20 +54,29 @@ class ConceitoDePartidaRoomTest {
         return carta
     }
 
-    @Test fun catalogoEmbarcadoRealOferece60RespostasSemDependerDaFabrica() = runBlocking {
+    @Test fun bootstrapVazioPreservaConteudoEHistoricoNoRoom() = runBlocking {
         comBanco { db ->
+            inserir(db)
+            val r = repo(db)
+            val carta = abrir(r, "preservar")
+            r.salvarProgresso("preservar", ProgressoDaPartida(1, "DICA_REVELADA", listOf(0, 0), listOf(1)), carta.clues.take(1), false)
+            val baralhosAntes = r.buscarTodos()
+            val usadasAntes = db.historicoDeDicasDao().usadas()
+            val reservasAntes = db.historicoDeDicasDao().reservadas()
+            var versao = 7
+            val store = object : com.quemsou.app.data.importer.CardsVersionStore {
+                override suspend fun versaoImportada() = versao
+                override suspend fun salvarVersaoImportada(valor: Int) { versao = valor }
+            }
             val json = contexto.assets.open("cards.json").bufferedReader().use { it.readText() }
-            val baralhos = CardsJson.deJson(json).baralhos.map {
-                (ParserDoCatalogo().validarBaralho(it) as ResultadoDoParse.Sucesso).valor
-            }
-            baralhos.forEach { b ->
-                db.baralhoDao().inserirTodos(listOf(b.paraEntidade()))
-                db.cardDao().inserirTodos(b.cards.map { it.paraEntidade(b.id) })
-            }
-            val disponiveis = repo(db).buscarTodos()
-            assertEquals(2, disponiveis.size)
-            assertEquals(60, AcervoDeRespostas.contarIdentidades(disponiveis.flatMap { it.cards }.map(AcervoDeRespostas::chaves)))
-            assertTrue(disponiveis.flatMap { it.cards }.all { SelecionadorDeDicas.disponiveis(it, emptySet()).size >= 10 })
+            assertTrue(CardsJson.deJson(json).baralhos.isEmpty())
+            com.quemsou.app.data.importer.CardsImporter(
+                { json }, ParserDoCatalogo(), db.baralhoDao(), db.cardDao(), store,
+            ).importarSeNecessario()
+            assertEquals(8, versao)
+            assertEquals(baralhosAntes, r.buscarTodos())
+            assertEquals(usadasAntes, db.historicoDeDicasDao().usadas())
+            assertEquals(reservasAntes, db.historicoDeDicasDao().reservadas())
         }
     }
 
@@ -95,7 +105,7 @@ class ConceitoDePartidaRoomTest {
      */
     @Test fun setupReconheceEsgotamentoRealETrocaDeSelecaoSemApagarHistorico() = runBlocking {
         comBanco { db ->
-            inserir(db, cards = listOf(card(total = 10)))
+            inserir(db, cards = listOf(card(total = 10), card("segunda", "Segunda resposta", total = 10)))
             val r = repo(db)
             val store = ViewModelStore()
             val espelho = object : ServidorDoEspelho {
@@ -107,6 +117,7 @@ class ConceitoDePartidaRoomTest {
                 override fun atualizarJogadores(jogadores: List<JogadorDoEspelho>) = Unit
                 override fun marcarEsteAparelho(jogadorId: String?) = Unit
                 override fun liberarLugar(jogadorId: String) = Unit
+                override fun publicarEstado(estado: EstadoDaPartidaNoEspelho) = Unit
                 override fun parar() = Unit
             }
             val vm = withContext(Dispatchers.Main) {
@@ -114,12 +125,14 @@ class ConceitoDePartidaRoomTest {
                     store.put("setup", it)
                     it.renomearJogador(0, "Ana")
                     it.renomearJogador(1, "Bruno")
-                    it.definirRodadas(1)
+                    it.definirRodadas(2)
                 }
             }
             try {
                 val inicial = withTimeout(10_000) { vm.uiState.first { it.baralhosCarregados } }
-                assertTrue(inicial.podeComecar)
+                assertFalse(inicial.podeComecar)
+                withContext(Dispatchers.Main) { vm.alternarBaralho("b") }
+                assertTrue(vm.uiState.value.podeComecar)
 
                 val carta = abrir(r, "esgotamento")
                 r.salvarProgresso(
@@ -129,17 +142,21 @@ class ConceitoDePartidaRoomTest {
                     true,
                 )
                 r.encerrarSessao("esgotamento")
+                val segunda = r.prepararSessao("esgotamento-2", listOf("b")).single().cards.single { it.id == "segunda" }
+                val outraCarta = r.prepararTurno("esgotamento-2", 1, segunda, 9)
+                r.salvarProgresso("esgotamento-2", ProgressoDaPartida(1, "ANUNCIO", listOf(0, 10), listOf(1), "j2"), outraCarta.clues.take(1), true)
+                r.encerrarSessao("esgotamento-2")
                 withContext(Dispatchers.Main) { vm.recarregarBaralhos() }
                 val esgotado = withTimeout(10_000) { vm.uiState.first { it.semRespostasNoAparelho } }
                 assertEquals(listOf("b"), esgotado.baralhosDisponiveis.map { it.id })
                 assertEquals(MotivoDoBloqueio.SEM_RESPOSTAS_NO_APARELHO, esgotado.motivoDoBloqueio)
                 assertFalse(esgotado.podeComecar)
                 val historico = db.historicoDeDicasDao().usadas().toSet()
-                val editorial = r.buscarPorIds(listOf("b")).single().cards.single()
+                val editorial = r.buscarPorIds(listOf("b")).single().cards.single { it.id == "hp" }
                 assertEquals(10, editorial.bancoDeDicas.size)
                 assertEquals(9, SelecionadorDeDicas.disponiveis(editorial, historico).size)
 
-                inserir(db, "novo", listOf(card("outro", "Outra resposta", total = 10)))
+                inserir(db, "novo", listOf(card("outro", "Outra resposta", total = 10), card("mais-um", "Mais uma resposta", total = 10)))
                 withContext(Dispatchers.Main) { vm.recarregarBaralhos() }
                 val recarregado = withTimeout(10_000) {
                     vm.uiState.first { it.baralhosDisponiveis.size == 2 }
@@ -277,7 +294,9 @@ class ConceitoDePartidaRoomTest {
             banco.execSQL("INSERT INTO sessoes_de_dicas VALUES ('antiga', '[]')")
             banco.version = 5
         }
-        val db = Room.databaseBuilder(contexto, AppDatabase::class.java, nome).addMigrations(MIGRACAO_5_6).build()
+        val db = Room.databaseBuilder(contexto, AppDatabase::class.java, nome)
+            .addMigrations(MIGRACAO_5_6, MIGRACAO_6_7)
+            .build()
         try {
             assertEquals(listOf("historico-conservado"), db.historicoDeDicasDao().usadas())
             assertEquals("{}", db.historicoDeDicasDao().sessao("antiga")!!.historicoJson)

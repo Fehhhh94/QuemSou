@@ -1,8 +1,10 @@
 # Guia de Cards
 
-Régua editorial de todo card do QuemSou. O baralho vive em
-`app/src/main/assets/cards.json` — ao editar, **incrementar o campo
-`version`**, senão o importador não recarrega o banco.
+Régua editorial de todo card do QuemSou. Conteúdo real vive no Firebase e
+nas origens privadas da Central, fora do Git. Não inserir cards/dicas em
+`app/src/main/assets/cards.json`, que permanece vazio. Para distribuir uma
+correção: salvar, validar, aplicar localmente e publicar no Firestore com nova
+versão técnica. Fluxo completo: `ADMINISTRADOR_LOCAL.md`.
 
 ## Régua editorial
 
@@ -43,9 +45,31 @@ Essa classificação editorial não é um ajuste automático de dificuldade no a
 
 ## Estrutura do card no JSON
 
+### Evolução do acervo
+
+Não há teto editorial total de dicas de uma resposta: os limites do JSON
+são por item recebido, não pelo banco reunido na instalação. Um baralho pode
+crescer até 500 cards e não existe mais o estado editorial "edição final".
+Ao ampliar uma resposta, preservar `respostaId` e criar ids apenas para fatos
+novos. Não republicar dicas antigas como se fossem inéditas. Lotes e fontes:
+`PACOTES_EDITORIAIS.md`.
+
+O convite de avaliação aparece após cada dica revelada. O export v3 distingue
+`DICA_REVELADA` de `ACERTO`/`QUEIMADO`, mantendo voto BOM/FRACO e comentário.
+Seu `contextoJson` contém `sessaoId`, `rodada`, `posicao`, `respostaId`,
+`resposta`, `dicaId`, `texto` e `versaoDoBaralho`; só aquela dica é incluída.
+Corrigir o voto atualiza essa ocorrência; outra rodada/partida é outro registro.
+Comentários são limitados a 1.000 caracteres. Rascunho sem voto não é salvo.
+Esses registros orientam revisão editorial e pedidos explicitamente enviados;
+não alteram sozinhos o conteúdo instalado, a seleção ou a dificuldade.
+
+### Campos
+
 - `id`: único no baralho (ex.: `pf_001`, `mm_014`).
 - `type`: `PESSOA`, `LUGAR` ou `COISA`.
-- `category`: `PERSONAGEM_FILME` ou `MUNDO_DA_MUSICA`. A categoria **Livre**
-  é um filtro que une todas as categorias — não existem cards exclusivos dela.
+- `category`: categoria interna do modelo. No JSON do catálogo, o card herda
+  `categoria` do baralho (`PERSONAGEM_FILME`, `MUNDO_DA_MUSICA`, `ESPECIAIS`);
+  não enviar `category` por card. Temas personalizados usam o agrupamento
+  Especiais; uma empresa não exige um enum novo. Contrato: `CATALOG_FORMAT.md`.
 - `answer`: a resposta secreta.
 - `clues`: lista com exatamente 10 dicas.

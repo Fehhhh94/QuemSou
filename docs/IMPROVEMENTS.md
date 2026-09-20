@@ -40,13 +40,11 @@ Nenhuma implementação de pagamentos ou marketplace nesta entrega.
   passo: sub-fase 5A.
 - **Baralho**: nova entidade; pertence a uma categoria existente e agrupa
   cards tematicamente (ex.: `PERSONAGEM_FILME` → baralho "Harry Potter").
-- **Teto de 100 cards por baralho**: crescimento além disso = novo baralho
-  ("Harry Potter 2"), preferindo subtítulos temáticos quando fizer sentido.
-- **Ciclo de vida**: `EM_DESENVOLVIMENTO` (versões novas podem adicionar,
-  remover ou melhorar cards; o app atualiza por versionamento) →
-  `FINALIZADO` (imutável para sempre; evolução só via novo
-  baralho/extensão). O catálogo e a UI sinalizam o estado (selo "em
-  evolução" vs "edição final").
+- **Teto atual de 500 cards por baralho**: o mesmo tema pode crescer sem criar
+  uma sequência de edições.
+- **Sem ciclo de edição final**: todos os baralhos podem receber conteúdo e
+  correções. O versionamento permanece técnico para atualização; valores
+  antigos de estado são aceitos por compatibilidade e não aparecem na UI.
 - **Seleção múltipla no Setup**: a partida pode usar a união dos cards de
   1+ baralhos — mesma filosofia da categoria LIVRE (filtro-união, sem
   entidade "baralho mesclado" persistida).
@@ -56,7 +54,7 @@ Nenhuma implementação de pagamentos ou marketplace nesta entrega.
   o versionamento do `CardsImporter`. A partida segue 100% offline — rede
   só na tela de catálogo.
 - **Sub-fases**: 5A — Catálogo (domínio + Room com migração, JSONs, tela de
-  catálogo com selos de estado, seleção múltipla no Setup, união
+  catálogo, seleção múltipla no Setup, união
   determinística na partida; validação no Z Fold) · 5B — Fábrica interna
   (pipeline Gemini → validação → revisão; o formato — script/CLI ou
   app-side oculto — é **decisão em aberto**, a fechar no início da 5B) ·
@@ -202,8 +200,8 @@ passa a ser a do desenvolvedor, nunca do usuário final.
     (mensagens numeradas 1–10), `ParserDoCatalogo`, `CATALOG_FORMAT.md`,
     envelope do `cards.json`, sorteio de shots.
   - **Conteúdo**: 60 cards embarcados × 5 dicas novas = 300 dicas novas.
-  - **Ciclo de vida**: baralhos `FINALIZADO` são imutáveis — a mudança
-    exige formato v2 + baralhos "Edição 2", nunca edição dos existentes.
+  - **Conteúdo**: com a decisão de 2026-09-19, o mesmo baralho pode receber
+    as dicas novas; não é necessário criar uma "Edição 2".
 
 ## 🟣 validarCatalogo: conferir `tamanhoEmBytes` declarado vs real
 

@@ -85,10 +85,8 @@
     <string name="catalogo_colecao_meta">%1$d baralhos · %2$d cards</string>
     <string name="catalogo_colecao_no_aparelho">%1$d de %2$d no aparelho</string>
     <string name="catalogo_requer_conexao">Requer conexão</string>
-    <string name="catalogo_selo_edicao_final">✓ EDIÇÃO FINAL</string>
-    <string name="catalogo_selo_em_evolucao">🧪 EM EVOLUÇÃO</string>
-    <string name="catalogo_baralho_meta">%1$d cards · v%2$d</string>
-    <string name="catalogo_baralho_meta_tamanho">%1$d cards · v%2$d · ~%3$s</string>
+    <string name="catalogo_baralho_meta">%1$d cards</string>
+    <string name="catalogo_baralho_meta_tamanho">%1$d cards · ~%2$s</string>
     <string name="catalogo_baixar">Baixar</string>
     <string name="catalogo_atualizar">Atualizar</string>
     <string name="catalogo_baixado">Baixado</string>
@@ -107,7 +105,8 @@
 
     <!-- Setup -->
     <string name="setup_title">Preparar QuemSou</string>
-    <string name="setup_baralhos_titulo">Baralhos da partida</string>
+    <string name="setup_baralhos_titulo">Temas da partida</string>
+    <string name="setup_especiais_descricao">Temas personalizados para empresas, famílias e eventos.</string>
     <string name="setup_baralhos_selecionar_todos">Selecionar todos</string>
     <string name="setup_baralhos_abrir_catalogo">Catálogo →</string>
     <string name="setup_baralho_cards">%1$d respostas disponíveis</string>
@@ -116,7 +115,7 @@
     <string name="partida_tentar_novamente">Tentar novamente</string>
     <string name="setup_bloqueio_nenhum_baralho">Selecione pelo menos um baralho</string>
     <string name="setup_bloqueio_cards_insuficientes">Faltam respostas diferentes com 10 dicas disponíveis. Reduza as rodadas ou escolha mais baralhos.</string>
-    <!-- Setup — espelho de leitura (4A parte 1: só o pareamento) -->
+    <!-- Setup — espelho de leitura pela rede local -->
     <string name="setup_espelho_titulo">Espelho de leitura</string>
     <string name="setup_espelho_descricao">Cada jogador abre este endereço no navegador do próprio celular. Na vez dele de ler, a dica aparece por lá.</string>
     <string name="setup_espelho_qr_cd">QR code com o endereço do espelho de leitura</string>
@@ -143,6 +142,10 @@
     <string name="setup_rodadas_titulo">Rodadas</string>
     <string name="setup_rodadas_diminuir_cd">Diminuir rodadas</string>
     <string name="setup_rodadas_aumentar_cd">Aumentar rodadas</string>
+    <plurals name="setup_rodadas_por_jogador">
+        <item quantity="one">%1$d rodada por pessoa · todos leem a mesma quantidade</item>
+        <item quantity="other">%1$d rodadas por pessoa · todos leem a mesma quantidade</item>
+    </plurals>
     <string name="setup_leitor_pontua_titulo">Leitor também pontua</string>
     <string name="setup_modo_shot_titulo">Modo Shot 🥃</string>
     <string name="setup_modo_shot_descricao">Algumas posições do grid pedem um shot antes de revelar a dica</string>
@@ -159,7 +162,7 @@
     <string name="partida_abandonar_confirmar">Abandonar</string>
     <string name="partida_abandonar_cancelar">Continuar jogando</string>
     <string name="partida_queimar_titulo">Queimar este card?</string>
-    <string name="partida_queimar_corpo">Ninguém pontua e o card sai do baralho.</string>
+    <string name="partida_queimar_corpo">A rodada termina sem acerto. O leitor recebe 10 pontos se “Leitor pontua” estiver ligado. Dicas ocultas ficam guardadas.</string>
     <string name="partida_queimar_confirmar">Queimar card</string>
     <string name="partida_queimar_cancelar">Cancelar</string>
     <string name="partida_tipo_pessoa">Sou uma PESSOA</string>
@@ -239,7 +242,7 @@
 
     <!-- Esta unidade: estados honestos, resumo de opções e semântica do grid -->
     <string name="setup_sem_respostas_titulo">Nenhuma resposta pronta neste aparelho</string>
-    <string name="setup_sem_respostas_corpo">Baixe um baralho no catálogo para jogar. Se os baralhos daqui já foram muito jogados, as respostas podem estar sem dez dicas disponíveis — nesse caso, peça mais dicas para elas. As dicas já usadas ficam guardadas.</string>
+    <string name="setup_sem_respostas_corpo">A primeira instalação precisa de internet para baixar um baralho no catálogo. Depois do download, você joga offline. Se os baralhos daqui já foram muito jogados, as respostas podem estar sem dez dicas disponíveis — nesse caso, peça mais dicas para elas. As dicas já usadas ficam guardadas.</string>
     <string name="setup_bloqueio_sem_respostas">Nenhuma resposta pronta neste aparelho. Abra o catálogo.</string>
     <string name="setup_bloqueio_selecao_sem_respostas">Os baralhos marcados estão sem respostas disponíveis. Marque outro baralho.</string>
     <string name="setup_opcoes_ativas">Valendo: %1$s</string>
@@ -263,4 +266,16 @@
         <item quantity="other">%1$d respostas disponíveis</item>
     </plurals>
     <string name="setup_baralhos_contador_composto">%1$s · %2$s</string>
+    <string name="dica_feedback_convite">Como foi esta dica? Avaliar (opcional)</string>
+    <string name="dica_feedback_editar">Dica avaliada · editar avaliação</string>
+    <string name="dica_feedback_titulo">Avaliar esta dica</string>
+    <string name="dica_feedback_explicacao">Salvo neste celular para orientar novos pacotes. Não altera pontos nem revela outras dicas.</string>
+    <string name="dica_feedback_comentario">Comentário opcional</string>
+    <string name="dica_feedback_boa">Boa dica</string>
+    <string name="dica_feedback_melhorar">Precisa melhorar</string>
+    <string name="dica_feedback_aguarde">Aguarde…</string>
+    <string name="dica_feedback_salvo">Avaliação salva neste celular.</string>
+    <string name="dica_feedback_erro">Não foi possível acessar a avaliação. Tente votar novamente; você pode continuar jogando.</string>
+    <string name="dica_feedback_reenviar">Toque no voto novamente para salvar o comentário editado.</string>
+    <string name="dica_feedback_voltar">Voltar à dica</string>
 </resources>

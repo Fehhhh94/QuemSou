@@ -94,6 +94,34 @@ class CardsImporterTest {
         )
 
     @Test
+    fun `bootstrap vazio preserva todos os baralhos e cards ja instalados`() = runTest {
+        val baralhoDao = FakeBaralhoDao()
+        val cardDao = FakeCardDao()
+        val store = FakeCardsVersionStore(0)
+        importer(jsonCom(7, listOf(baralhoJson("legado"), baralhoJson("baixado"))), baralhoDao, cardDao, store)
+            .importarSeNecessario()
+        val baralhosAntes = baralhoDao.baralhos.toList()
+        val cardsAntes = cardDao.cards.toList()
+        val vazio = importer(jsonCom(8, emptyList()), baralhoDao, cardDao, store)
+        assertEquals(ResultadoImportacao.Importado(0, 8), vazio.importarSeNecessario())
+        assertEquals(baralhosAntes, baralhoDao.baralhos)
+        assertEquals(cardsAntes, cardDao.cards)
+        assertEquals(ResultadoImportacao.NadaAFazer(8), vazio.importarSeNecessario())
+    }
+
+    @Test
+    fun `instalacao nova com bootstrap vazio nao inventa conteudo`() = runTest {
+        val baralhoDao = FakeBaralhoDao()
+        val cardDao = FakeCardDao()
+        val store = FakeCardsVersionStore(0)
+        assertEquals(ResultadoImportacao.Importado(0, 8),
+            importer(jsonCom(8, emptyList()), baralhoDao, cardDao, store).importarSeNecessario())
+        assertTrue(baralhoDao.baralhos.isEmpty())
+        assertTrue(cardDao.cards.isEmpty())
+        assertEquals(8, store.versaoSalva)
+    }
+
+    @Test
     fun `asset mais novo que o banco importa baralhos e cards e salva a versao`() = runTest {
         val baralhoDao = FakeBaralhoDao()
         val cardDao = FakeCardDao()

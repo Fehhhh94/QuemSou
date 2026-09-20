@@ -36,10 +36,15 @@ class MigracaoEHistoricoTest {
             banco.execSQL("INSERT INTO feedback_de_cards VALUES (1,'b','hp','BOM','Preservar',1,'ACERTO',2,123)")
             banco.version = 4
         }
-        val db = Room.databaseBuilder(contexto, AppDatabase::class.java, nome).addMigrations(MIGRACAO_4_5, MIGRACAO_5_6).build()
+        val db = Room.databaseBuilder(contexto, AppDatabase::class.java, nome)
+            .addMigrations(MIGRACAO_4_5, MIGRACAO_5_6, MIGRACAO_6_7)
+            .build()
         try {
             assertEquals("Cinema", db.baralhoDao().buscarTodos().single().nome)
             assertEquals("Preservar", db.feedbackDeCardDao().buscarTodosComResposta().single().feedback.comentario)
+            val feedbackMigrado = db.feedbackDeCardDao().buscarTodosComResposta().single().feedback
+            assertEquals(1, feedbackMigrado.revisaoLocal)
+            assertNull(feedbackMigrado.sincronizadoEm)
             val legado = db.cardDao().buscarPorBaralhos(listOf("b")).single().paraDominio()
             assertTrue(legado.bancoDeDicas.isEmpty())
             val expandido = legado.copy(respostaId = "harry-potter",

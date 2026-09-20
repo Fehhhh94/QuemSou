@@ -148,11 +148,7 @@ enum class EstadoLocalDoBaralho {
     NAO_BAIXADO,
     BAIXADO,
 
-    /**
-     * Há versão mais nova no índice do que no aparelho — na prática só
-     * acontece com baralhos `EM_DESENVOLVIMENTO` (um `FINALIZADO` nunca muda
-     * de versão; a regra é editorial, não do app).
-     */
+    /** Há versão técnica mais nova no índice do que no aparelho. */
     ATUALIZACAO_DISPONIVEL,
 }
 

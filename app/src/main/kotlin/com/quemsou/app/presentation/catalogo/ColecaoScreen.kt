@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.quemsou.app.R
 import com.quemsou.app.presentation.ui.components.BannerOffline
-import com.quemsou.app.presentation.ui.components.SeloDeEstado
 import com.quemsou.app.presentation.ui.theme.NovidadeAmbar
 import com.quemsou.app.presentation.ui.theme.NovidadeAmbarEscuro
 
@@ -170,19 +169,11 @@ private fun CardDeBaralho(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = entrada.nome,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                )
-                SeloDeEstado(estado = entrada.estado)
-            }
+            Text(
+                text = entrada.nome,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
             if (entrada.descricao.isNotBlank()) {
                 Text(text = entrada.descricao, style = MaterialTheme.typography.bodyMedium)
             }
@@ -191,11 +182,10 @@ private fun CardDeBaralho(
                     stringResource(
                         R.string.catalogo_baralho_meta_tamanho,
                         entrada.quantidadeDeCards,
-                        entrada.versao,
                         formatarTamanho(entrada.tamanhoEmBytes),
                     )
                 } else {
-                    stringResource(R.string.catalogo_baralho_meta, entrada.quantidadeDeCards, entrada.versao)
+                    stringResource(R.string.catalogo_baralho_meta, entrada.quantidadeDeCards)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -9,11 +9,11 @@ package com.quemsou.app.domain.model
  * O teto de [MAXIMO_DE_CARDS] cards por baralho **não** é validado aqui: é
  * regra de conteúdo com violação legível, checada pelo
  * [com.quemsou.app.domain.validacao.ValidadorDeBaralho] (mesma filosofia do
- * `ValidadorEditorial`) — crescimento além do teto vira um baralho novo.
+ * `ValidadorEditorial`).
  *
  * @property id identificador estável do baralho no catálogo (ex.:
  *   "cinema-classico-1"); participa da chave de ordenação da união.
- * @property nome nome de exibição (ex.: "Cinema Clássico — Edição 1").
+ * @property nome nome de exibição (ex.: "Cinema Clássico").
  * @property categoria categoria temática do baralho inteiro.
  * @property colecao coleção a que o baralho pertence (metadado de
  *   agrupamento do catálogo).
@@ -44,10 +44,10 @@ data class Baralho(
 
     companion object {
         /**
-         * Teto de cards por baralho. Crescimento além disso vira um baralho
-         * novo (ex.: "Harry Potter 2"), preferindo subtítulos temáticos.
-         */
-        const val MAXIMO_DE_CARDS = 100
+     * Teto atual de cards por baralho. Pode ser revisto no futuro sem mudar
+     * a identidade do baralho.
+     */
+        const val MAXIMO_DE_CARDS = 500
 
         /**
          * Monte da partida a partir dos [baralhos] selecionados: a união dos

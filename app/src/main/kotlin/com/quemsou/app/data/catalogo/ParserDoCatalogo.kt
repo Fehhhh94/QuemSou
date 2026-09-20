@@ -19,7 +19,7 @@ import kotlinx.serialization.json.Json
  * crua de desserialização ou de construtor. Todas as violações são acumuladas.
  *
  * Depois da estrutura, o baralho ainda passa pelo
- * [ValidadorDeBaralho] (teto de 100, ids únicos, categoria real) — as
+ * [ValidadorDeBaralho] (teto de 500, ids únicos, categoria real) — as
  * violações dele entram no mesmo resultado.
  */
 class ParserDoCatalogo @Inject constructor() {

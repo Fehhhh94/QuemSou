@@ -167,8 +167,12 @@ foram vistas, não é seguro devolver as sete retroativamente.
 - Se houver menos respostas distintas elegíveis que rodadas, bloquear a
   partida e orientar reduzir rodadas ou escolher mais baralhos. Nunca completar
   o monte repetindo uma resposta na mesma partida.
-- A partida tem um número configurável de rodadas (`RegrasPartida.numeroDeRodadas`,
-  padrão 5).
+- Uma partida nova usa ciclos completos de leitores: o total de rodadas é
+  múltiplo da quantidade de jogadores. Com 2 jogadores, 4, 6, 8… rodadas;
+  com 3, 3, 6, 9…; com 4, 4, 8, 12…. O Setup começa com duas rodadas por
+  pessoa (4 no elenco inicial) e os botões adicionam ou removem um ciclo.
+  Adicionar ou remover jogador preserva quantas vezes cada pessoa será leitora.
+  Assim todos leem e participam como adivinhadores a mesma quantidade.
 - O monte é embaralhado de forma determinística a partir do código da partida
   (ex.: "LOBO"), como embaralhamento interno do anfitrião (Fase 4 — Nearby
   Connections); veja `docs/CLAUDE.md` para a arquitetura de multiplayer.

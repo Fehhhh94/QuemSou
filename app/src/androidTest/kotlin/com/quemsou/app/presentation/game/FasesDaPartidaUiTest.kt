@@ -130,7 +130,7 @@ class FasesDaPartidaUiTest {
     // region Área de leitura da dica (R1)
 
     /** A dica exata da reprodução da revisão: curta, mas de duas a três linhas. */
-    private val dicaCurta = "Tenho uma nave como marca registrada dos meus shows."
+    private val dicaCurta = "Esta pista fictícia testa a apresentação da rodada."
 
     private val dicaLonga =
         "Comecei tocando em bares da minha cidade natal antes de assinar com uma " +
@@ -166,6 +166,7 @@ class FasesDaPartidaUiTest {
                             onAlguemAcertou = onAlguemAcertou,
                             onOutraDica = {},
                             onPedirQueimar = {},
+                            feedback = { FeedbackDaDicaWidget(FeedbackDaDicaUiState("teste", carregando = false)) { _, _, _ -> } },
                         )
                     }
                 }

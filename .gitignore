@@ -11,6 +11,7 @@ local.properties
 # Build do módulo app
 app/build/
 app/.cxx/
+app/google-services.json
 
 # Android Studio
 .idea/
@@ -31,3 +32,14 @@ fabrica/*.local.*
 fabrica/__pycache__/
 *.sqlite3
 *.sqlite3-journal
+
+# Configuracao local do Firebase. O APK recebe os valores no build, mas o
+# arquivo baixado da conta Google nao e versionado neste repositorio.
+administrador/firebase.local.json
+
+# Conteúdo, exportações e anexos pessoais nunca acompanham o código.
+.codex-remote-attachments/
+administrador/__pycache__/
+/conteudo-privado/
+/origens/
+/backups/

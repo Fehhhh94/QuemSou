@@ -1,11 +1,17 @@
 package com.quemsou.app.presentation.game
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelStore
 import com.quemsou.app.data.feedback.ModoDevFeedbackStore
 import com.quemsou.app.data.feedback.NovoFeedback
 import com.quemsou.app.data.feedback.RegistroDeFeedback
 import com.quemsou.app.data.feedback.ResultadoDoTurnoRegistrado
 import com.quemsou.app.data.feedback.VotoDeCard
+import com.quemsou.app.data.espelho.EstadoDaPartidaNoEspelho
+import com.quemsou.app.data.espelho.FaseDoEspelho
+import com.quemsou.app.data.espelho.JogadorDoEspelho
+import com.quemsou.app.data.espelho.ResultadoDoInicio
+import com.quemsou.app.data.espelho.ServidorDoEspelho
 import com.quemsou.app.data.local.FeedbackComResposta
 import com.quemsou.app.domain.model.Baralho
 import com.quemsou.app.domain.model.Card
@@ -69,20 +75,55 @@ class PartidaViewModelTest {
     /** Acumula os feedbacks gravados em memória — sem Room. */
     private class RegistroDeFeedbackFake : RegistroDeFeedback {
         val registrados = mutableListOf<NovoFeedback>()
+        var falhar = false
+        var aguardar: CompletableDeferred<Unit>? = null
         private val quantidade = MutableStateFlow(0)
 
         override suspend fun registrar(novo: NovoFeedback) {
+            aguardar?.await()
+            check(!falhar)
+            if (novo.resultadoDoTurno == ResultadoDoTurnoRegistrado.DICA_REVELADA) {
+                registrados.removeAll { it.contextoJson == novo.contextoJson }
+            }
             registrados += novo
             quantidade.value = registrados.size
         }
 
         override fun quantidade(): Flow<Int> = quantidade
 
-        override suspend fun buscarTodosComResposta() = emptyList<FeedbackComResposta>()
+        override suspend fun buscarTodosComResposta() = registrados.map {
+            FeedbackComResposta(com.quemsou.app.data.local.FeedbackDeCardEntity(
+                baralhoId = it.baralhoId, cardId = it.cardId, voto = it.voto.name,
+                comentario = it.comentario, rodada = it.rodada, resultadoDoTurno = it.resultadoDoTurno.name,
+                numeroDaDicaDoAcerto = it.numeroDaDicaDoAcerto, criadoEm = 1, contextoJson = it.contextoJson,
+            ), null)
+        }
 
         override suspend fun apagarTudo() {
             registrados.clear()
             quantidade.value = 0
+        }
+    }
+
+    private class ServidorDoEspelhoFake : ServidorDoEspelho {
+        override val endereco = MutableStateFlow<String?>(null)
+        override val conectados = MutableStateFlow(emptyMap<String, Boolean>())
+        override val esteAparelho = MutableStateFlow<String?>(null)
+        val publicados = mutableListOf<EstadoDaPartidaNoEspelho>()
+        var parou = false
+
+        override suspend fun iniciar(jogadores: List<JogadorDoEspelho>): ResultadoDoInicio =
+            ResultadoDoInicio.SemRede
+
+        override fun atualizarJogadores(jogadores: List<JogadorDoEspelho>) = Unit
+        override fun marcarEsteAparelho(jogadorId: String?) = Unit
+        override fun liberarLugar(jogadorId: String) = Unit
+        override fun publicarEstado(estado: EstadoDaPartidaNoEspelho) {
+            publicados += estado
+        }
+
+        override fun parar() {
+            parou = true
         }
     }
 
@@ -136,7 +177,77 @@ class PartidaViewModelTest {
         modoDev: Boolean = false,
         registro: RegistroDeFeedback = RegistroDeFeedbackFake(),
         repositorio: RepositorioDeCards = RepositorioFake(baralhos()),
-    ) = PartidaViewModel(handle, repositorio, ModoDevFake(modoDev), registro)
+        espelho: ServidorDoEspelho = ServidorDoEspelhoFake(),
+    ) = PartidaViewModel(handle, repositorio, ModoDevFake(modoDev), registro, espelho)
+
+    @Test fun `avalia somente dica revelada sem modo dev nem outras dicas no contexto`() {
+        val registro = RegistroDeFeedbackFake()
+        val vm = viewModel(registro = registro)
+        vm.avaliarDica("chave-invalida", VotoDeCard.BOM)
+        assertTrue(registro.registrados.isEmpty())
+        vm.iniciarTurno()
+        vm.revelarDica(3)
+        val dica = vm.uiState.value as PartidaUiState.DicaRevelada
+        val chave = vm.feedbackDaDica.value!!.chave
+        vm.avaliarDica(chave, VotoDeCard.FRACO, "  Ambígua  ")
+        val gravado = registro.registrados.single()
+        assertEquals(ResultadoDoTurnoRegistrado.DICA_REVELADA, gravado.resultadoDoTurno)
+        assertEquals("Ambígua", gravado.comentario)
+        assertTrue(gravado.contextoJson.contains(dica.texto))
+        assertFalse(gravado.contextoJson.contains("bancoDeDicas"))
+        assertFalse(gravado.contextoJson.contains("clues"))
+        assertEquals(dica, vm.uiState.value)
+        assertTrue(vm.feedbackDaDica.value!!.salvo)
+    }
+
+    @Test fun `falha de feedback permite continuar e voto tardio nao vai para outra dica`() {
+        val registro = RegistroDeFeedbackFake().apply { falhar = true }
+        val vm = viewModel(registro = registro)
+        vm.iniciarTurno()
+        vm.revelarDica(1)
+        val chave = vm.feedbackDaDica.value!!.chave
+        vm.avaliarDica(chave, VotoDeCard.FRACO)
+        assertTrue(vm.feedbackDaDica.value!!.erro)
+        vm.outraDica()
+        vm.revelarDica(2)
+        vm.avaliarDica(chave, VotoDeCard.BOM)
+        assertTrue(registro.registrados.isEmpty())
+        assertNull(vm.feedbackDaDica.value!!.voto)
+    }
+
+    @Test fun `conclusao de gravacao antiga nao marca proxima dica como avaliada`() {
+        val registro = RegistroDeFeedbackFake().apply { aguardar = CompletableDeferred() }
+        val vm = viewModel(registro = registro)
+        vm.iniciarTurno()
+        vm.revelarDica(1)
+        val chave = vm.feedbackDaDica.value!!.chave
+        vm.avaliarDica(chave, VotoDeCard.BOM)
+        vm.avaliarDica(chave, VotoDeCard.FRACO)
+        vm.outraDica()
+        vm.revelarDica(2)
+        registro.aguardar!!.complete(Unit)
+        assertEquals(VotoDeCard.BOM, registro.registrados.single().voto)
+        assertFalse(vm.feedbackDaDica.value!!.salvo)
+        assertNull(vm.feedbackDaDica.value!!.voto)
+    }
+
+    @Test fun `restaurar dica recupera voto e editar nao duplica avaliacao`() {
+        val registro = RegistroDeFeedbackFake()
+        val config = configuracao()
+        val handle = handleDe(config)
+        val repo = RepositorioFake(baralhos())
+        val vm = viewModel(config, handle, registro = registro, repositorio = repo)
+        vm.iniciarTurno()
+        vm.revelarDica(4)
+        vm.avaliarDica(vm.feedbackDaDica.value!!.chave, VotoDeCard.BOM)
+        val restaurado = viewModel(config, handle, registro = registro, repositorio = repo)
+        assertTrue(restaurado.feedbackDaDica.value!!.salvo)
+        assertEquals(VotoDeCard.BOM, restaurado.feedbackDaDica.value!!.voto)
+        restaurado.avaliarDica(restaurado.feedbackDaDica.value!!.chave, VotoDeCard.FRACO, "Revisar")
+        assertEquals(1, registro.registrados.size)
+        assertEquals("Revisar", registro.registrados.single().comentario)
+        assertEquals(1, repo.vistas.size)
+    }
 
     @Test fun `dica so aparece depois da gravacao e toque duplicado e ignorado`() {
         val repo = RepositorioFake(baralhos())
@@ -152,6 +263,31 @@ class PartidaViewModelTest {
         assertTrue(vm.uiState.value is PartidaUiState.DicaRevelada)
         assertEquals(1, repo.vistas.size)
         assertEquals(listOf(3), repo.progressos.values.single().posicoes)
+    }
+
+    @Test fun `espelho acompanha turno dica e encerra junto com a partida`() {
+        val espelho = ServidorDoEspelhoFake()
+        val base = configuracao().copy(
+            jogadores = configuracao().jogadores.mapIndexed { indice, jogador ->
+                jogador.copy(espelhoId = "linha-${indice + 1}")
+            },
+        )
+        val vm = viewModel(configuracao = base, espelho = espelho)
+        val store = ViewModelStore().also { it.put("partida", vm) }
+
+        assertEquals(FaseDoEspelho.VEZ_DE_JOGAR, espelho.publicados.last().fase)
+        assertEquals("linha-1", espelho.publicados.last().leitorId)
+
+        vm.iniciarTurno()
+        assertEquals(FaseDoEspelho.GRID, espelho.publicados.last().fase)
+        assertNotNull(espelho.publicados.last().resposta)
+
+        vm.revelarDica(3)
+        assertEquals(FaseDoEspelho.DICA_REVELADA, espelho.publicados.last().fase)
+        assertNotNull(espelho.publicados.last().dica)
+
+        store.clear()
+        assertTrue(espelho.parou)
     }
 
     @Test fun `acerto na terceira grava so tres dicas e libera turno no anuncio`() {

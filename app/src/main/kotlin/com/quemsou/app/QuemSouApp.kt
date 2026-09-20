@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import com.quemsou.app.data.importer.CardsImporter
 import com.quemsou.app.data.importer.ResultadoImportacao
+import com.quemsou.app.data.feedback.AgendadorDaSincronizacaoDeFeedback
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -24,11 +25,15 @@ class QuemSouApp : Application() {
     @Inject
     lateinit var cardsImporter: CardsImporter
 
+    @Inject
+    lateinit var agendadorDaSincronizacaoDeFeedback: AgendadorDaSincronizacaoDeFeedback
+
     private val escopoDaAplicacao = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun onCreate() {
         super.onCreate()
         importarCards()
+        agendadorDaSincronizacaoDeFeedback.agendar()
     }
 
     private fun importarCards() {

@@ -1,6 +1,7 @@
 ﻿package com.quemsou.app.presentation.setup
 
 import com.quemsou.app.data.espelho.JogadorDoEspelho
+import com.quemsou.app.data.espelho.EstadoDaPartidaNoEspelho
 import com.quemsou.app.data.espelho.RegistroDeSessoes
 import com.quemsou.app.data.espelho.ResultadoDoInicio
 import com.quemsou.app.data.espelho.ServidorDoEspelho
@@ -12,6 +13,7 @@ import com.quemsou.app.domain.model.Colecao
 import com.quemsou.app.domain.model.EstadoDoBaralho
 import com.quemsou.app.domain.repository.RepositorioDeCards
 import com.quemsou.app.testutil.MainDispatcherRule
+import androidx.lifecycle.ViewModelStore
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -51,6 +53,7 @@ class SetupViewModelTest {
         val enderecoAtual = MutableStateFlow<String?>(null)
         var parou = false
         var inicios = 0
+        val estadosPublicados = mutableListOf<EstadoDaPartidaNoEspelho>()
         var portaoDoInicio: CompletableDeferred<Unit>? = null
 
         /** Elenco como o servidor o conhece agora. */
@@ -90,6 +93,10 @@ class SetupViewModelTest {
 
         override fun liberarLugar(jogadorId: String) {
             if (noAr) sessoes.liberarLugar(jogadorId)
+        }
+
+        override fun publicarEstado(estado: EstadoDaPartidaNoEspelho) {
+            if (noAr) estadosPublicados += estado
         }
 
         override fun parar() {
@@ -139,25 +146,52 @@ class SetupViewModelTest {
         return viewModel
     }
 
+    private fun viewModelPronto(quantidade: Int = 2) =
+        viewModelComNomes(quantidade).also { it.selecionarTodosBaralhos() }
+
     // region Baralhos da partida
 
     @Test
-    fun `todos os baralhos nascem selecionados contando respostas distintas entre edicoes`() {
-        val estado = viewModelComNomes().uiState.value
+    fun `especiais ficam depois dos comuns e nao sao selecionados automaticamente`() {
+        val especial = baralho("kimberly-clark-financas", 30).copy(
+            nome = "Kimberly-Clark — Finanças",
+            categoria = CardCategory.ESPECIAIS,
+            colecao = Colecao("especiais", "Especiais", "⭐"),
+        )
+        val musica = baralho("musica").copy(colecao = Colecao("musica", "Música", "🎵"))
+        repositorio.baralhos = listOf(especial, musica)
+        val viewModel = viewModelComNomes()
+        assertEquals(listOf("musica", especial.id), viewModel.uiState.value.baralhosDisponiveis.map { it.id })
+        assertTrue(viewModel.uiState.value.baralhosDisponiveis.last().especial)
+        assertTrue(viewModel.uiState.value.baralhosSelecionados.isEmpty())
 
-        assertEquals(setOf("b1", "b2"), estado.baralhosSelecionados)
-        // Os dois baralhos de teste compartilham cinco respostas.
-        assertEquals(10, estado.cardsNoMonte)
-        assertTrue(estado.podeComecar)
+        viewModel.alternarBaralho(especial.id)
+        assertEquals(setOf(especial.id), viewModel.uiState.value.baralhosSelecionados)
+        assertEquals(30, viewModel.uiState.value.cardsNoMonte)
+        viewModel.confirmar()
+        assertEquals(listOf(especial.id), viewModel.configuracaoPronta.value!!.baralhos)
+        viewModel.recarregarBaralhos()
+        assertEquals(setOf(especial.id), viewModel.uiState.value.baralhosSelecionados)
+        viewModel.alternarBaralho(especial.id)
+        assertTrue(viewModel.uiState.value.baralhosSelecionados.isEmpty())
+        viewModel.selecionarTodosBaralhos()
+        assertEquals(setOf(especial.id, musica.id), viewModel.uiState.value.baralhosSelecionados)
     }
 
     @Test
-    fun `desmarcar todos os baralhos bloqueia com motivo visivel imediato`() {
-        val viewModel = viewModelComNomes()
+    fun `nenhum baralho nasce selecionado ao preparar uma nova partida`() {
+        val estado = viewModelComNomes().uiState.value
 
+        assertEquals(emptySet<String>(), estado.baralhosSelecionados)
+        assertEquals(0, estado.cardsNoMonte)
+        assertEquals(MotivoDoBloqueio.NENHUM_BARALHO, estado.motivoDoBloqueioVisivel)
+        assertFalse(estado.podeComecar)
+    }
+
+    @Test
+    fun `selecionar e desmarcar um baralho volta a bloquear com motivo visivel`() {
+        val viewModel = viewModelComNomes().also { it.alternarBaralho("b1") }
         viewModel.alternarBaralho("b1")
-        viewModel.alternarBaralho("b2")
-
         val estado = viewModel.uiState.value
         assertEquals(MotivoDoBloqueio.NENHUM_BARALHO, estado.motivoDoBloqueio)
         assertEquals(MotivoDoBloqueio.NENHUM_BARALHO, estado.motivoDoBloqueioVisivel)
@@ -198,11 +232,11 @@ class SetupViewModelTest {
     @Test
     fun `um baralho esgotado e outro com respostas nao declara o acervo esgotado`() {
         repositorio.baralhos = listOf(baralhoEsgotado("b1"), baralho("b2"))
-        val viewModel = viewModelComNomes()
+        val viewModel = viewModelPronto()
 
         val estado = viewModel.uiState.value
         assertFalse(estado.semRespostasNoAparelho)
-        // Os dois nascem marcados; o esgotado não contribui com nada.
+        // O atalho marcou os dois; o esgotado não contribui com nada.
         assertEquals(10, estado.cardsNoMonte)
         assertTrue(estado.podeComecar)
     }
@@ -212,7 +246,7 @@ class SetupViewModelTest {
         repositorio.baralhos = listOf(baralhoEsgotado("b1"), baralho("b2"))
         val viewModel = viewModelComNomes()
 
-        viewModel.alternarBaralho("b2") // sobra só o esgotado marcado
+        viewModel.alternarBaralho("b1")
 
         val estado = viewModel.uiState.value
         assertEquals(setOf("b1"), estado.baralhosSelecionados)
@@ -227,9 +261,6 @@ class SetupViewModelTest {
     fun `com respostas elegiveis e nenhum baralho marcado o motivo continua sendo a selecao vazia`() {
         repositorio.baralhos = listOf(baralhoEsgotado("b1"), baralho("b2"))
         val viewModel = viewModelComNomes()
-
-        viewModel.alternarBaralho("b1")
-        viewModel.alternarBaralho("b2")
 
         val estado = viewModel.uiState.value
         assertFalse(estado.semRespostasNoAparelho)
@@ -297,8 +328,6 @@ class SetupViewModelTest {
     @Test
     fun `selecionar todos volta a marcar tudo`() {
         val viewModel = viewModelComNomes()
-        viewModel.alternarBaralho("b1")
-        viewModel.alternarBaralho("b2")
 
         viewModel.selecionarTodosBaralhos()
 
@@ -308,21 +337,21 @@ class SetupViewModelTest {
     @Test
     fun `uniao com menos cards que rodadas bloqueia`() {
         val viewModel = viewModelComNomes()
-        viewModel.alternarBaralho("b1") // sobra só b2, com 5 cards
+        viewModel.alternarBaralho("b2") // seleciona b2, com 5 cards
 
         viewModel.definirRodadas(6)
 
         assertEquals(MotivoDoBloqueio.CARDS_INSUFICIENTES, viewModel.uiState.value.motivoDoBloqueioVisivel)
         assertFalse(viewModel.uiState.value.podeComecar)
 
-        viewModel.definirRodadas(5)
+        viewModel.definirRodadas(4)
         assertTrue(viewModel.uiState.value.podeComecar)
     }
 
     @Test
     fun `recarregar preserva a selecao do usuario e novos baralhos entram desmarcados`() {
         val viewModel = viewModelComNomes()
-        viewModel.alternarBaralho("b2") // usuário deixa só b1
+        viewModel.alternarBaralho("b1")
 
         repositorio.baralhos = listOf(baralho("b1"), baralho("b2"), baralho("b3"))
         viewModel.recarregarBaralhos()
@@ -334,7 +363,7 @@ class SetupViewModelTest {
 
     @Test
     fun `confirmar leva os baralhos selecionados em ordem estavel`() {
-        val viewModel = viewModelComNomes()
+        val viewModel = viewModelPronto()
 
         viewModel.confirmar()
 
@@ -405,6 +434,41 @@ class SetupViewModelTest {
     }
 
     @Test
+    fun `rodadas formam ciclos completos e mudam pelo total de jogadores`() {
+        val viewModel = criarViewModel()
+
+        assertEquals(2, viewModel.uiState.value.jogadores.size)
+        assertEquals(4, viewModel.uiState.value.numeroDeRodadas)
+        assertEquals(2, viewModel.uiState.value.rodadasPorJogador)
+
+        viewModel.adicionarJogador()
+        assertEquals(3, viewModel.uiState.value.jogadores.size)
+        assertEquals(6, viewModel.uiState.value.numeroDeRodadas)
+
+        viewModel.adicionarJogador()
+        assertEquals(4, viewModel.uiState.value.jogadores.size)
+        assertEquals(8, viewModel.uiState.value.numeroDeRodadas)
+
+        viewModel.removerJogador(0)
+        assertEquals(3, viewModel.uiState.value.jogadores.size)
+        assertEquals(6, viewModel.uiState.value.numeroDeRodadas)
+    }
+
+    @Test
+    fun `definir rodadas aceita apenas multiplos da quantidade de jogadores`() {
+        val viewModel = criarViewModel()
+
+        viewModel.definirRodadas(5)
+        assertEquals(4, viewModel.uiState.value.numeroDeRodadas)
+
+        viewModel.definirRodadas(6)
+        assertEquals(6, viewModel.uiState.value.numeroDeRodadas)
+
+        viewModel.definirRodadas(0)
+        assertEquals(6, viewModel.uiState.value.numeroDeRodadas)
+    }
+
+    @Test
     fun `ciclar grupo percorre sem grupo, grupos 1 a 3 e volta`() {
         val viewModel = viewModelComNomes()
         viewModel.alternarJogarEmTimes()
@@ -426,7 +490,7 @@ class SetupViewModelTest {
 
     @Test
     fun `confirmar com jogar em times leva o agrupamento escolhido`() {
-        val viewModel = viewModelComNomes(3)
+        val viewModel = viewModelPronto(3)
         viewModel.alternarJogarEmTimes()
         viewModel.ciclarGrupo(0) // Grupo 1
         viewModel.ciclarGrupo(2) // Grupo 1 — mesmo grupo do jogador 1
@@ -439,7 +503,7 @@ class SetupViewModelTest {
 
     @Test
     fun `desligar jogar em times descarta o agrupamento no confirmar`() {
-        val viewModel = viewModelComNomes()
+        val viewModel = viewModelPronto()
         viewModel.alternarJogarEmTimes()
         viewModel.ciclarGrupo(0)
         viewModel.alternarJogarEmTimes() // desliga de volta
@@ -466,7 +530,7 @@ class SetupViewModelTest {
 
     @Test
     fun `confirmar leva o modo shot e a quantidade escolhida`() {
-        val viewModel = viewModelComNomes()
+        val viewModel = viewModelPronto()
         viewModel.alternarModoShot()
         viewModel.definirQuantidadeDeShots(1)
 
@@ -483,13 +547,12 @@ class SetupViewModelTest {
         bloqueado.confirmar()
         assertNull(bloqueado.configuracaoPronta.value)
 
-        val viewModel = viewModelComNomes(3)
-        viewModel.definirRodadas(4)
+        val viewModel = viewModelPronto(3)
         viewModel.confirmar()
 
         val configuracao = viewModel.configuracaoPronta.value!!
         assertEquals(4, configuracao.codigo.length)
-        assertEquals(4, configuracao.numeroDeRodadas)
+        assertEquals(6, configuracao.numeroDeRodadas)
         assertTrue(configuracao.leitorPontua)
         assertEquals(listOf("Jogador 1", "Jogador 2", "Jogador 3"), configuracao.jogadores.map { it.nome })
 
@@ -497,7 +560,7 @@ class SetupViewModelTest {
         assertNull(viewModel.configuracaoPronta.value)
     }
 
-    // region Espelho de leitura (4A parte 1)
+    // region Espelho de leitura
 
     @Test
     fun `espelho nasce desligado e nada sobe sem o toque`() {
@@ -576,7 +639,7 @@ class SetupViewModelTest {
     @Test
     fun `sem rede o switch volta a desligado com o motivo explicado`() {
         servidor.desfecho = ResultadoDoInicio.SemRede
-        val viewModel = viewModelComNomes()
+        val viewModel = viewModelPronto()
 
         viewModel.alternarEspelho()
 
@@ -603,7 +666,7 @@ class SetupViewModelTest {
 
     @Test
     fun `comecar a partida nao exige ninguem conectado`() {
-        val viewModel = viewModelComNomes()
+        val viewModel = viewModelPronto()
         viewModel.alternarEspelho()
 
         viewModel.confirmar()
@@ -611,6 +674,31 @@ class SetupViewModelTest {
         assertEquals(emptySet<String>(), viewModel.uiState.value.espelhoConectados)
         assertTrue(viewModel.uiState.value.podeComecar)
         assertEquals(listOf("Jogador 1", "Jogador 2"), viewModel.configuracaoPronta.value!!.jogadores.map { it.nome })
+    }
+
+    @Test
+    fun `confirmar preserva ids do pareamento e entrega servidor para a partida`() {
+        val viewModel = viewModelPronto(3)
+        viewModel.removerJogador(0)
+        viewModel.alternarEspelho()
+        val store = ViewModelStore().also { it.put("setup", viewModel) }
+
+        viewModel.confirmar()
+        store.clear()
+
+        assertEquals(listOf("j2", "j3"), viewModel.configuracaoPronta.value!!.jogadores.map { it.espelhoId })
+        assertFalse(servidor.parou)
+    }
+
+    @Test
+    fun `sair do setup sem partida derruba o servidor`() {
+        val viewModel = viewModelPronto()
+        viewModel.alternarEspelho()
+        val store = ViewModelStore().also { it.put("setup", viewModel) }
+
+        store.clear()
+
+        assertTrue(servidor.parou)
     }
 
     @Test

@@ -34,7 +34,7 @@ class ValidadorDeBaralho {
                     ViolacaoDeBaralho(
                         regra = RegraDeBaralho.TETO_DE_CARDS_EXCEDIDO,
                         mensagem = "O baralho '${baralho.id}' tem ${baralho.quantidadeDeCards} cards; " +
-                            "o máximo é ${Baralho.MAXIMO_DE_CARDS} — crescimento além disso vira um baralho novo.",
+                            "o máximo atual é ${Baralho.MAXIMO_DE_CARDS}.",
                     ),
                 )
             }

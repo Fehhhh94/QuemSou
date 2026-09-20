@@ -18,6 +18,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import java.util.concurrent.atomic.AtomicLong
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +30,10 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
@@ -84,6 +89,9 @@ interface ServidorDoEspelho {
     /** Devolve o lugar de [jogadorId] à mesa, esquecendo a sessão de rede. */
     fun liberarLugar(jogadorId: String)
 
+    /** Publica a fase atual; no-op quando o servidor não está no ar. */
+    fun publicarEstado(estado: EstadoDaPartidaNoEspelho)
+
     /** Derruba o servidor e esquece as sessões. */
     fun parar()
 }
@@ -98,9 +106,8 @@ interface ServidorDoEspelho {
  * - `GET /jogadores` → elenco com quais nomes já estão em uso.
  * - `POST /entrar` → reivindica um jogador e devolve o token da sessão.
  * - `GET /estado?jogador=<id>&token=<token>` → canal SSE autenticado pelo
- *   par da sessão. **Nesta parte 1 emite só `{"fase":"aguardando"}` e
- *   keep-alives**: a estrutura do canal fica pronta; o conteúdo (dica e
- *   resposta da vez) vem na parte 2.
+ *   par da sessão. Emite a fase atual e keep-alives. Dica e resposta são
+ *   filtradas por jogador antes da serialização.
  *
  * O JSON é montado à mão com kotlinx.serialization e devolvido como texto —
  * o plugin de negociação de conteúdo só somaria dependência para quatro
@@ -121,6 +128,8 @@ class KtorServidorDoEspelho @Inject constructor(
     override val esteAparelho: StateFlow<String?> = sessoes.esteAparelho
 
     private val json = Json { ignoreUnknownKeys = true }
+
+    private val estadoDaPartida = MutableStateFlow(EstadoDaPartidaNoEspelho.Aguardando)
 
     /** Escopo próprio: parar o servidor bloqueia e não pode segurar a UI. */
     private val escopo = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -170,6 +179,11 @@ class KtorServidorDoEspelho @Inject constructor(
         sessoes.liberarLugar(jogadorId)
     }
 
+    override fun publicarEstado(estado: EstadoDaPartidaNoEspelho) {
+        if (servidor == null) return
+        estadoDaPartida.value = estado
+    }
+
     override fun parar() {
         val emAndamento = synchronized(travaDoServidor) {
             geracao.incrementAndGet()
@@ -177,6 +191,7 @@ class KtorServidorDoEspelho @Inject constructor(
                 servidor = null
                 _endereco.value = null
                 sessoes.limpar()
+                estadoDaPartida.value = EstadoDaPartidaNoEspelho.Aguardando
             }
         }
         if (emAndamento != null) {
@@ -248,25 +263,32 @@ class KtorServidorDoEspelho @Inject constructor(
                     return@get
                 }
                 call.response.headers.append(CABECALHO_CACHE, SEM_CACHE)
-                val aguardando = json.encodeToString(EstadoJson(FASE_AGUARDANDO))
                 call.respondTextWriter(
                     contentType = ContentType.Text.EventStream.withCharset(Charsets.UTF_8),
                 ) {
                     // Reconexão automática do EventSource: se o canal cair,
                     // o navegador volta sozinho sem o jogador fazer nada.
                     write("retry: $RECONEXAO_SSE_MS\n\n")
-                    write("data: $aguardando\n\n")
-                    flush()
-                    // Sem tráfego, roteador e navegador derrubam a conexão
-                    // ociosa; o comentário SSE mantém o canal vivo até a
-                    // parte 2 ter o que dizer de verdade. A escrita falha
-                    // quando o jogador fecha a aba — fim natural da coroutine.
-                    runCatching {
+                    val estados = estadoDaPartida
+                        .map { estado ->
+                            "data: ${json.encodeToString(estado.paraJogador(jogadorId))}\n\n"
+                        }
+                        .distinctUntilChanged()
+                    val keepAlives = flow {
                         while (true) {
                             delay(KEEP_ALIVE_MS)
-                            write(": keep-alive\n\n")
+                            emit(": keep-alive\n\n")
+                        }
+                    }
+                    try {
+                        merge(estados, keepAlives).collect { evento ->
+                            write(evento)
                             flush()
                         }
+                    } catch (cancelamento: CancellationException) {
+                        throw cancelamento
+                    } catch (_: IOException) {
+                        // A aba fechou ou a rede caiu; o EventSource reconecta.
                     }
                 }
             }
@@ -286,6 +308,7 @@ class KtorServidorDoEspelho @Inject constructor(
     }
 
     private suspend fun ApplicationCall.responderAsset(arquivo: String, tipo: ContentType) {
+        response.headers.append(CABECALHO_CACHE, SEM_CACHE)
         val bytes = withContext(Dispatchers.IO) {
             contexto.assets.open("$PASTA_DO_CLIENTE/$arquivo").use { it.readBytes() }
         }
@@ -311,6 +334,7 @@ class KtorServidorDoEspelho @Inject constructor(
                         false
                     } else {
                         sessoes.definirJogadores(jogadores)
+                        estadoDaPartida.value = EstadoDaPartidaNoEspelho.Aguardando
                         servidor = candidato
                         _endereco.value = "http://$ip:$porta"
                         true
@@ -341,9 +365,8 @@ class KtorServidorDoEspelho @Inject constructor(
         const val RECONEXAO_SSE_MS = 3_000
 
         const val CABECALHO_CACHE = "Cache-Control"
-        const val SEM_CACHE = "no-cache"
+        const val SEM_CACHE = "no-store"
 
-        const val FASE_AGUARDANDO = "aguardando"
         const val ERRO_JA_TOMADO = "ja_tomado"
         const val ERRO_DESCONHECIDO = "desconhecido"
         const val ERRO_PEDIDO_INVALIDO = "pedido_invalido"
@@ -365,7 +388,3 @@ private data class EntradaAceitaJson(val token: String, val jogadorId: String, v
 
 @Serializable
 private data class ErroJson(val erro: String)
-
-/** Envelope do canal SSE. Na parte 2 ganha dica, resposta e vez de quem lê. */
-@Serializable
-private data class EstadoJson(val fase: String)

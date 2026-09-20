@@ -9,14 +9,20 @@ import androidx.room.Room
 import com.quemsou.app.data.RepositorioDeCardsLocal
 import com.quemsou.app.data.catalogo.ArquivoCacheDoIndice
 import com.quemsou.app.data.catalogo.CacheDoIndice
+import com.quemsou.app.data.catalogo.ClienteDoCatalogoFirestore
+import com.quemsou.app.data.catalogo.ClienteDoCatalogoNaNuvem
 import com.quemsou.app.data.catalogo.FonteDoCatalogo
-import com.quemsou.app.data.catalogo.HttpFonteDoCatalogo
+import com.quemsou.app.data.catalogo.FonteDoCatalogoFirestore
 import com.quemsou.app.data.espelho.KtorServidorDoEspelho
 import com.quemsou.app.data.espelho.ServidorDoEspelho
 import com.quemsou.app.data.feedback.DataStoreModoDevFeedbackStore
 import com.quemsou.app.data.feedback.ModoDevFeedbackStore
 import com.quemsou.app.data.feedback.RegistroDeFeedback
 import com.quemsou.app.data.feedback.RegistroDeFeedbackLocal
+import com.quemsou.app.data.feedback.AgendadorDaSincronizacaoDeFeedback
+import com.quemsou.app.data.feedback.AgendadorDaSincronizacaoWorkManager
+import com.quemsou.app.data.feedback.DestinoDeFeedbackNaNuvem
+import com.quemsou.app.data.feedback.DestinoDeFeedbackNoFirestore
 import com.quemsou.app.data.importer.AssetsFonteDeCardsJson
 import com.quemsou.app.data.importer.CardsVersionStore
 import com.quemsou.app.data.importer.DataStoreCardsVersionStore
@@ -30,6 +36,7 @@ import com.quemsou.app.data.local.MIGRACAO_2_3
 import com.quemsou.app.data.local.MIGRACAO_3_4
 import com.quemsou.app.data.local.MIGRACAO_4_5
 import com.quemsou.app.data.local.MIGRACAO_5_6
+import com.quemsou.app.data.local.MIGRACAO_6_7
 import com.quemsou.app.domain.repository.RepositorioDeCards
 import dagger.Binds
 import dagger.Module
@@ -63,7 +70,12 @@ abstract class DataModule {
     abstract fun bindRepositorioDeCards(impl: RepositorioDeCardsLocal): RepositorioDeCards
 
     @Binds
-    abstract fun bindFonteDoCatalogo(impl: HttpFonteDoCatalogo): FonteDoCatalogo
+    abstract fun bindFonteDoCatalogo(impl: FonteDoCatalogoFirestore): FonteDoCatalogo
+
+    @Binds
+    abstract fun bindClienteDoCatalogoNaNuvem(
+        impl: ClienteDoCatalogoFirestore,
+    ): ClienteDoCatalogoNaNuvem
 
     @Binds
     abstract fun bindCacheDoIndice(impl: ArquivoCacheDoIndice): CacheDoIndice
@@ -73,6 +85,16 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindRegistroDeFeedback(impl: RegistroDeFeedbackLocal): RegistroDeFeedback
+
+    @Binds
+    abstract fun bindAgendadorDaSincronizacaoDeFeedback(
+        impl: AgendadorDaSincronizacaoWorkManager,
+    ): AgendadorDaSincronizacaoDeFeedback
+
+    @Binds
+    abstract fun bindDestinoDeFeedbackNaNuvem(
+        impl: DestinoDeFeedbackNoFirestore,
+    ): DestinoDeFeedbackNaNuvem
 
     /** Singleton: só pode existir um servidor disputando a porta do espelho. */
     @Binds
@@ -85,7 +107,14 @@ abstract class DataModule {
         @Singleton
         fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "quemsou.db")
-                .addMigrations(MIGRACAO_1_2, MIGRACAO_2_3, MIGRACAO_3_4, MIGRACAO_4_5, MIGRACAO_5_6)
+                .addMigrations(
+                    MIGRACAO_1_2,
+                    MIGRACAO_2_3,
+                    MIGRACAO_3_4,
+                    MIGRACAO_4_5,
+                    MIGRACAO_5_6,
+                    MIGRACAO_6_7,
+                )
                 .build()
 
         @Provides

@@ -27,12 +27,20 @@ O serviço continua trabalhando com o app fechado. Ao voltar à tela, o app
 consulta os pedidos; enquanto aberta, atualiza a cada 15 segundos. Não há
 notificação push nem sincronização Android em background nesta entrega.
 
-A avaliação após a rodada guarda voto, comentário, versão, carta preparada
+A avaliação opcional após cada dica guarda só o fato revelado e sua identidade;
+o convite é independente da avaliação de carta. Export v3: `CARDS_GUIDE.md`.
+A avaliação adicional após a rodada guarda voto, comentário, versão, carta preparada
 e dicas reveladas. O pedido oferece a opção explícita de enviar essas
 avaliações ao gerador. **Pedir mais dicas e aplicar avaliações** amplia o
 mesmo baralho, preservando a identidade das respostas.
 Acrescenta até 60 dicas por resposta, limitado ao espaço restante até 500;
 atingido o limite de alguma resposta, a ampliação desse baralho é desabilitada.
+
+Esse limite ainda pertence à implementação atual do serviço, não ao acervo
+local: pacotes complementares instalados podem ampliar o banco sem teto total
+artificial (`CATALOG_FORMAT.md`). A entrega de 2026-09-16 não altera nem ativa
+a fábrica. Converter a ampliação automática em novos pacotes, além do limite
+atual, permanece pendente para a unidade específica da fábrica.
 
 ## Histórico e qualidade
 

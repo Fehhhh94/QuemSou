@@ -9,7 +9,8 @@ import androidx.room.PrimaryKey
  * feedback** (5B parte 2) sobre um card jogado, dado no Anúncio da partida.
  *
  * Histórico completo: o mesmo card pode receber feedback em partidas
- * diferentes — cada avaliação é uma **inserção nova**, nunca sobrescreve.
+ * diferentes. Votos de dica na mesma ocorrência são editáveis; o contexto
+ * inclui sessão, rodada e posição. A estrutura v6 também comporta esses votos.
  * Deliberadamente **sem FK** para `cards`/`baralhos`: reimportação ou remoção
  * de baralho não pode apagar o histórico da fábrica; o export junta a
  * resposta por `cardId` quando o card ainda existe.
@@ -24,9 +25,12 @@ import androidx.room.PrimaryKey
  * @property voto `BOM` ou `FRACO`.
  * @property comentario comentário opcional; `null` se não houver.
  * @property rodada rodada da partida em que o card foi jogado.
- * @property resultadoDoTurno `ACERTO` ou `QUEIMADO`.
+ * @property resultadoDoTurno `ACERTO`, `QUEIMADO` ou `DICA_REVELADA`.
  * @property numeroDaDicaDoAcerto dica em que houve o acerto; `null` se queimado.
  * @property criadoEm timestamp (epoch millis) da gravação.
+ * @property revisaoLocal cresce quando o mesmo voto de dica é editado; impede
+ * um envio antigo de marcar uma edição mais nova como sincronizada.
+ * @property sincronizadoEm confirmação local do último envio ao Firestore.
  */
 @Entity(tableName = "feedback_de_cards")
 data class FeedbackDeCardEntity(
@@ -40,4 +44,6 @@ data class FeedbackDeCardEntity(
     val numeroDaDicaDoAcerto: Int?,
     val criadoEm: Long,
     @ColumnInfo(defaultValue = "''") val contextoJson: String = "",
+    @ColumnInfo(defaultValue = "1") val revisaoLocal: Int = 1,
+    val sincronizadoEm: Long? = null,
 )

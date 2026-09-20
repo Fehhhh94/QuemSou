@@ -10,6 +10,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.Column
@@ -71,7 +72,6 @@ import com.quemsou.app.navigation.ConfiguracaoDaPartida
 import com.quemsou.app.presentation.ui.components.BarraDeAcaoInferior
 import com.quemsou.app.presentation.ui.components.CodigoQr
 import com.quemsou.app.presentation.ui.components.ConfirmDialog
-import com.quemsou.app.presentation.ui.components.SeloDeEstado
 import com.quemsou.app.presentation.ui.theme.SeloVerde
 import com.quemsou.app.presentation.ui.theme.SeloVerdeClaro
 import com.quemsou.app.presentation.ui.theme.ShotAmbar
@@ -182,7 +182,11 @@ fun SetupScreen(
                     }
                 }
                 item {
-                    SecaoRodadas(rodadas = uiState.numeroDeRodadas, onDefinir = viewModel::definirRodadas)
+                    SecaoRodadas(
+                        rodadas = uiState.numeroDeRodadas,
+                        quantidadeDeJogadores = uiState.jogadores.size,
+                        onDefinir = viewModel::definirRodadas,
+                    )
                 }
                 item {
                     Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface) {
@@ -242,7 +246,7 @@ fun SetupScreen(
  */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-private fun SecaoBaralhos(
+internal fun SecaoBaralhos(
     uiState: SetupUiState,
     onAlternarBaralho: (String) -> Unit,
     onSelecionarTodos: () -> Unit,
@@ -285,14 +289,22 @@ private fun SecaoBaralhos(
                     text = "${baralhosDaColecao.first().colecaoIcone} ${baralhosDaColecao.first().colecaoNome}",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.semantics { heading() },
                 )
+                if (baralhosDaColecao.first().especial) {
+                    Text(
+                        text = stringResource(R.string.setup_especiais_descricao),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 baralhosDaColecao.forEach { baralho ->
                     Row(
                         modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).toggleable(
                             value = baralho.id in uiState.baralhosSelecionados,
                             role = Role.Checkbox,
                             onValueChange = { onAlternarBaralho(baralho.id) },
-                        ).padding(vertical = 8.dp),
+                        ).heightIn(min = 48.dp).padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
@@ -304,7 +316,6 @@ private fun SecaoBaralhos(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            SeloDeEstado(estado = baralho.estado, compacto = true)
                         }
                     }
                 }
@@ -342,7 +353,7 @@ private fun SecaoBaralhos(
 }
 
 /**
- * Espelho de leitura (4A parte 1): o anfitrião liga o servidor local, mostra
+ * Espelho de leitura: o anfitrião liga o servidor local, mostra
  * o QR e o endereço, e acompanha quem já entrou pelo navegador.
  *
  * Acesso em Mais opções, depois dos jogadores e baralhos. Começar a partida
@@ -412,10 +423,8 @@ private fun SecaoEspelho(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            // Mesmo verde do selo "edição final" do catálogo, com a variante
-            // clara/escura do tema — o ✓ é confirmação, não novidade. "Este
-            // aparelho" fica em onSurface: contraste cheio, sem cor própria,
-            // para não competir com o verde de quem entrou pela rede.
+            // O ✓ verde confirma quem entrou pela rede. "Este aparelho" fica
+            // em onSurface, com contraste cheio e sem cor própria.
             val verdeDoEntrou = if (isSystemInDarkTheme()) SeloVerdeClaro else SeloVerde
             uiState.jogadores.forEachIndexed { indice, jogador ->
                 val estado = uiState.estadoNoEspelho(jogador.id)
@@ -582,14 +591,17 @@ private fun BotaoDeOpcoes(
 }
 
 @Composable
-private fun SecaoRodadas(rodadas: Int, onDefinir: (Int) -> Unit) {
+private fun SecaoRodadas(rodadas: Int, quantidadeDeJogadores: Int, onDefinir: (Int) -> Unit) {
+    val rodadasPorJogador = rodadas / quantidadeDeJogadores
+    val diminuirDescricao = stringResource(R.string.setup_rodadas_diminuir_cd)
+    val aumentarDescricao = stringResource(R.string.setup_rodadas_aumentar_cd)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(R.string.setup_rodadas_titulo), style = MaterialTheme.typography.titleMedium)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             FilledIconButton(
-                onClick = { onDefinir(rodadas - 1) },
-                enabled = rodadas > 1,
-                modifier = Modifier.size(48.dp),
+                onClick = { onDefinir(rodadas - quantidadeDeJogadores) },
+                enabled = rodadas > quantidadeDeJogadores,
+                modifier = Modifier.size(48.dp).semantics { contentDescription = diminuirDescricao },
             ) {
                 Text("−")
             }
@@ -599,10 +611,22 @@ private fun SecaoRodadas(rodadas: Int, onDefinir: (Int) -> Unit) {
                 modifier = Modifier.width(32.dp),
                 textAlign = TextAlign.Center,
             )
-            FilledIconButton(onClick = { onDefinir(rodadas + 1) }, modifier = Modifier.size(48.dp)) {
+            FilledIconButton(
+                onClick = { onDefinir(rodadas + quantidadeDeJogadores) },
+                modifier = Modifier.size(48.dp).semantics { contentDescription = aumentarDescricao },
+            ) {
                 Text("+")
             }
         }
+        Text(
+            text = pluralStringResource(
+                R.plurals.setup_rodadas_por_jogador,
+                rodadasPorJogador,
+                rodadasPorJogador,
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

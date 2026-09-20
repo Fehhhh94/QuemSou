@@ -82,9 +82,12 @@ data class ConfiguracaoDaPartida(
  * @property grupoId chave de agrupamento (especificação v4): jogadores com o
  *   mesmo `grupoId` jogam no mesmo grupo; `null` = grupo próprio de tamanho 1
  *   (o estado padrão — o antigo "individual").
+ * @property espelhoId identidade da linha no pareamento local. O default
+ *   mantém configurações antigas decodificáveis.
  */
 @Serializable
 data class JogadorConfigurado(
     val nome: String,
     val grupoId: String? = null,
+    val espelhoId: String? = null,
 )

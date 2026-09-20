@@ -82,4 +82,37 @@ class FabricaPersistenciaTest {
             assertTrue(novaCarta.clues.intersect(carta.clues.take(3).toSet()).isEmpty())
         } finally { db.close() }
     }
+
+    @Test fun estadoFinalizadoLegadoNaoBloqueiaAtualizacao() = runBlocking {
+        val db = Room.inMemoryDatabaseBuilder(contexto, AppDatabase::class.java).build()
+        try {
+            fun modelo(versao: Int): com.quemsou.app.domain.model.Baralho {
+                val json = BaralhoJson(
+                    "legado",
+                    "Tema legado",
+                    "PERSONAGEM_FILME",
+                    ColecaoJson("legado", "Tema legado", "🎬"),
+                    versao,
+                    "FINALIZADO",
+                    listOf(
+                        CardDoBaralhoJson(
+                            "legado-1",
+                            "PESSOA",
+                            "Resposta",
+                            List(10) { "Dica válida ${it + 1}" },
+                        ),
+                    ),
+                )
+                return (ParserDoCatalogo().validarBaralho(json) as ResultadoDoParse.Sucesso).valor
+            }
+
+            val instalador = InstaladorDeBaralhos(db)
+            instalador.instalar(modelo(1))
+            instalador.instalar(modelo(2))
+
+            assertEquals(2, db.baralhoDao().buscarPorIds(listOf("legado")).single().versao)
+        } finally {
+            db.close()
+        }
+    }
 }

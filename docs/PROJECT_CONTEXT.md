@@ -1,6 +1,6 @@
 # Contexto atual — central de jogos e QuemSou
 
-> Atualizado em 2026-09-12. Este é o dono da visão atual de produto,
+> Atualizado em 2026-09-20. Este é o dono da visão atual de produto,
 > arquitetura e estágio. Regras completas e história ficam nos documentos
 > apontados.
 
@@ -17,10 +17,12 @@ dez dicas. O jogo suporta 2–4 jogadores, grupos, Modo Shot opcional e baralhos
 locais. Tema, resposta, baralho e carta são conceitos do QuemSou, não contratos
 obrigatórios dos futuros jogos.
 
-A partida principal é offline. A internet atende ao catálogo e, futuramente,
-à geração automática solicitada dentro do app. A fábrica permanece sem
-ativação nesta unidade. O pareamento do espelho usa a rede local; transmitir
-as dicas durante a partida continua pendente.
+A partida principal é offline após baixar os primeiros baralhos. A internet atende ao catálogo. Por decisão de
+Felipe, a fábrica está **em hold**, sem ativação ou desenvolvimento nesta
+etapa; novos conteúdos são pedidos ao assistente por tema e integrados
+pontualmente. O código existente é preservado. O espelho usa a rede local e acompanha a partida:
+cada navegador recebe a fase atual, mas dica e resposta secreta só são
+enviadas à sessão do leitor.
 
 ### Identidade e navegação
 
@@ -30,16 +32,31 @@ as dicas durante a partida continua pendente.
 - Paleta azul, verde-lima, papel quente e tinta escura, com variante noturna.
   Tipografia forte, formas arredondadas e ilustração vetorial de cartas.
   Dentro da partida, âmbar continua reservado ao Modo Shot.
-- Setup começa pelos nomes e grupos, seguido de rodadas e baralhos. Leitor
-  pontua, Shot e pareamento ficam em Mais opções. Recolher preserva valores
-  e resume as regras secundárias que já estão valendo.
+- Setup começa pelos nomes e grupos, seguido de rodadas e baralhos. Uma nova
+  partida começa sem baralho marcado, para a pessoa escolher conscientemente
+  o conteúdo; o atalho "Selecionar todos" continua disponível. Leitor pontua,
+  Shot e pareamento ficam em Mais opções. Recolher preserva valores e resume
+  as regras secundárias que já estão valendo.
+- Rodadas são configuradas em ciclos completos: o total acompanha a quantidade
+  de jogadores para que todos sejam leitores e adivinhadores o mesmo número de vezes.
+- A seleção tem o título "Temas da partida". Conteúdos personalizados ficam
+  em **Especiais**, depois dos grupos comuns. Kimberly-Clark — Finanças é o
+  primeiro, com 30 respostas e escolha individual, sem seleção automática.
+  A implementação reutiliza coleções e ids existentes; versões permanecem
+  técnicas. Outros nomes/coleções e as regras de união não foram migrados.
 - Falta de conteúdo tem três estados distintos, porque levam a saídas
   diferentes: sem nenhuma resposta elegível no aparelho (baixar baralho),
   nenhum baralho marcado (marcar) e seleção só com baralhos esgotados (trocar
   a seleção). A disponibilidade olha respostas elegíveis, não a lista de
   baralhos: o repositório mantém o baralho e filtra as cartas dentro dele.
   Baralho esgotado continua listado com "0 respostas disponíveis".
-- Avaliar cartas continua acessível na Home; exportar/limpar mantêm seus
+- Após cada dica revelada há um convite para avaliar, sem diálogo automático.
+  Voto e comentário são opcionais, salvos localmente naquele momento e
+  recuperados ao restaurar a dica. Falha no feedback não bloqueia o jogo.
+  O registro identifica sessão, rodada, posição, resposta e fato editorial;
+  não exporta as dicas ocultas nessa avaliação. Editar o voto não o duplica.
+- Avaliar a carta ao fim da rodada continua como opção adicional na Home;
+  exportar/limpar funcionam também com essa opção desligada e mantêm seus
   controles e confirmação. Criação de baralhos fica recolhida; a tela da fábrica
   apresenta a conexão quando necessária. Identificação do build permanece no rodapé.
 - Home e Setup têm conteúdo limitado em largura; conteúdo longo pode rolar.
@@ -58,13 +75,32 @@ as dicas durante a partida continua pendente.
 
 ## Estado atual
 
+- Administrador local no navegador disponível pelo atalho
+  `Abrir-Administrador.cmd`. Consolida asset, cópia local do catálogo e
+  rascunhos privados; valida pelo Gradle real e só aplica após confirmação,
+  com conflito de revisão e backup. Uma ação explícita adicional publica a
+  versão validada no Firestore ou a retira do índice sem apagar a versão. Não
+  faz push, não gera APK e não reativa a fábrica. Evidência:
+  `ADMINISTRADOR_LOCAL.md`.
+
+- Modelo editorial de resposta + banco de dicas ativo em
+  `acervoEditorial/{respostaId}` (admin-only, upstream de `catalogo/**`):
+  `docs/CATALOG_FORMAT.md`. A Central ganhou uma prévia local de migração e um
+  editor de banco de dicas (acrescentar, corrigir preservando o id, escopo
+  público/privado, desativar/reativar), transporte remoto atômico para até
+  500 dicas e projeção controlada para os baralhos. Código validado localmente
+  e no emulador; **Rules publicadas e acervo migrado em produção em 2026-09-19**.
+  O editor usa a base remota, preserva IDs/histórico, detecta
+  conflitos e impede dicas privadas em baralho público. Estado e evidências:
+  `docs/ADMINISTRADOR_LOCAL.md`, `docs/HANDOFF_ACTIVE.md`.
+
 - Conceito de partidas implementado localmente: baralhos como coleções de
   respostas, acervo compartilhado entre temas/edições, cartas de dez dicas,
   consumo só das reveladas e rotação por última aparição. Regras e exemplos:
   `docs/GAME_RULES.md`. Evidência atual e pendências: `docs/HANDOFF_ACTIVE.md`.
-- Fábrica automática: Felipe autorizou sua implementação e escolheu este computador ligado como
-  host. Pedidos persistentes, recuperação, instalação e ampliação foram
-  implementados; HTTPS e geração real seguem sem ativação. Operação:
+- Fábrica automática em hold por decisão de Felipe. A implementação anterior
+  de pedidos, recuperação, instalação e ampliação foi preservada, sem ativar
+  HTTPS ou geração real. Referência técnica para eventual retomada:
   `docs/DECK_STUDIO.md`.
 
 - Fases 0–3 concluídas e validadas em partida completa no Samsung Z Fold,
@@ -72,11 +108,11 @@ as dicas durante a partida continua pendente.
 - Modo Shot concluído e validado fisicamente.
 - Fase 5A (catálogo) e 5B (fábrica/feedback) concluídas e validadas conforme o
   histórico.
-- Fase 4A, parte 1 (pareamento do espelho) implementada no commit local
-  `2c09cdc`, coberta por 230 testes JVM e APK debug montado; validação física
-  ainda pendente e nenhum push realizado.
-- Fase 4A partes 2 e 3 pendentes. Fase 4 Nearby continua no backlog e é outra
-  iniciativa.
+- Fase 4A, partes 1 e 2 implementadas: pareamento, continuidade do servidor,
+  fases da partida, dica/resposta por leitor, anúncio e placar final. A
+  validação física da parte 2 ainda está pendente.
+- Fase 4A parte 3 (presença automática e endurecimentos de operação) continua
+  pendente. Fase 4 Nearby permanece no backlog e é outra iniciativa.
 - Nome definitivo da central em aberto; `Bora Jogar` é provisório. QuemSou
   identifica o primeiro jogo.
 
@@ -86,7 +122,8 @@ O estado operacional e a próxima ação estão em `docs/HANDOFF_ACTIVE.md`.
 
 - Kotlin 2.1.0, Java 17 no bytecode e JBR/JVM 21 no build.
 - Jetpack Compose Material 3, Navigation Compose com rotas tipadas.
-- Hilt + KSP, Room, DataStore, kotlinx.serialization e OkHttp.
+- Hilt + KSP, Room, DataStore, kotlinx.serialization, Firebase Auth/Firestore
+  e OkHttp.
 - Ktor server CIO 3.2.4 no espelho local; ZXing `core` para QR em memória.
 - Um módulo Android `:app`, pacote `com.quemsou.app`.
 
@@ -132,34 +169,60 @@ A fonte completa é `docs/GAME_RULES.md`. Contratos que afetam arquitetura:
 
 ## Persistência e conteúdo
 
-- Room v6 separa conteúdo editorial, reservas, dicas utilizadas, últimas
-  aparições de respostas e checkpoints de sessões/rodadas. Migrações 4→5→6
-  aditivas; o histórico conservador da v5 é preservado.
-- `CardsImporter` atualiza somente conteúdo embarcado quando a versão de
-  `assets/cards.json` aumenta; downloads não são apagados.
+- Room v7 separa conteúdo editorial, reservas, dicas utilizadas, últimas
+  aparições de respostas, checkpoints de sessões/rodadas e o estado da fila de
+  feedback. Migrações 4→5→6→7 aditivas; o histórico conservador é preservado.
+- `CardsImporter` mantém o protocolo do envelope legado; na v8 vazia
+  avança apenas o marcador, sem alterar conteúdo instalado ou downloads.
 - O catálogo cruza índice remoto/cache com Room e nunca persiste baralho que
   falhe no parser/validador.
-- Dois baralhos finais embarcados possuem 30 cards cada: Cinema Clássico e
-  Mundo da Música.
+- Os baralhos não têm mais estado editorial final: todos podem receber
+  correções e novos cards até o teto atual de 500. `versao` e os valores
+  antigos de `estado` permanecem apenas como compatibilidade técnica e não
+  aparecem na interface.
+- GitHub guarda código/regras e fixtures fictícias, não o conteúdo editorial.
+  Firebase guarda os baralhos publicados e o acervo de dicas. A Central usa
+  cópias privadas fora do Git; caminhos e backup em `ADMINISTRADOR_LOCAL.md`.
+  O catálogo GitHub antigo foi descontinuado, sem limpeza do histórico.
+- O APK leva somente `{"version":8,"baralhos":[]}`. Na atualização, o
+  importador preserva todos os baralhos já instalados, históricos e feedbacks.
+  Uma instalação nova precisa baixar conteúdo com internet antes de jogar;
+  após o download, a partida funciona offline. Não há fallback GitHub.
+- Avaliações de dica reutilizam a tabela Room, com discriminador
+  `DICA_REVELADA` e snapshot próprio. Export `quemsou-feedback` v3 mantém
+  os campos anteriores e acrescenta esse tipo; avaliação de carta preservada.
+  A migração 6→7 adiciona revisão local e confirmação de sincronização. Quando
+  há configuração Firebase, WorkManager envia apenas avaliações de dicas e o
+  painel as consulta no Firestore; sem rede ou configuração, o jogo continua e
+  a fila permanece no aparelho. Não há treinamento nem geração automática.
 - Cards e ids de baralho são chaves estáveis. Regras editoriais:
   `docs/CARDS_GUIDE.md`; JSON: `docs/CATALOG_FORMAT.md`.
 
 ## Catálogo
 
-A criação sob pedido é um serviço separado do catálogo estático, com HTTPS
-autenticado. O app recebe o resultado e instala o conteúdo validado numa
-transação. O servidor ainda não está ativado; ver `DECK_STUDIO.md`.
+A criação sob pedido continua separada e em hold; não existe geração automática
+de cards nesta migração. O JSON do catálogo permanece como formato canônico de
+autoria, validação e contingência, conforme `CATALOG_FORMAT.md`.
 
-O catálogo é estático, sem Firebase nem backend próprio. A única URL remota do
-app fica em `HttpFonteDoCatalogo.URL_DO_INDICE`. O último índice válido fica em
-cache local; baralhos baixados continuam jogáveis sem rede.
+O app passou a consultar o catálogo publicado no Firestore. Cada manifesto
+aponta para uma versão imutável dividida em blocos de até 25 cards; hashes
+SHA-256 do bloco e do baralho completo são conferidos antes do parser. O último
+índice válido fica em cache local e o conteúdo aprovado é instalado no Room,
+que continua como fonte de verdade da partida e mantém baralhos baixados
+jogáveis sem rede.
+
+Baralhos comuns usam visibilidade `PUBLICO`. A categoria `ESPECIAIS` usa
+`PRIVADO` por padrão e exige `leitoresCatalogo/{uid}.ativo == true`, além da
+autenticação anônima. O administrador publica somente após salvar e validar o
+conteúdo exato. Retirar um baralho apenas muda `publicado` para `false`; versões
+e blocos não são apagados.
 
 O catálogo mostra coleções e baralhos, nunca as respostas dos cards. Download
 inválido é recusado antes do Room. A régua de publicação é executada por:
 
 ```powershell
 .\gradlew.bat validarBaralho -Parquivo=<json>
-.\gradlew.bat validarCatalogo -Ppasta=<raiz-do-QuemSou-Baralhos>
+.\gradlew.bat validarCatalogo -Ppasta=<pasta-privada-do-catalogo>
 ```
 
 ## Espelho de leitura — Fase 4A
@@ -168,7 +231,7 @@ O anfitrião liga um servidor HTTP local no Setup. Outros jogadores abrem o QR
 ou endereço no próprio navegador, escolhem o nome e aguardam. O espelho é
 apresentação; o domínio continua sendo a única fonte das regras.
 
-### Parte 1 implementada
+### Partes 1 e 2 implementadas
 
 - `RegistroDeSessoes`: elenco, reivindicação por token, reconexão, marcador
   “este aparelho” e liberação manual de sessão morta.
@@ -178,15 +241,16 @@ apresentação; o domínio continua sendo a única fonte das regras.
 - `assets/espelho/`: HTML/JS offline, sem framework e sem CDN.
 - Setup: switch opt-in, QR, URL, estado dos jogadores e confirmação de
   liberação. Começar a partida não depende de ninguém conectado.
-- Servidor pertence ao `SetupViewModel` nesta parte e cai ao sair da tela.
+- O servidor passa do `SetupViewModel` ao `PartidaViewModel`, publica todas as
+  fases e cai ao sair da partida. Reconexões recebem o estado mais recente.
+- Dica e resposta são filtradas por sessão antes da serialização; durante o
+  turno, só o leitor as recebe. Anúncio e placar são públicos para a mesa.
 
 ### Pendente
 
-- Parte 2: transportar dica/resposta da vez e prolongar o servidor durante a
-  partida.
-- Parte 3: escopo ainda não detalhado no documento atual; definir antes de
-  implementar.
-- Validação em aparelho/rede física do pareamento da parte 1.
+- Parte 3: presença automática de sessões e demais endurecimentos; detalhar o
+  escopo antes de implementar.
+- Validação em aparelho/rede física de uma partida completa com o espelho.
 
 Ktor está fixado em 3.2.4 por compatibilidade com Kotlin 2.1.x. Consulte
 `docs/BUGS.md`, seção 8, antes de atualizar.
@@ -205,21 +269,40 @@ Detalhes: `docs/BUGS.md`, seção 7.
 
 ## Evidência vigente
 
-A base atual tem 270 testes JVM por variante, 23 instrumentados no emulador
-Pixel_1/API 35 e 17 testes Python (também em modo otimizado), além de build e
-lint sem erros. A fábrica tem testes de reabertura do pedido persistido,
-instalação/ampliação com partida ativa e HTTP local com geração simulada.
-O resultado, o APK e os limites visuais estão em `docs/HANDOFF_ACTIVE.md`.
-Não confundir esses números com validação física no aparelho, TalkBack ou
-operação real da fábrica — todos seguem pendentes.
+A base anterior passou em 286 testes JVM por variante (Debug/Release), build do
+app e do APK de testes, além de 11 instrumentados no emulator-5580. Em turno
+posterior, confirmado pelo Codex: as regras ampliadas do catálogo, o índice
+composto e sete baralhos de jogo foram publicados no projeto `borajogar-app`
+(seis `PUBLICO`, Kimberly-Clark — Finanças `PRIVADO`); o APK
+`0.5.0-dev-0919.1436` foi instalado inicialmente no Samsung SM-F966B; e
+uma avaliação real na dica 10 do card `mm_028` (Shakira) sincronizou pelo
+WorkManager e apareceu na Central. Evidência completa:
+`docs/ADMINISTRADOR_LOCAL.md`, seção "Evidências de conclusão". Não houve
+comprovação de novo download do especial privado pela interface Android nem lint.
+Em 2026-09-20, 292 testes JVM e assembleDebug passaram; a atualização
+`0.5.0-dev-0920.0045` foi instalada preservando dados. No Fold/API 36,
+Mundo dos Bruxos e Mundo Pop foram atualizados pela UI Firebase, o especial
+privado apareceu no catálogo e completou quatro rodadas. Consumo de somente
+uma dica e exclusão da resposta com nove restantes foram conferidos em
+Instrumentos. Feedbacks e históricos anteriores foram preservados.
+O download privado v1 não foi forçado porque a mesma versão já estava instalada.
+O acervo editorial (`acervoEditorial/**`) é uma coleção separada, agora ativa;
+contagem e evidência da migração estão em `docs/ADMINISTRADOR_LOCAL.md`.
+Fábrica segue em hold.
+APK e limites da evidência: `docs/HANDOFF_ACTIVE.md`. Saída pelo botão do
+placar deixa uma flag de sessão aberta, sem reservas: `docs/BUGS.md`, seção 9.
+Sorteio físico da mesma resposta com banco ampliado, TalkBack e revisão humana
+do novo conteúdo permanecem pendentes; não equivalem aos cenários acima.
 
 ## Roadmap resumido
 
 - Validar a versão pessoal com a turma e escolher o próximo jogo.
-- Evoluir a fábrica conforme o conceito aprovado, com geração dentro do app.
+- Manter a fábrica em hold e criar conteúdo pontualmente a partir dos temas
+  solicitados por Felipe; retomada automática exige nova decisão.
 
-- Fase 4A partes 2 e 3.
-- Primeiro ciclo de geração/publicação de conteúdo na fábrica de baralhos.
+- Validar fisicamente a Fase 4A parte 2 e definir a presença automática da
+  parte 3.
+- Geração/publicação pela fábrica fica suspensa enquanto estiver em hold.
 - Revalidação ritual de restauração por morte de processo no Z Fold.
 - Backlog: Nearby Connections, retomar partida após swipe, visão comercial de
   baralhos e salas online.

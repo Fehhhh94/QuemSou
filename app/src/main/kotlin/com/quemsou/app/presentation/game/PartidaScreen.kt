@@ -37,6 +37,7 @@ fun PartidaScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val feedbackDev by viewModel.feedbackDev.collectAsState()
+    val feedbackDaDica by viewModel.feedbackDaDica.collectAsState()
     val abandonoSolicitado by viewModel.abandonoSolicitado.collectAsState()
     var confirmarQueimar by remember { mutableStateOf(false) }
 
@@ -87,6 +88,11 @@ fun PartidaScreen(
                         onAlguemAcertou = viewModel::abrirQuemAcertou,
                         onOutraDica = viewModel::outraDica,
                         onPedirQueimar = { confirmarQueimar = true },
+                        feedback = {
+                            if (estado == uiState) feedbackDaDica?.let { feedback ->
+                                FeedbackDaDicaWidget(feedback, viewModel::avaliarDica)
+                            }
+                        },
                     )
 
                     is PartidaUiState.QuemAcertou -> QuemAcertouBackdrop(estado = estado, viewModel = viewModel)

@@ -8,7 +8,9 @@ local.
 ## Estado do projeto
 
 - Partida principal offline e jogável em um único aparelho.
-- Catálogo de baralhos com cache e downloads opcionais.
+- Catálogo Firebase com cache: primeira instalação exige baixar baralhos;
+  depois, as partidas funcionam offline.
+- Conteúdo editorial e backups fora do Git. O APK não embarca respostas/dicas.
 - Fase 4A parte 1 implementada: pareamento do espelho por QR/URL local.
 - Partes 2 e 3 do espelho ainda pendentes.
 
@@ -25,13 +27,26 @@ Pré-requisitos: Android Studio/JBR configurado pelo projeto e Android SDK 35.
 
 APK gerado em `app/build/outputs/apk/debug/app-debug.apk`.
 
+## Administrar baralhos nesta máquina
+
+Dê dois cliques em `Abrir-Administrador.cmd`. A Central de Baralhos abre no
+navegador local para consultar, editar rascunhos e validar com a régua do app.
+Ela também mostra automaticamente sob cada dica os feedbacks sincronizados pelo
+app via Firestore, mantém a importação manual como contingência, prepara pedidos
+de revisão para o Codex e permite remover uma origem local com backup. Depois
+de salvar e validar o conteúdo exato, uma ação separada pode publicar ou retirar
+o baralho do catálogo no Firestore, sempre com confirmação. O painel não faz
+push, não gera APK e não reativa a fábrica automática.
+
+Instruções: [administrador/README.md](administrador/README.md).
+
 ## Stack
 
 - Kotlin + Jetpack Compose Material 3
 - Clean Architecture + MVVM
 - Hilt/KSP, Room e DataStore
 - Navigation Compose com rotas tipadas
-- OkHttp para catálogo
+- Firebase Auth/Firestore para catálogo e feedback; Room mantém o jogo offline
 - Ktor CIO para servidor HTTP local
 - ZXing core para QR gerado no aparelho
 

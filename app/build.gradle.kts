@@ -12,6 +12,12 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+// A configuracao da conta Google permanece local e ignorada pelo Git. Sem o
+// arquivo, o projeto continua compilando e o sincronizador fica desativado.
+if (file("google-services.json").isFile) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.quemsou.app"
     compileSdk = 35
@@ -102,6 +108,11 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime.ktx)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
     // Cliente HTTP leve, usado exclusivamente pela tela de catálogo (5A):
     // a partida segue 100% offline.

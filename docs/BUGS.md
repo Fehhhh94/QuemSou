@@ -1,8 +1,8 @@
 # Bugs
 
-Bugs encontrados em teste de jogo físico (Samsung Galaxy Z Fold, Android 16)
-após o fechamento documental da Fase 3. Corrigidos em código e **validados
-no Z Fold físico no fechamento da Fase 3 (2026-07-09)**.
+Registro de bugs e armadilhas do projeto. Os achados históricos da Fase 3
+foram corrigidos e validados no Z Fold em 2026-07-09; cada seção informa seu
+próprio estado. **Achado aberto em 2026-09-20: seção 9 (saída do placar).**
 
 ## Checklist de validação física — Modo Shot + Fase 5A + 5B parte 2 (CONCLUÍDA em 2026-07-12)
 
@@ -20,8 +20,8 @@ ressalva: a restauração pós-morte de processo (parte do item 8) é
    abrir o app e jogar uma rodada completa — sem crash na abertura, cards
    presentes (importador v4 recarrega os dois baralhos embarcados).
 2. ✓ **Catálogo**: Home → Baralhos; coleções listadas com contagens; filtro
-   por categoria; nível 2 com selos ("✓ EDIÇÃO FINAL" / "🧪 EM EVOLUÇÃO");
-   nenhum card de baralho listado em lugar nenhum.
+   por categoria; nível 2 com os selos usados naquela versão; nenhum card de
+   baralho listado em lugar nenhum. Os selos foram removidos em 2026-09-19.
 3. ✓ **Download real do baralho de teste**: baixar "Baralho de Teste —
    Edição 1"; ver progresso; baralho aparece no Setup depois. Bump da
    `versao` v2→v3 no repositório `QuemSou-Baralhos` acendeu o botão
@@ -267,3 +267,26 @@ ressalva: a restauração pós-morte de processo (parte do item 8) é
   `https://repo1.maven.org/maven2/io/ktor/ktor-server-cio-jvm/<versão>/ktor-server-cio-jvm-<versão>.module`.
   Se o `requires` do stdlib for maior que o Kotlin do projeto, aquela versão
   do Ktor está fora de alcance.
+
+## 9. Voltar ao início pelo placar não fecha a sessão persistida — aberto
+
+- **Reproduzido em 2026-09-20:** Samsung SM-F966B, API 36,
+  BoraJogar 0.5.0-dev-0920.0045. Concluir quatro rodadas, tocar “Ver placar”
+  e depois “Voltar ao início”. A Home aparece normalmente, mas Room mantém
+  `sessoes_de_dicas.encerrada=0` com `progressoJson.fase=PLACAR_FINAL`.
+- **Causa confirmada:** `PartidaScreen` passa `onVoltarAoInicio` diretamente
+  ao `PlacarFinalContent`. O BackHandler nessa mesma fase chama
+  `viewModel.confirmarAbandono(onVoltarAoInicio)`, que executa
+  `RepositorioDeCardsLocal.encerrarSessao` antes da navegação. O botão pula
+  essa rotina; não é apenas atraso da coroutine.
+- **Impacto observado:** inconsistência de ciclo de vida, sem bloqueio da
+  partida testada nem perda de dados. Reservas finais zero; dicas utilizadas,
+  121 feedbacks e checkpoints anteriores preservados. Preparar outra sessão
+  encerra as anteriores pelo código existente, mas isso não substitui o
+  encerramento correto ao sair. Não alterar Room manualmente como limpeza.
+- **Evidência:** `build/qa-fold-20260920/verification.json` e snapshots
+  `final/` / `final-confirmada/`; `verify_evidence.py` exit 1 na exigência de
+  zero sessões abertas. Não houve correção nesta unidade de teste.
+- **Próxima validação, após autorização:** regressão do callback do botão
+  e reexecução física de uma partida completa → Home → encerrada=1,
+  mantendo zero reservas e o histórico. Não exige nova publicação Firebase.

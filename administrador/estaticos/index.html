@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="central-token" content="__TOKEN_CSRF__">
+  <title>Central de Baralhos</title>
+  <link rel="stylesheet" href="/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <h1>Central de Baralhos</h1>
+    <p class="subtitulo">Painel local. Publicar no Firestore exige validação e confirmação; instalar no telefone continua separado.</p>
+  </header>
+
+  <p id="estado-global" class="estado" role="status" aria-live="polite"></p>
+  <ul id="avisos" class="avisos"></ul>
+
+  <main class="paineis">
+    <section class="biblioteca" aria-labelledby="titulo-biblioteca">
+      <h2 id="titulo-biblioteca">Biblioteca</h2>
+
+      <div class="campo">
+        <label for="busca">Buscar por nome, tema ou resposta</label>
+        <input id="busca" type="search" autocomplete="off" placeholder="ex.: bruxos, guitarra">
+      </div>
+
+      <div class="filtros">
+        <div class="campo">
+          <label for="filtro-origem">Origem</label>
+          <select id="filtro-origem"></select>
+        </div>
+        <div class="campo">
+          <label for="filtro-grupo">Agrupamento</label>
+          <select id="filtro-grupo"></select>
+        </div>
+        <div class="campo">
+          <label for="filtro-situacao">Situação</label>
+          <select id="filtro-situacao">
+            <option value="">Todas</option>
+            <option value="editavel">Atualizáveis</option>
+            <option value="protegido">Estado incompatível</option>
+            <option value="rascunho">Com rascunho</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="campo campo-caixa">
+        <input id="mostrar-tecnicos" type="checkbox">
+        <label for="mostrar-tecnicos">Mostrar baralhos técnicos de teste</label>
+      </p>
+
+      <p id="resumo-biblioteca" class="resumo"></p>
+      <ul id="lista" class="lista"></ul>
+
+      <section class="feedbacks-importados" aria-labelledby="titulo-feedbacks">
+        <h3 id="titulo-feedbacks">Feedbacks do app</h3>
+        <p class="nota">O painel consulta o Firestore automaticamente. A importação manual permanece como contingência.</p>
+        <div class="estado-nuvem">
+          <p id="estado-nuvem" class="resumo" aria-live="polite">Verificando a nuvem…</p>
+          <div class="acoes-nuvem">
+            <button id="atualizar-nuvem" type="button">Atualizar agora</button>
+            <button id="copiar-uid-nuvem" type="button" hidden>Copiar UID do painel</button>
+          </div>
+        </div>
+        <p id="resumo-feedbacks" class="resumo"></p>
+        <ul id="listas-feedbacks" class="listas-feedbacks"></ul>
+        <details class="contingencia-feedback">
+          <summary>Importação manual de contingência</summary>
+          <p class="nota">Use somente se a sincronização estiver indisponível.</p>
+          <input id="arquivo-feedback" type="file" accept=".json,application/json" multiple hidden>
+          <button id="importar-feedback" type="button">Importar lista de feedback</button>
+        </details>
+      </section>
+
+      <h3>Rascunho novo</h3>
+      <form id="form-novo" class="form-novo">
+        <div class="campo">
+          <label for="novo-nome">Nome do baralho</label>
+          <input id="novo-nome" required maxlength="80">
+        </div>
+        <div class="campo">
+          <label for="novo-grupo">Agrupamento</label>
+          <input id="novo-grupo" required maxlength="80">
+        </div>
+        <div class="campo">
+          <label for="novo-icone">Ícone</label>
+          <input id="novo-icone" required maxlength="8" value="⭐">
+        </div>
+        <div class="campo">
+          <label for="novo-categoria">Categoria interna</label>
+          <select id="novo-categoria">
+            <option value="ESPECIAIS">ESPECIAIS</option>
+            <option value="PERSONAGEM_FILME">PERSONAGEM_FILME</option>
+            <option value="MUNDO_DA_MUSICA">MUNDO_DA_MUSICA</option>
+          </select>
+        </div>
+        <button type="submit">Criar rascunho privado</button>
+        <p class="nota">Fica só nesta máquina. Não entra no índice do catálogo nem no app.</p>
+      </form>
+    </section>
+
+    <section class="editor" aria-labelledby="titulo-editor">
+      <h2 id="titulo-editor">Editor</h2>
+      <div id="editor-vazio" class="vazio">
+        <p>Escolha um baralho na biblioteca para ver dicas, feedbacks e editar o conteúdo.</p>
+      </div>
+      <div id="editor" hidden></div>
+    </section>
+  </main>
+
+  <div class="paineis" id="acervo-editorial" aria-labelledby="titulo-acervo">
+    <section class="biblioteca" aria-labelledby="titulo-acervo">
+      <h2 id="titulo-acervo">Acervo de respostas e dicas</h2>
+      <p class="nota">
+        Escolha uma resposta para administrar até 500 dicas. Quando cadastrada no Firestore,
+        a edição usa o banco remoto. A prévia reúne as origens locais; migrar e salvar no
+        Firestore são ações explícitas. Os baralhos só mudam após projetar, validar e publicar.
+      </p>
+      <p id="acervo-resumo" class="resumo">Carregando…</p>
+      <ul id="acervo-avisos" class="observacoes"></ul>
+      <ul id="acervo-conflitos" class="observacoes"></ul>
+      <p class="campo campo-caixa">
+        <input id="acervo-mostrar-tecnicos" type="checkbox">
+        <label for="acervo-mostrar-tecnicos">Incluir baralhos técnicos de teste na prévia</label>
+      </p>
+      <p class="acoes">
+        <button id="acervo-atualizar-previa" type="button">Atualizar prévia</button>
+        <button id="acervo-migrar-previa" type="button" disabled>
+          Migrar respostas seguras para o Firestore (criar apenas)
+        </button>
+      </p>
+      <div class="campo">
+        <label for="acervo-busca-resposta">Buscar resposta por nome ou id</label>
+        <input id="acervo-busca-resposta" type="search" autocomplete="off" placeholder="ex.: shakira">
+      </div>
+      <ul id="acervo-lista-respostas" class="lista"></ul>
+      <p id="acervo-paginacao-respostas" class="resumo"></p>
+    </section>
+
+    <section class="editor" aria-labelledby="titulo-acervo-editor">
+      <h2 id="titulo-acervo-editor">Banco de dicas da resposta</h2>
+      <div id="acervo-editor-vazio" class="vazio">
+        <p>Escolha uma resposta na lista para administrar o banco de dicas.</p>
+      </div>
+      <div id="acervo-editor" hidden></div>
+    </section>
+  </div>
+
+  <script src="/app.js"></script>
+  <script src="/acervo.js"></script>
+  <script src="/acervo-firestore.js"></script>
+  <script src="/acervo-ui.js"></script>
+</body>
+</html>
