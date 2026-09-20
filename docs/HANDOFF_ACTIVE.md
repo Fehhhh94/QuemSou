@@ -3,6 +3,8 @@
 Atualizado em 2026-09-20. Separação implementada e verificada localmente.
 Felipe confirmou commit e push dos DOIS repositórios, sem reescrever histórico.
 Essa autorização é pontual; não altera as regras gerais dos agentes.
+Fechamento confirmado: app `ed83ffc` e catálogo `078c6a9` enviados para
+`origin/main`, com HEAD remoto conferido e ambos os worktrees limpos.
 
 ## Entrega e preservação
 
@@ -47,8 +49,8 @@ Essa autorização é pontual; não altera as regras gerais dos agentes.
 
 ## Próxima ação segura
 
-- Fechar commit/push normal dos dois repositórios após revisão final, conforme
-  autorização explícita do Felipe. Não incluir os JSONs privados nem forçar push.
+- Commit/push de código e retirada dos JSONs concluídos. Não voltar a adicionar
+  conteúdo real ao Git; manutenção editorial segue pela Central privada.
 - Novo teste físico desta build/instalação limpa e a inconsistência de saída
   do placar (BUGS, seção 9) são unidades separadas, não corrigidas aqui.
 - Limpeza de conteúdo nas revisões históricas exige decisão própria.
