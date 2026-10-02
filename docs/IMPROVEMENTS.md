@@ -1,13 +1,12 @@
 # Improvements
 
-## Criação automática e dicas inéditas (2026-09-12)
+## Fábrica automática — em hold
 
-Pedido atual de Felipe substitui o fluxo manual da fábrica nesta unidade:
-criar baralho diretamente no celular, executar geração/revisão pelo Codex,
-receber automaticamente e usar avaliações para ampliar a qualidade. Acervo
-canônico por resposta, com pelo menos 60 dicas na geração e seleção de dez
-inéditas por celular. Implementação local e pendências: `DECK_STUDIO.md`.
-Nenhuma implementação de pagamentos ou marketplace nesta entrega.
+O pedido de criação automática de 2026-09-12 foi suspenso pela decisão
+posterior de Felipe. A fábrica permanece preservada, sem ativação nem
+desenvolvimento nesta etapa. Novos lotes são preparados somente por pedido
+de tema; direção vigente: `PROJECT_CONTEXT.md`. Implementação anterior e
+pendências para uma eventual retomada: `DECK_STUDIO.md`.
 
 ## ✅ Modo Shot (entregue)
 
@@ -203,21 +202,21 @@ passa a ser a do desenvolvedor, nunca do usuário final.
   - **Conteúdo**: com a decisão de 2026-09-19, o mesmo baralho pode receber
     as dicas novas; não é necessário criar uma "Edição 2".
 
-## 🟣 validarCatalogo: conferir `tamanhoEmBytes` declarado vs real
+## ✅ validarCatalogo: conferir `tamanhoEmBytes` declarado vs real
 
-- **Status**: registrado em 2026-07-12 — achado do bump v2→v3 do baralho
-  de teste no fechamento da validação física (`docs/BUGS.md`, item 3 do
-  checklist). Melhoria pequena, na próxima passada pelo validador.
+- **Status**: entregue em 2026-10-02. Achado original do bump v2→v3 do
+  baralho de teste em 2026-07-12 (`docs/BUGS.md`, item 3 do checklist).
 - **Problema**: o `tamanhoEmBytes` do índice é opcional e declarado à mão;
   ao bumpar um baralho o campo fica defasado sem ninguém perceber —
-  nenhuma camada mede o tamanho real do arquivo (o app só o exibe como
-  meta no card do catálogo).
+  o validador antes não conferia o tamanho real do arquivo.
 - **Melhoria**: `./gradlew validarCatalogo` passa a comparar o
   `tamanhoEmBytes` declarado no índice com o tamanho real do arquivo
   `baralhos/<id>.json` correspondente — mesma família dos checks de
   consistência cruzada já existentes (versão, contagem, órfãos);
-  divergência vira violação legível. Campo ausente segue válido (é
-  opcional).
+  divergência positiva vira violação legível. Campo ausente ou zero segue
+  válido. A medida inclui os bytes UTF-8, espaços e quebras de linha do
+  arquivo exato. Quatro regressões adicionadas; 294 testes por variante
+  aprovados e catálogo local aprovado. Evidência: `HANDOFF_ACTIVE.md`.
 
 ## 🟣 Feedback dev — julgamento do desfecho do turno (calibragem de cards)
 

@@ -1,5 +1,61 @@
 # Lotes editoriais embarcados
 
+## 2026-10-02 — Friends: expansão local para 50 respostas
+
+Felipe confirmou o pedido de mais vinte respostas para Friends. A origem
+privada `friends-1` passa localmente de v1 para v2: cinquenta cartas, oitocentos
+fatos. Novos ids `fr_031`–`fr_050`, dez dicas por resposta com `respostaId` e
+ids de fatos estáveis. As trinta cartas anteriores e seus seiscentos fatos
+foram preservados integralmente; não foram reduzidos seus bancos de vinte.
+O lote combina personagens, um animal nomeado, um objeto e um local da série.
+Pessoa/Lugar/Coisa continuam como tipos internos, no mesmo tema Cinema e TV.
+
+Inventário de 294 respostas nas origens locais, incluindo a biblioteca legada,
+sem colisão normalizada com as novas. Dicas redigidas em português, sem copiar
+diálogos ou letras de música. Cada resposta nova tem dez fatos; não foi
+reativada a fábrica nem aplicada a meta de geração automática de sessenta.
+
+`validarBaralho` aprovou as cinquenta cartas. `validarCatalogo` aprovou a
+pasta de preparação e a origem integrada, incluindo tamanho exato do JSON.
+Backup integral em `backups/friends-expansao-20261002-084535`; índice e
+rascunho de edição sincronizados. Quatorze arquivos das origens e dos
+rascunhos anteriores permaneceram idênticos; somente arquivo Friends,
+índice e seu rascunho de edição mudaram. Conteúdo, revisão HTML, fontes por
+resposta e manifesto em
+`%LOCALAPPDATA%/QuemSou/administrador/temporarios/friends-expansao-20261002`.
+SHA-256 do JSON integrado:
+`8db916344ddd54d12bab25c85b5bb5203869bf4b7ffebb5123b1f88d4378a5c3`.
+
+Fontes públicas consultadas na pesquisa e checagem dos fatos:
+
+- [Friends Central — família e visitas de Nora](https://friends.fandom.com/wiki/Nora_Tyler_Bing)
+- [Friends Central — família e visitas de Sandra](https://friends.fandom.com/wiki/Sandra_Greene)
+- [Friends Central — episódios de Amy](https://friends.fandom.com/wiki/Amy_Greene)
+- [Friends Central — episódios de Jill](https://friends.fandom.com/wiki/Jill_Greene)
+- [Friends Central — família de Alice](https://friends.fandom.com/wiki/Alice_Knight)
+- [Friends Central — história de Emma](https://friends.fandom.com/wiki/Emma_Geller-Greene)
+- [Friends Central — processo de adoção](https://friends.fandom.com/wiki/Erica)
+- [Friends Central — viagem à praia](https://friends.fandom.com/wiki/Bonnie)
+- [Friends Central — namoro com o policial](https://friends.fandom.com/wiki/Gary)
+- [Friends Central — vizinho e viagem](https://friends.fandom.com/wiki/Danny)
+- [Friends Central — namoro com a aluna](https://friends.fandom.com/wiki/Elizabeth_Stevens)
+- [Friends Central — pai da aluna](https://friends.fandom.com/wiki/Paul_Stevens)
+- [Friends Central — cliente da Bloomingdale's](https://friends.fandom.com/wiki/Joshua_Burgin)
+- [Friends Central — colega de apartamento](https://friends.fandom.com/wiki/Janine_Lecroix)
+- [Friends Central — retorno ao trabalho](https://friends.fandom.com/wiki/Gavin_Mitchell)
+- [Friends Central — reencontro do colégio](https://friends.fandom.com/wiki/Will_Colbert)
+- [Friends Central — macaco de Ross](https://friends.fandom.com/wiki/Marcel)
+- [Friends Central — cafeteria](https://friends.fandom.com/wiki/Central_Perk)
+- [Parque Warner — cenário licenciado da cafeteria](https://www.parquewarner.com/blog/friends-photo-experience)
+- [Friends Central — pelúcia de Joey](https://friends.fandom.com/wiki/Hugsy)
+- [Friends Central — mãe biológica](https://friends.fandom.com/wiki/Phoebe_Abbott)
+
+Validação automatizada não comprova diversão ou precisão factual humana de
+cada dica. Revisão durante partidas pendente. Nenhuma publicação remota:
+Firebase e Fold continuam com v1, trinta cartas e seiscentos fatos. Para
+distribuir a v2, a Central precisa validar o conteúdo exato novamente e
+receber autorização explícita de publicação.
+
 ## 2026-09-20 — Cinema e TV: Friends
 
 Baralho privado de autoria `friends-1`, em desenvolvimento v1, criado por pedido

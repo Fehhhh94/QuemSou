@@ -56,7 +56,7 @@ Campos da entrada (todos obrigatórios, exceto `tamanhoEmBytes`):
 | `quantidadeDeCards` | int ≥ 1 | Contagem declarada, para a tela listar sem baixar. |
 | `url` | string | URL do JSON completo do baralho. |
 | `descricao` | string | Uma frase curta para o card da tela de catálogo (pode ser vazia). |
-| `tamanhoEmBytes` | long, opcional | Tamanho do JSON do baralho; a UI exibe "~12 KB" no meta. Ausente/0 = não exibido. |
+| `tamanhoEmBytes` | long, opcional | Tamanho do arquivo JSON do baralho em bytes; a UI exibe "~12 KB" no meta. Ausente/0 = não exibido. Se positivo, `validarCatalogo` exige igualdade com o arquivo, incluindo espaços e quebras de linha em UTF-8. |
 
 ## Coleção
 

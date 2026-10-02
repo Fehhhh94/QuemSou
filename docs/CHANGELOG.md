@@ -2,6 +2,32 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-10-02 — tamanho real do catálogo e expansão local de Friends
+
+- `validarCatalogo` agora reprova tamanho positivo do índice divergente dos
+  bytes do JSON. Campo ausente ou zero permanece válido; a medida considera
+  acentos, emoji, espaços e quebras de linha do arquivo real. Duas regressões
+  reproduziram a aceitação indevida antes da correção; os quatro testes novos
+  e a suíte completa passaram (294 testes Debug e 294 Release).
+- Por pedido confirmado de Felipe, Friends passou de 30 para 50 respostas
+  na cópia local, v2. Vinte cartas acrescentam 200 dicas originais de fatos
+  públicos, com dez pistas por carta e identidades editoriais estáveis.
+  As trinta cartas anteriores, seus ids e 600 fatos permanecem idênticos.
+  Zero colisões normalizadas com 294 respostas das origens inventariadas.
+- Candidato, catálogo de preparação e catálogo local integrado aprovados
+  pelos validadores reais. Backup anterior à integração, índice sincronizado
+  e rascunho de edição atualizado sem reaproveitar aprovação da v1.
+  Conteúdo e revisão completa ficam no diretório privado, fora do Git.
+  Fontes e limites: `PACOTES_EDITORIAIS.md`.
+- Firebase e aparelho continuam com Friends v1; publicação, download da v2
+  e avaliação humana das dicas pendentes. A fábrica continua em hold. Texto
+  antigo do backlog que ainda chamava a geração automática de pedido atual
+  foi alinhado à decisão vigente.
+- Handoff do encerramento do placar arquivado sem alterações em
+  `historico/HANDOFF_2026-10-02_ENCERRAMENTO_PLACAR.md`. Commit e push desta
+  unidade usam a autorização de fechamento automático dada por Felipe
+  nesta conversa; não houve publicação no Firebase.
+
 ### 2026-10-02 — encerramento da sessão ao sair do placar
 
 - O botão "Voltar ao início" passou a aguardar a mesma rotina de encerramento usada

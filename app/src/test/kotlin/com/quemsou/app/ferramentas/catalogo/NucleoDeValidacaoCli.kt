@@ -81,8 +81,10 @@ data class ResultadoDoCatalogo(
  * arquivos `.json` dentro de `baralhos`, formato de `docs/CATALOG_FORMAT.md`):
  * o índice e cada baralho isoladamente (mesma disciplina de [validarArquivoDeBaralho]) e a
  * consistência cruzada entre os dois — versão do índice == versão do
- * arquivo, quantidade declarada == quantidade real, todo id do índice tem
- * arquivo `<id>.json` (convenção já usada no repositório real) e vice-versa.
+ * arquivo, quantidade declarada == quantidade real, tamanho em bytes
+ * positivo declarado == tamanho do arquivo (ausente/zero continua opcional).
+ * Todo id do índice tem arquivo `<id>.json` (convenção já usada no repositório
+ * real) e vice-versa.
  * Esta última checagem é a que teria pego o índice bumpado sem o arquivo do
  * baralho acompanhar (achado da validação física da 5A).
  */
@@ -125,6 +127,11 @@ fun validarPastaDoCatalogo(raiz: File): ResultadoDoCatalogo {
         if (baralho.quantidadeDeCards != entrada.quantidadeDeCards) {
             violacoesCruzadas += "baralho '${entrada.id}': índice declara " +
                 "${entrada.quantidadeDeCards} card(s), mas o arquivo tem ${baralho.quantidadeDeCards}."
+        }
+        val tamanhoReal = resultado.caminho.length()
+        if (entrada.tamanhoEmBytes > 0 && entrada.tamanhoEmBytes != tamanhoReal) {
+            violacoesCruzadas += "baralho '${entrada.id}': ${entrada.tamanhoEmBytes} bytes no índice, " +
+                "mas $tamanhoReal bytes no arquivo."
         }
         if (baralho.id != entrada.id) {
             violacoesCruzadas += "arquivo '${entrada.id}.json': declara id '${baralho.id}', " +

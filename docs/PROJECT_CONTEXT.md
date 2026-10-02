@@ -80,11 +80,19 @@ enviadas à sessão do leitor.
 
 ## Estado atual
 
+- `validarCatalogo` confere o tamanho positivo declarado no índice contra os
+  bytes do arquivo real; campo ausente ou zero continua válido. Regressões
+  e validação do catálogo aprovadas; entrega: `HANDOFF_ACTIVE.md`.
+- Friends ampliado na cópia local para v2, com 50 respostas e 800 dicas:
+  vinte cartas novas de dez fatos, mantendo as trinta anteriores e seus
+  bancos de vinte. A versão publicada e instalada continua v1; publicação
+  e download da v2 ainda pendentes. Lote/fontes: `PACOTES_EDITORIAIS.md`.
+
 - Saída pelo botão "Voltar ao início" do placar corrigida localmente: aguarda
   o encerramento persistido da sessão antes de navegar, preservando os demais
   dados. Testes JVM e UI com Room no emulador passaram; atualização e
   revalidação física no Fold pendentes. Diagnóstico: `BUGS.md`, seção 9;
-  APK local e entrega: `HANDOFF_ACTIVE.md`.
+  APK local e entrega: `historico/HANDOFF_2026-10-02_ENCERRAMENTO_PLACAR.md`.
 
 - Administrador local no navegador disponível pelo atalho
   `Abrir-Administrador.cmd`. Consolida asset, cópia local do catálogo e

@@ -39,7 +39,12 @@ class NucleoDeValidacaoCliTest {
         }
     """.trimIndent()
 
-    private fun jsonDeIndice(id: String = "baralho-1", versao: Int = 1, quantidadeDeCards: Int = 1) = """
+    private fun jsonDeIndice(
+        id: String = "baralho-1",
+        versao: Int = 1,
+        quantidadeDeCards: Int = 1,
+        tamanhoEmBytes: Long? = null,
+    ) = """
         {
           "baralhos": [
             {
@@ -51,7 +56,7 @@ class NucleoDeValidacaoCliTest {
               "estado": "EM_DESENVOLVIMENTO",
               "quantidadeDeCards": $quantidadeDeCards,
               "url": "https://exemplo.dev/baralhos/$id.json",
-              "descricao": ""
+              "descricao": ""${tamanhoEmBytes?.let { ", \"tamanhoEmBytes\": $it" }.orEmpty()}
             }
           ]
         }
@@ -140,6 +145,53 @@ class NucleoDeValidacaoCliTest {
         val resultado = validarPastaDoCatalogo(pasta.root)
 
         assertTrue(resultado.violacoesCruzadas.any { it.contains("declara 5 card(s)") })
+    }
+
+    @Test
+    fun `tamanho declarado igual aos bytes UTF8 do arquivo eh aprovado`() {
+        pasta.newFolder("baralhos")
+        val arquivo = File(pasta.root, "baralhos/baralho-1.json")
+        arquivo.writeText(jsonDeBaralho().replace("Baralho de Teste", "Baralho de ação 🧪"), Charsets.UTF_8)
+        assertTrue(arquivo.length() > arquivo.readText(Charsets.UTF_8).length)
+        pasta.newFile("indice.json").writeText(jsonDeIndice(tamanhoEmBytes = arquivo.length()))
+
+        assertEquals(0, validarPastaDoCatalogo(pasta.root).totalDeViolacoes)
+    }
+
+    @Test
+    fun `tamanho declarado divergente dos bytes reais reprova catalogo`() {
+        pasta.newFolder("baralhos")
+        val arquivo = File(pasta.root, "baralhos/baralho-1.json")
+        arquivo.writeText(jsonDeBaralho())
+        val declarado = arquivo.length() + 7
+        pasta.newFile("indice.json").writeText(jsonDeIndice(tamanhoEmBytes = declarado))
+
+        val resultado = validarPastaDoCatalogo(pasta.root)
+
+        assertEquals(1, resultado.totalDeViolacoes)
+        assertTrue(resultado.violacoesCruzadas.single().contains("$declarado bytes no índice"))
+        assertTrue(resultado.violacoesCruzadas.single().contains("${arquivo.length()} bytes no arquivo"))
+    }
+
+    @Test
+    fun `tamanho zero permanece valido como metadado nao informado`() {
+        pasta.newFolder("baralhos")
+        File(pasta.root, "baralhos/baralho-1.json").writeText(jsonDeBaralho())
+        pasta.newFile("indice.json").writeText(jsonDeIndice(tamanhoEmBytes = 0))
+
+        assertEquals(0, validarPastaDoCatalogo(pasta.root).totalDeViolacoes)
+    }
+
+    @Test
+    fun `tamanho mede espacos e quebras de linha presentes no arquivo`() {
+        pasta.newFolder("baralhos")
+        val arquivo = File(pasta.root, "baralhos/baralho-1.json")
+        val json = jsonDeBaralho()
+        arquivo.writeText(json.replace("\n", "\r\n") + "\r\n", Charsets.UTF_8)
+        val tamanhoSemFormatacaoExtra = json.toByteArray(Charsets.UTF_8).size.toLong()
+        pasta.newFile("indice.json").writeText(jsonDeIndice(tamanhoEmBytes = tamanhoSemFormatacaoExtra))
+
+        assertEquals(1, validarPastaDoCatalogo(pasta.root).totalDeViolacoes)
     }
 
     @Test
