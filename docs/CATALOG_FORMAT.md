@@ -69,7 +69,7 @@ A Central oferece seis agrupamentos amplos, definidos em
 
 | Id da coleção | Nome | Conteúdo atual |
 | --- | --- | --- |
-| `cinema-classico` | Cinema e TV | Cinema Clássico, Mundo dos Bruxos, Animação, Friends |
+| `cinema-classico` | Cinema e TV | Cinema Clássico, Mundo dos Bruxos, Animação, Friends; novos lotes locais de The Big Bang Theory, Stranger Things e The Office (EUA) |
 | `mundo-da-musica` | Música | Mundo da Música, Mundo Pop, Instrumentos |
 | `esportes` | Esportes | Ainda sem baralhos |
 | `conhecimentos-gerais` | Conhecimentos Gerais | Ainda sem baralhos |
@@ -84,6 +84,9 @@ de coleção; reassociações exigem migração controlada, backup e validação
 Todos os membros de uma coleção usam seu nome/ícone canônicos. Na criação,
 o painel oferece somente os seis grupos e reutiliza seus ids (não gera outro
 slug a partir do nome visível). Novos agrupamentos exigem decisão explícita.
+
+Os três lotes de séries criados em 2026-10-02 ainda não foram publicados no
+Firestore; fontes, recortes e integração local: `PACOTES_EDITORIAIS.md`.
 
 Grupos vazios existem no cadastro da Central, não como baralhos vazios no
 Firestore. O app deriva agrupamentos do índice publicado e, portanto, só os

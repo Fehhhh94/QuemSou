@@ -1,69 +1,74 @@
-# Handoff ativo — validação do catálogo e expansão de Friends
+# Handoff ativo — três novos baralhos de séries
 
 ## Unidade atual — 2026-10-02
 
-Objetivo confirmado: seguir as melhorias e criar mais cartas. Felipe confirmou
-Friends com vinte respostas novas. A autorização de commit e push automático
-foi dada nesta conversa. Publicação Firebase não foi solicitada; fábrica em hold.
+Objetivo confirmado: Felipe pediu outros baralhos de séries. Foram criados
+The Big Bang Theory, Stranger Things e The Office (EUA), vinte respostas cada.
+A autorização de commit e push automático foi dada nesta conversa.
+Publicação Firebase não foi solicitada; fábrica em hold.
 
-Executor anterior e atual: Codex. Base: `main`, HEAD `fb16980`, remoto
-`Fehhhh94/QuemSou`, worktree inicialmente limpo e sincronizado. Nenhuma mudança
-preexistente nesta unidade. Handoff anterior arquivado com hash idêntico em
-`historico/HANDOFF_2026-10-02_ENCERRAMENTO_PLACAR.md`.
+Executor anterior e atual: Codex. Base: `main`, HEAD `f08adc6`, remoto
+`Fehhhh94/QuemSou`, worktree inicialmente limpo e sincronizado. Nenhuma
+mudança preexistente nesta unidade. Handoff anterior arquivado com bytes
+idênticos em `historico/HANDOFF_2026-10-02_CATALOGO_E_FRIENDS.md`.
 
-## Implementação e conteúdo
+## Conteúdo e integração
 
-- `NucleoDeValidacaoCli.kt`: tamanho positivo declarado no índice precisa
-  corresponder aos bytes do arquivo. Campo ausente ou zero continua válido.
-  A CLI permanece no sourceSet de testes e não entra no APK.
-- `NucleoDeValidacaoCliTest.kt`: quatro regressões para igualdade em UTF-8
-  com acentos/emoji, divergência, zero e espaços/quebras de linha reais.
-- Friends local v2: 50 cartas, 800 fatos. Novos ids `fr_031`–`fr_050`, vinte
-  respostas de dez dicas cada; ids e conteúdo das trinta cartas anteriores,
-  incluindo seus bancos de vinte, preservados integralmente.
-- Cópia privada do catálogo e rascunho de edição sincronizados. A aprovação
-  antiga do rascunho foi invalidada; a Central exigirá nova validação antes
-  de publicar. O rascunho original de criação v1 foi preservado.
-- Donos atualizados: `CATALOG_FORMAT.md`, `IMPROVEMENTS.md`,
-  `PROJECT_CONTEXT.md`, `PACOTES_EDITORIAIS.md`, `CHANGELOG.md` e este handoff.
-  A menção antiga a geração automática como pedido atual foi corrigida no
-  backlog para a decisão vigente de hold.
+- Três baralhos v1, `EM_DESENVOLVIMENTO`, no agrupamento Cinema e TV:
+  `the-big-bang-theory-1`, `stranger-things-1` e `the-office-1`.
+  Sessenta cartas, seiscentos fatos, dez por resposta, com `respostaId`
+  e ids estáveis das dicas. Fontes/recortes: `PACOTES_EDITORIAIS.md`.
+- Stranger Things cobre somente temporadas 1–4 e exclui obras derivadas;
+  as três descrições avisam sobre spoilers. The Office é a versão americana.
+- Conteúdo, manifesto, fontes por resposta, preparação, revisão HTML e recibo
+  em `%LOCALAPPDATA%/QuemSou/administrador/temporarios/series-20261002`.
+  JSONs integrados na origem privada `origens/catalogo/baralhos/`;
+  conteúdo real não entrou no Git nem no asset vazio do APK.
+- Índice atualizado com três entradas e tamanhos exatos. Os seis baralhos
+  anteriores, biblioteca legada e nove rascunhos foram preservados por hash.
+  Foram acrescentados três rascunhos de edição, sem aprovação; a Central
+  exigirá validar novamente antes de publicar. Rascunhos anteriores mantêm
+  o índice-base original e eventuais conflitos precisam de revisão.
+- Donos atualizados: `CATALOG_FORMAT.md`, `PROJECT_CONTEXT.md`,
+  `PACOTES_EDITORIAIS.md`, `CHANGELOG.md` e este handoff.
+  Nenhum código do app ou regra do jogo mudou.
 
 ## Validações e evidências
 
-- Antes da correção: 14 testes focados, duas falhas reproduzindo tamanhos
-  incorretos aceitos. Depois: 14/14 aprovados.
-- `gradlew.bat test validarCatalogo -Ppasta=<origem privada>`: 294 testes
-  Debug e 294 Release, zero falhas/erros/skips. Catálogo original aprovado.
-- Candidato Friends de cinquenta cartas aprovado por `validarBaralho`.
-  `validarCatalogo` aprovou tanto a preparação quanto a origem após integração.
-- Varredura de 294 respostas nas origens: zero colisões normalizadas. Banco
-  novo com 200 dicas, sem duplicação normalizada por resposta ou resposta
-  completa nas pistas. Isso não comprova dificuldade/diversão humana.
-- Backup integral anterior à aplicação local:
-  `%LOCALAPPDATA%/QuemSou/administrador/backups/friends-expansao-20261002-084535`.
-  Apenas arquivo Friends, índice e rascunho de edição mudaram; quatorze
-  arquivos anteriores preservados por SHA-256. Histórico e feedback do
-  aparelho não foram acessados nesta unidade.
-- Candidato, catálogo preparado, revisão HTML, fontes por resposta,
-  manifesto e recibo de integração:
-  `%LOCALAPPDATA%/QuemSou/administrador/temporarios/friends-expansao-20261002`.
-  SHA-256 do JSON integrado:
-  `8db916344ddd54d12bab25c85b5bb5203869bf4b7ffebb5123b1f88d4378a5c3`.
-- Logs Gradle em `build/qa-catalogo-cards-20261002/`, ignorados pelo Git.
-  Conteúdo real não foi colocado no repositório.
+- Seleção conferida antes da redação contra 314 ocorrências nas origens
+  locais: sessenta respostas novas, zero colisões normalizadas.
+- Dez dicas e dez fatos distintos após normalização em cada carta,
+  seiscentos ids de dicas únicos, nenhuma pista contendo a resposta completa.
+  Revisão editorial corrigiu relação familiar, dupla de vendas e redundâncias.
+- `gradlew.bat test validarCatalogo -Ppasta=<preparação>` aprovado:
+  294 testes Debug e 294 Release, zero falhas, erros ou skips; catálogo com
+  nove baralhos aprovado, sem divergência entre índice e arquivos.
+- `validarBaralho` aprovou separadamente cada um dos três lotes.
+  `validarCatalogo` também aprovou a origem após a integração.
+  O inventário real da Central reconhece os três lotes como editáveis,
+  sem avisos ou observações de inconsistência.
+- Backup integral antes da escrita local:
+  `%LOCALAPPDATA%/QuemSou/administrador/backups/series-20261002-092301`.
+  Dezesseis arquivos anteriores continuam idênticos; somente o índice mudou.
+  Feedbacks e históricos do aparelho não foram acessados.
+- Hashes dos três novos JSONs e recibo em `manifesto.json` e
+  `integracao-local.json` no diretório privado da entrega. Logs Gradle em
+  `build/qa-series-20261002/`, ignorados pelo Git.
+- O handoff anterior foi arquivado sem alteração. Revisão humana em partidas
+  continua pendente; aprovação mecânica não comprova diversão, dificuldade
+  ou precisão factual humana de cada dica. Não há nova prova de dispositivo.
 
 ## Pendências e próxima ação
 
-Revisar as dicas durante partidas. Para disponibilizar Friends v2 no celular,
-obter autorização específica de publicação, validar a origem exata pela
-Central e publicar no Firestore; depois baixar a atualização pela UI real e
-conferir a preservação das identidades e dos históricos. A v1 de trinta cartas
-é a última versão remota/física validada; esta unidade não publicou conteúdo.
+Para disponibilizar os três novos lotes no celular, obter autorização específica
+de publicação, validar o conteúdo exato pela Central e publicar no Firestore;
+depois baixar pela UI real e conferir cartas, identidades e histórico.
+Friends v2 também continua somente local; a v1 de trinta cartas é a última
+versão remota/física validada. Essa pendência está no handoff arquivado.
 
-Permanece pendente instalar o APK da correção do placar no Fold e repetir a
-saída pela Home, conforme o handoff arquivado. TalkBack e espelho em rede
-física continuam pendentes. Não há nova prova de dispositivo nesta unidade.
+Permanece pendente instalar no Fold o APK da correção do placar e repetir a
+saída pela Home, conforme `historico/HANDOFF_2026-10-02_ENCERRAMENTO_PLACAR.md`.
+TalkBack e espelho em rede física continuam pendentes.
 
 Não autorizados nesta unidade: publicação Firebase, limpeza de dados,
 ativação da fábrica e alteração das regras do jogo.

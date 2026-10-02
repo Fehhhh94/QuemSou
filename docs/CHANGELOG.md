@@ -2,6 +2,24 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-10-02 — novos lotes locais de séries
+
+- Criados The Big Bang Theory, Stranger Things e The Office (EUA), v1,
+  com vinte respostas e duzentas dicas cada, no agrupamento Cinema e TV.
+  As sessenta respostas não colidem com as 314 ocorrências anteriores.
+  Fontes públicas por resposta, spoilers e recorte de Stranger Things
+  até a quarta temporada documentados em `PACOTES_EDITORIAIS.md`.
+- Os três JSONs e seus rascunhos de edição foram integrados fora do Git,
+  com backup e índice consistente. Dezesseis arquivos anteriores preservados
+  byte a byte; nenhuma carta existente foi alterada. A fábrica continua em hold.
+- Validadores reais aprovaram cada baralho, o catálogo preparado e a origem
+  integrada. Gradle: 294 testes Debug e 294 Release, sem falhas, erros ou skips.
+  Revisão humana em partidas, publicação Firebase e download continuam pendentes.
+- Handoff anterior arquivado sem alteração em
+  `historico/HANDOFF_2026-10-02_CATALOGO_E_FRIENDS.md`. Commit e push seguem
+  a autorização automática dada por Felipe nesta conversa; conteúdo real
+  permanece privado no armazenamento local, sem publicação em nuvem.
+
 ### 2026-10-02 — tamanho real do catálogo e expansão local de Friends
 
 - `validarCatalogo` agora reprova tamanho positivo do índice divergente dos

@@ -80,9 +80,17 @@ enviadas à sessão do leitor.
 
 ## Estado atual
 
+- Três baralhos de séries criados e integrados na Central local, v1:
+  The Big Bang Theory, Stranger Things e The Office (EUA), vinte respostas
+  e duzentos fatos cada. Stranger Things usa somente temporadas 1–4; as
+  descrições avisam sobre spoilers. Publicação e download ainda pendentes.
+  Conteúdo e revisão completos ficam fora do Git; lote/fontes:
+  `PACOTES_EDITORIAIS.md`. Entrega atual: `HANDOFF_ACTIVE.md`.
+
 - `validarCatalogo` confere o tamanho positivo declarado no índice contra os
   bytes do arquivo real; campo ausente ou zero continua válido. Regressões
-  e validação do catálogo aprovadas; entrega: `HANDOFF_ACTIVE.md`.
+  e validação do catálogo aprovadas; entrega:
+  `historico/HANDOFF_2026-10-02_CATALOGO_E_FRIENDS.md`.
 - Friends ampliado na cópia local para v2, com 50 respostas e 800 dicas:
   vinte cartas novas de dez fatos, mantendo as trinta anteriores e seus
   bancos de vinte. A versão publicada e instalada continua v1; publicação

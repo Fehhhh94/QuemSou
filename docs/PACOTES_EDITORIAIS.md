@@ -1,5 +1,56 @@
 # Lotes editoriais embarcados
 
+## 2026-10-02 — três novos baralhos de séries na Central local
+
+Por pedido de Felipe, foram criados três lotes manuais no agrupamento existente
+**Cinema e TV**, sem ativar a fábrica. Cada baralho tem vinte respostas e
+duzentos fatos, dez por carta, com identidades de resposta e dicas estáveis.
+
+| Baralho | Id | Versão local | Recorte |
+| --- | --- | --- | --- |
+| The Big Bang Theory | `the-big-bang-theory-1` | 1 | Série principal, doze temporadas |
+| Stranger Things | `stranger-things-1` | 1 | Temporadas 1–4; exclui a quinta e obras derivadas |
+| The Office (EUA) | `the-office-1` | 1 | Versão americana, nove temporadas; exclui séries derivadas |
+
+As descrições avisam sobre spoilers. O lote de Stranger Things inclui um lugar
+e uma criatura; Pessoa/Lugar/Coisa permanecem tipos internos. As sessenta
+respostas foram conferidas antes da redação contra 314 ocorrências nas origens
+locais, incluindo a biblioteca legada: zero colisões normalizadas. Não foram
+copiados diálogos nem letras de música. A revisão corrigiu uma relação entre
+irmãos por casamento e uma dupla de vendas, e substituiu pistas redundantes.
+
+`validarBaralho` aprovou cada lote de vinte cartas. `validarCatalogo` aprovou
+os nove baralhos do catálogo preparado e da origem depois da integração,
+incluindo quantidades, versões e tamanhos exatos em UTF-8. Backup anterior à
+integração em `backups/series-20261002-092301`: dezesseis arquivos anteriores
+continuam idênticos por SHA-256; somente o índice existente mudou. Os seis
+baralhos anteriores, a biblioteca legada e os nove rascunhos foram preservados.
+Foram acrescentados três rascunhos de edição alinhados às novas origens, sem
+aprovação reaproveitada. Os rascunhos anteriores conservam seu índice-base;
+qualquer conflito posterior deve ser resolvido pela revisão da Central.
+
+Conteúdo, fontes por resposta, manifesto com hashes, revisão HTML e recibo de
+integração em
+`%LOCALAPPDATA%/QuemSou/administrador/temporarios/series-20261002`.
+Os novos arquivos vivem em `origens/catalogo/baralhos/`, fora do Git. O índice
+usa o endereço opaco Firestore do contrato, sem criar URLs públicas fictícias.
+
+Pesquisa pública consultada, com fontes específicas de cada resposta no manifesto:
+
+- [The Big Bang Theory Wiki — personagens](https://bigbangtheory.fandom.com/wiki/List_of_The_Big_Bang_Theory_characters)
+- [Stranger Things Wiki — personagens e acontecimentos](https://strangerthings.fandom.com/wiki/Mike_Wheeler)
+- [Netflix Tudum — recorte e acontecimentos da quarta temporada](https://www.netflix.com/tudum/articles/stranger-things-season-4-recap)
+- [Netflix Tudum — apresentação musical de Eddie](https://www.netflix.com/tudum/articles/what-song-does-eddie-play-stranger-things-season-4-finale)
+- [Dunderpedia — personagens da versão americana](https://theoffice.fandom.com/wiki/List_of_The_Office_Characters)
+- [Peacock — série, elenco e episódios](https://www.peacocktv.com/stream-tv/the-office/characters)
+- [Peacock — Jim e Darryl como colegas de apartamento](https://www.peacocktv.com/watch-online/tv/the-office-superfan-episodes/8229469043710582112/seasons/9/episodes/vandalism-extended-cut-episode-14/4bf91ff5-a82f-3064-8e10-58fb93bb4c5e)
+
+Validação de formato não comprova diversão, dificuldade ou precisão factual
+humana de todas as dicas. Revisão durante partidas pendente. Não houve
+publicação Firebase nem alteração no telefone. Para distribuir os lotes,
+validar novamente o conteúdo exato pela Central e obter autorização explícita
+de publicação. Friends local v2 e os demais conteúdos continuam preservados.
+
 ## 2026-10-02 — Friends: expansão local para 50 respostas
 
 Felipe confirmou o pedido de mais vinte respostas para Friends. A origem
