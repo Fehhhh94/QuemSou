@@ -2,8 +2,8 @@ package com.quemsou.app.domain.model
 
 /**
  * Coleção de baralhos: **metadado de agrupamento** do catálogo (ex.:
- * "Cinema Clássico" 🎬 reúne temas relacionados). Não é entidade de
- * domínio com regras — quem agrupa, filtra e exibe é a UI do catálogo; o
+ * "Cinema e TV" 🎬 reúne Cinema Clássico e outros baralhos relacionados). Não é
+ * entidade de domínio com regras — quem agrupa, filtra e exibe é a UI do catálogo; o
  * conteúdo é validado no nível do [Baralho].
  *
  * @property id identificador estável da coleção (slug).

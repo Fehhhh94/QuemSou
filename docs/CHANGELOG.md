@@ -2,6 +2,109 @@
 
 Todas as mudanças notáveis do projeto QuemSou serão documentadas neste arquivo.
 
+### 2026-10-02 — encerramento da sessão ao sair do placar
+
+- O botão "Voltar ao início" passou a aguardar a mesma rotina de encerramento usada
+  pelo Voltar do Android. Antes ele navegava direto e deixava a sessão aberta;
+  agora Room encerra a sessão antes do callback, sem apagar os outros dados.
+- Nova regressão de UI + Room percorre duas rodadas com conteúdo fictício,
+  controla a espera da transação e confere sessão encerrada, zero reservas,
+  conteúdo, checkpoints, dicas/respostas utilizadas e feedback preservados.
+  O teste reproduziu o defeito antes da correção e passou depois.
+- Dois novos testes JVM cobrem espera, toques duplicados e recuperação de
+  falha no encerramento. `test`, `assembleDebug` e `assembleDebugAndroidTest`
+  passaram: 290 testes por variante e 11 instrumentados no Pixel_2/API 35.
+- APK local `0.5.0-dev-1002.0746` preparado; atualização e revalidação no
+  Fold pendentes. Na implementação, alterações preexistentes preservadas,
+  sem commit, push ou mudança remota. Handoff anterior preservado em
+  `historico/HANDOFF_2026-09-24_FRIENDS_FOLD.md`.
+- Após os resultados, Felipe autorizou commit e push dos arquivos pendentes,
+  incluindo agrupamentos e documentação anterior. Rechecagem aprovada:
+  Gradle 290 testes por variante, Python 213 testes (quatro skips previstos)
+  e Node 36 aprovados (um skip do emulador Firestore). Sem novo deploy Firebase.
+
+### 2026-09-24 — Friends baixado e verificado no Fold
+
+- No Samsung SM-F966B/API 36, BoraJogar `0.5.0-dev-0920.0045`, o catálogo real
+  exibiu Friends dentro de Cinema e TV e concluiu o download com `Baixado`.
+- O Room passou de 8 para 9 baralhos e de 204 para 234 cards. `friends-1` v1
+  tem 30 cards e respostas únicos, exatamente 20 dicas por resposta (600 no
+  total) e dez dicas de compatibilidade por card; `quick_check` retornou `ok`.
+- Na etapa de download, feedbacks, histórico, sessões e reservas existentes
+  foram preservados. Em seguida, uma partida controlada de duas rodadas usando
+  somente Friends sorteou Ursula Buffay e Barry Farber. Cada turno recebeu dez
+  dicas únicas do respectivo banco de vinte; uma dica por card foi revelada e
+  persistida, sem criar feedback artificial.
+- O placar terminou 10–10, as reservas voltaram a zero e o catálogo permaneceu
+  intacto. A saída normal reproduziu o bug conhecido da sessão em
+  `PLACAR_FINAL` com `encerrada=0`; a Home continuou utilizável. Não houve
+  reinstalação, limpeza de dados, abandono, commit ou push. A configuração
+  temporária de tela ligada no USB foi restaurada.
+
+### 2026-09-20 — Friends publicado com 30 respostas e 600 dicas
+
+- A pedido explícito de Felipe, criado `friends-1` no agrupamento Cinema e TV:
+  30 personagens e 20 fatos originais por resposta. Cada card mantém dez dicas
+  de compatibilidade e banco de vinte para sorteio de dez no aparelho.
+- Zero colisões normalizadas com as 200 respostas das origens atuais; ids de
+  card, resposta e dica estáveis. Sem falas copiadas e sem resposta completa
+  dentro das dicas.
+- Candidato e rascunho exato aprovados pelo `validarBaralho` real, exit 0,
+  30 cards. Central mostra Cinema e TV com quatro baralhos e cada banco com
+  20 fatos; backup privado criado antes da revisão factual final.
+- Após autorização explícita, integrado à cópia privada do catálogo com backup
+  integral e `validarCatalogo` aprovado. A origem exata foi validada novamente
+  pela Central e publicada no Firebase como `PUBLICO`, v1, em dois blocos.
+- Auditoria remota confirmou 30 cards/600 dicas, manifesto apontando para v1,
+  hash íntegro e conteúdo igual à projeção local. Rules, um feedback existente,
+  195 respostas editoriais e Kimberly-Clark privado permaneceram inalterados.
+- O conteúdo não entrou no Git e a fábrica segue em hold. Naquela unidade, a
+  atualização no Fold ficou pendente porque o aparelho não estava conectado;
+  ela foi concluída e verificada fisicamente em 2026-09-24.
+
+### 2026-09-20 — seis agrupamentos amplos
+
+- Felipe aprovou Cinema e TV, Música, Esportes, Conhecimentos Gerais,
+  Lugares e Natureza e Especiais. Cinema Clássico continua sendo um baralho;
+  Animação passa a compartilhar seu grupo. Instrumentos e Mundo Pop passam
+  a compartilhar o grupo de Mundo da Música. Nenhum card/dica foi criado.
+- Cadastro canônico da Central, seletor de novos baralhos, ícone/categoria
+  padrão e contagem de ids únicos. Os três grupos vazios estão disponíveis
+  na Central, mas não geram baralhos fictícios nem aparecem no app.
+- Origens e rascunhos privados reorganizados com backup completo e candidatos
+  validados; envelope privado v8→v9, asset vazio do APK inalterado. IDs e nomes
+  dos baralhos, cards, dicas e bancos preservados; somente vínculos de coleção
+  e metadados técnicos mudaram.
+- Publicados no Firebase: Cinema Clássico v4, Mundo dos Bruxos v5, Animação v3,
+  Mundo da Música v3, Mundo Pop v3 e Instrumentos v3. Cada snapshot foi validado
+  pelo Gradle real antes de publicar. Auditoria remota confirmou hashes,
+  igualdade com a origem e conteúdo igual ao anterior; versões antigas mantidas.
+- Kimberly-Clark privado v1, Rules, feedback e acervo editorial preservados.
+  Python 213 testes (quatro skips previstos), Node 36/36, Gradle test e dois
+  catálogos candidatos aprovados. UI verificou seis opções, contagens e grupo
+  vazio. Sem commit, push, APK novo ou acesso ao telefone; atualizar os seis
+  baralhos no catálogo do app é a próxima ação do usuário.
+- Handoff anterior preservado em `historico/HANDOFF_2026-09-20_CINEMA_E_MIGRACAO.md`;
+  o handoff ativo contém apenas esta unidade.
+
+### 2026-09-20 — Cinema como agrupamento amplo
+
+- Por decisão de Felipe, o agrupamento Cinema Clássico passa a se chamar
+  Cinema; Cinema Clássico continua como nome do baralho, ao lado de Mundo dos
+  Bruxos. Id legado da coleção e ids de todos os conteúdos preservados.
+- Aplicado nas duas cópias privadas de Cinema Clássico e no catálogo local de
+  Mundo dos Bruxos, com backup e validação Gradle real. Três baralhos e dois
+  catálogos candidatos aprovados; auditoria confirmou cards/dicas intactos.
+- Após autorização específica de Felipe, publicados no Firebase Cinema
+  Clássico v3 (30 cards) e Mundo dos Bruxos v4 (70 cards), ambos em Cinema.
+  Revalidação Gradle para publicação e leitura posterior de manifesto, versão
+  e blocos aprovadas; hashes válidos, cards/dicas iguais aos anteriores e
+  versões antigas preservadas. Os demais manifestos, Rules e feedback ficaram
+  inalterados; não houve escrita no acervo editorial.
+- Os demais agrupamentos não mudaram. Nenhum conteúdo voltou ao Git e não
+  houve instalação, commit ou push nesta unidade. Atualização no telefone
+  continua sendo feita pelo catálogo do app.
+
 ### 2026-09-20 — separação do conteúdo editorial e do Git
 
 - Felipe aprovou manter todos os baralhos, respostas e dicas no Firebase e em

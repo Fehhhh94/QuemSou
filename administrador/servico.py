@@ -14,6 +14,7 @@ import threading
 import aplicacao
 import acervo_editorial
 import fontes
+from agrupamentos import listar_agrupamentos
 from feedbacks import ArmazemDeFeedbacks
 from edicao import (
     FalhaDaEdicao,
@@ -50,6 +51,7 @@ class Central:
 
     def inventario(self):
         dados = fontes.inventariar(self.config, self.rascunhos)
+        dados["agrupamentos"] = listar_agrupamentos()
         dados["origens"] = [
             {
                 "origem": origem,

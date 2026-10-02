@@ -1,5 +1,46 @@
 # Lotes editoriais embarcados
 
+## 2026-09-20 — Cinema e TV: Friends
+
+Baralho privado de autoria `friends-1`, em desenvolvimento v1, criado por pedido
+explícito de Felipe enquanto a fábrica automática permanece em hold. São 30
+personagens, ids `fr_001`–`fr_030`, e 20 fatos originais por resposta (600 no
+total). `clues` conserva dez fatos para compatibilidade e `bancoDeDicas` traz
+os vinte; a partida sorteia dez no aparelho. Nenhum trecho de diálogo foi
+copiado e nenhuma dica contém a resposta completa.
+
+A varredura das 200 respostas presentes nas origens locais encontrou zero
+colisões normalizadas. O arquivo candidato e o rascunho exato foram aprovados
+pelo `validarBaralho` real. Isso comprova formato e regras automatizadas, não
+diversão, dificuldade ou revisão factual humana de todos os 600 fatos.
+
+Fontes públicas consultadas para personagens e episódios, com textos
+reescritos em português:
+
+- [Hachette — materiais licenciados de Friends](https://hachettebookgroup.com/wp-content/uploads/2024/01/Friends-TV-Show.pdf)
+- [TVmaze — guia de episódios](https://www.tvmaze.com/shows/431/friends/episodeguide)
+- [Lista de personagens e recorrências](https://en.wikipedia.org/wiki/List_of_Friends_and_Joey_characters)
+- [Visão geral da série](https://en.wikipedia.org/wiki/Friends)
+- [Time — guia de episódios e personagens recorrentes](https://time.com/3635722/friends-viewing-guide-for-newbies/)
+
+O rascunho permanece em `%LOCALAPPDATA%/QuemSou/administrador/rascunhos`, com
+cópias recuperáveis em `backups/friends-rascunho-*`. Após autorização explícita,
+o conteúdo exato aprovado foi integrado ao índice privado com backup integral
+`backups/friends-catalogo-20260920-201526`, e o catálogo completo passou no
+`validarCatalogo` real. A Central aprovou novamente a origem aplicada e publicou
+`friends-1` v1 como `PUBLICO` no Firebase. Auditoria posterior reconstruiu os
+dois blocos, confirmou 30 cards/600 dicas, hash
+`19fc891654c47cd49a63d8c02ba8fc05d277209ba64473a656e10df64732a85c`
+e igualdade exata com a projeção local. Nenhum conteúdo entrou no Git. A
+instalação no aparelho foi concluída em 2026-09-24 no Fold/API 36 pela interface
+real do catálogo. A UI confirmou `Baixado`; o Room confirmou `friends-1` v1,
+30 cards e 20 dicas por resposta, preservando feedbacks e histórico existentes.
+Uma partida física controlada posterior, somente com Friends, completou duas
+rodadas com respostas distintas. Cada turno sorteou dez dicas únicas do banco de
+vinte e persistiu somente a dica revelada; reservas finais zero e nenhum
+feedback artificial. Isso valida o mecanismo no aparelho, não substitui a
+revisão humana de diversão, dificuldade e precisão dos 600 fatos.
+
 ## 2026-09-16 — Especiais: Kimberly-Clark — Finanças
 
 Asset v6 acrescenta o tema `kimberly-clark-financas` à coleção `especiais`

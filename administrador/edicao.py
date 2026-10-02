@@ -18,6 +18,7 @@ from __future__ import annotations
 import copy
 import re
 import secrets
+from agrupamentos import colecao_do_agrupamento
 
 from fontes import (
     ESTADO_EM_DESENVOLVIMENTO,
@@ -285,6 +286,12 @@ def criar_baralho_de_rascunho(nome, grupo, icone, categoria, sufixo=None):
     icone = _texto(icone, "O ícone do agrupamento")
     if categoria not in CATEGORIAS:
         raise FalhaDaEdicao("campo_invalido", "Categoria desconhecida.")
+    try:
+        colecao = colecao_do_agrupamento(grupo)
+    except ValueError as erro:
+        raise FalhaDaEdicao("agrupamento_desconhecido", str(erro)) from erro
+    if (colecao["id"] == "especiais") != (categoria == "ESPECIAIS"):
+        raise FalhaDaEdicao("campo_invalido", "Especiais exige a categoria interna ESPECIAIS e vice-versa.")
     base = slug(nome)
     if not base:
         raise FalhaDaEdicao("campo_invalido", "O nome não gera um id válido.")
@@ -295,7 +302,7 @@ def criar_baralho_de_rascunho(nome, grupo, icone, categoria, sufixo=None):
         "id": identificador,
         "nome": nome,
         "categoria": categoria,
-        "colecao": {"id": slug(grupo) or base, "nome": grupo, "icone": icone},
+        "colecao": colecao,
         "versao": 1,
         "estado": ESTADO_EM_DESENVOLVIMENTO,
         "cards": [],

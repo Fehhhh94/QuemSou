@@ -1,6 +1,6 @@
 # Contexto atual — central de jogos e QuemSou
 
-> Atualizado em 2026-09-20. Este é o dono da visão atual de produto,
+> Atualizado em 2026-10-02. Este é o dono da visão atual de produto,
 > arquitetura e estágio. Regras completas e história ficam nos documentos
 > apontados.
 
@@ -43,7 +43,12 @@ enviadas à sessão do leitor.
   em **Especiais**, depois dos grupos comuns. Kimberly-Clark — Finanças é o
   primeiro, com 30 respostas e escolha individual, sem seleção automática.
   A implementação reutiliza coleções e ids existentes; versões permanecem
-  técnicas. Outros nomes/coleções e as regras de união não foram migrados.
+  técnicas. Há seis agrupamentos amplos: **Cinema e TV**, **Música**,
+  **Esportes**, **Conhecimentos Gerais**, **Lugares e Natureza** e **Especiais**.
+  Os grupos sem baralhos ficam disponíveis na Central, mas ocultos no app.
+  Assuntos específicos continuam sendo baralhos, sem novos subgrupos. IDs dos
+  baralhos e regras de união não mudam. Mapeamento: `CATALOG_FORMAT.md`;
+  aplicação local e publicação remota: `HANDOFF_ACTIVE.md`.
 - Falta de conteúdo tem três estados distintos, porque levam a saídas
   diferentes: sem nenhuma resposta elegível no aparelho (baixar baralho),
   nenhum baralho marcado (marcar) e seleção só com baralhos esgotados (trocar
@@ -74,6 +79,12 @@ enviadas à sessão do leitor.
   permanece para preservar a instalação, o acervo e os históricos locais.
 
 ## Estado atual
+
+- Saída pelo botão "Voltar ao início" do placar corrigida localmente: aguarda
+  o encerramento persistido da sessão antes de navegar, preservando os demais
+  dados. Testes JVM e UI com Room no emulador passaram; atualização e
+  revalidação física no Fold pendentes. Diagnóstico: `BUGS.md`, seção 9;
+  APK local e entrega: `HANDOFF_ACTIVE.md`.
 
 - Administrador local no navegador disponível pelo atalho
   `Abrir-Administrador.cmd`. Consolida asset, cópia local do catálogo e
@@ -286,11 +297,20 @@ privado apareceu no catálogo e completou quatro rodadas. Consumo de somente
 uma dica e exclusão da resposta com nove restantes foram conferidos em
 Instrumentos. Feedbacks e históricos anteriores foram preservados.
 O download privado v1 não foi forçado porque a mesma versão já estava instalada.
+Em 2026-09-24, o Friends público foi baixado pela interface no mesmo Fold: a UI
+confirmou `Baixado` e o Room confirmou 30 cards, 600 dicas nos bancos e dez
+dicas de compatibilidade por card, sem alterar feedbacks, histórico ou sessões.
+Uma partida física de duas rodadas usando somente Friends confirmou dez dicas
+únicas sorteadas do banco de vinte em cada resposta, histórico por dica revelada
+e reservas finais zero. O bug conhecido da saída do placar (`encerrada=0` em
+`PLACAR_FINAL`) permaneceu reproduzível; ver `docs/BUGS.md`, seção 9.
 O acervo editorial (`acervoEditorial/**`) é uma coleção separada, agora ativa;
 contagem e evidência da migração estão em `docs/ADMINISTRADOR_LOCAL.md`.
 Fábrica segue em hold.
-APK e limites da evidência: `docs/HANDOFF_ACTIVE.md`. Saída pelo botão do
-placar deixa uma flag de sessão aberta, sem reservas: `docs/BUGS.md`, seção 9.
+Evidência anterior no Fold preservada em
+`docs/historico/HANDOFF_2026-09-24_FRIENDS_FOLD.md`. A correção local da saída
+pelo placar está em `docs/BUGS.md`, seção 9; APK novo e validação atual em
+`docs/HANDOFF_ACTIVE.md`. A revalidação física dessa correção está pendente.
 Sorteio físico da mesma resposta com banco ampliado, TalkBack e revisão humana
 do novo conteúdo permanecem pendentes; não equivalem aos cenários acima.
 

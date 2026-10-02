@@ -108,7 +108,7 @@ fun PartidaScreen(
                     is PartidaUiState.PlacarFinal -> PlacarFinalContent(
                         estado = estado,
                         onJogarDeNovo = viewModel::reiniciarPartida,
-                        onVoltarAoInicio = onVoltarAoInicio,
+                        onVoltarAoInicio = { viewModel.confirmarAbandono(onVoltarAoInicio) },
                     )
                 }
             }

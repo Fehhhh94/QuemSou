@@ -268,17 +268,23 @@ ressalva: a restauração pós-morte de processo (parte do item 8) é
   Se o `requires` do stdlib for maior que o Kotlin do projeto, aquela versão
   do Ktor está fora de alcance.
 
-## 9. Voltar ao início pelo placar não fecha a sessão persistida — aberto
+## 9. Voltar ao início pelo placar não fecha a sessão persistida — corrigido localmente; validação física pendente
 
 - **Reproduzido em 2026-09-20:** Samsung SM-F966B, API 36,
   BoraJogar 0.5.0-dev-0920.0045. Concluir quatro rodadas, tocar “Ver placar”
   e depois “Voltar ao início”. A Home aparece normalmente, mas Room mantém
   `sessoes_de_dicas.encerrada=0` com `progressoJson.fase=PLACAR_FINAL`.
-- **Causa confirmada:** `PartidaScreen` passa `onVoltarAoInicio` diretamente
+- **Reproduzido novamente em 2026-09-24:** no mesmo aparelho e build, partida
+  de duas rodadas usando somente Friends chegou ao placar 10–10 e voltou à
+  Home. Room manteve a nova sessão com `encerrada=0` e
+  `fase=PLACAR_FINAL`; reservas ficaram em zero, catálogo e 121 feedbacks
+  permaneceram inalterados. A sessão residual anterior foi marcada encerrada
+  quando a nova partida começou.
+- **Causa antes da correção:** `PartidaScreen` passava `onVoltarAoInicio` diretamente
   ao `PlacarFinalContent`. O BackHandler nessa mesma fase chama
   `viewModel.confirmarAbandono(onVoltarAoInicio)`, que executa
-  `RepositorioDeCardsLocal.encerrarSessao` antes da navegação. O botão pula
-  essa rotina; não é apenas atraso da coroutine.
+  `RepositorioDeCardsLocal.encerrarSessao` antes da navegação. O botão pulava
+  essa rotina; não era apenas atraso da coroutine.
 - **Impacto observado:** inconsistência de ciclo de vida, sem bloqueio da
   partida testada nem perda de dados. Reservas finais zero; dicas utilizadas,
   121 feedbacks e checkpoints anteriores preservados. Preparar outra sessão
@@ -286,7 +292,22 @@ ressalva: a restauração pós-morte de processo (parte do item 8) é
   encerramento correto ao sair. Não alterar Room manualmente como limpeza.
 - **Evidência:** `build/qa-fold-20260920/verification.json` e snapshots
   `final/` / `final-confirmada/`; `verify_evidence.py` exit 1 na exigência de
-  zero sessões abertas. Não houve correção nesta unidade de teste.
-- **Próxima validação, após autorização:** regressão do callback do botão
-  e reexecução física de uma partida completa → Home → encerrada=1,
-  mantendo zero reservas e o histórico. Não exige nova publicação Firebase.
+  zero sessões abertas. Nova evidência em
+  `build/qa-friends-fold-20260924/after-game/` e
+  `verify_friends_game.py`. Não houve correção nas unidades de teste.
+- **Correção local em 2026-10-02:** o botão do placar usa
+  `viewModel.confirmarAbandono(onVoltarAoInicio)`, a mesma rotina do BackHandler.
+  A navegação aguarda `encerrarSessao`; a transação marca a sessão encerrada
+  e libera reservas sem apagar histórico, checkpoints, conteúdo ou feedback.
+- **Regressão automatizada:** `SaidaDoPlacarRoomUiTest` usa a tela real,
+  duas rodadas e Room em memória. Antes da correção, falhou porque a saída
+  ocorreu antes da persistência; depois passou, com `encerrada=true`, zero
+  sessões abertas/reservas e os demais dados idênticos. Dois novos testes JVM
+  cobrem espera, saída duplicada e falha recuperável. `gradlew test`:
+  290 testes por variante, zero falhas; 11 testes UI no Pixel_2,
+  `emulator-5580`, API 35. Evidência local: `build/qa-sessao-20261002/`.
+- **Próxima validação física:** instalar por atualização o APK local
+  `0.5.0-dev-1002.0746` e repetir partida completa → Home → `encerrada=1`
+  no Fold, mantendo zero reservas e o histórico. O aparelho não estava
+  conectado nesta unidade; o build anterior continua com o defeito.
+  Não exige nova publicação Firebase nem limpeza de dados.

@@ -38,6 +38,10 @@ somente o índice remoto/cache e não foi redesenhada nesta unidade.
 
 ## Funcionamento
 
+- cadastro de seis agrupamentos amplos, inclusive os ainda vazios; criação
+  usa seleção e ids canônicos, sem criar um grupo por baralho. O resumo conta
+  baralhos únicos, sem duplicar as origens. Grupos vazios não vão ao app nem
+  geram documentos vazios no Firestore. Mapeamento: `CATALOG_FORMAT.md`;
 - servidor HTTP somente em `127.0.0.1`, com validação de Host/Origin, token
   anti-CSRF, CSP fechada e lista fixa de arquivos estáticos;
 - busca por nome, agrupamento, categoria e respostas; filtros de origem,

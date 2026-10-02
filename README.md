@@ -38,6 +38,9 @@ de salvar e validar o conteúdo exato, uma ação separada pode publicar ou reti
 o baralho do catálogo no Firestore, sempre com confirmação. O painel não faz
 push, não gera APK e não reativa a fábrica automática.
 
+Os novos baralhos usam uma lista de seis agrupamentos amplos. Grupos ainda
+vazios ficam disponíveis na Central, sem aparecer no catálogo do app.
+
 Instruções: [administrador/README.md](administrador/README.md).
 
 ## Stack

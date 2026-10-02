@@ -31,7 +31,7 @@ Lista as entradas que a tela de catálogo exibe sem baixar os baralhos.
       "id": "cinema-classico-1",
       "nome": "Cinema Clássico",
       "categoria": "PERSONAGEM_FILME",
-      "colecao": { "id": "cinema-classico", "nome": "Cinema Clássico", "icone": "🎬" },
+      "colecao": { "id": "cinema-classico", "nome": "Cinema e TV", "icone": "🎬" },
       "versao": 1,
       "estado": "EM_DESENVOLVIMENTO",
       "quantidadeDeCards": 30,
@@ -64,6 +64,33 @@ Metadado de **agrupamento** — o nível 1 da tela de catálogo lista temas
 relacionados. Não representa uma sequência de edições, não tem regras próprias
 e aparece idêntico no índice e no JSON do baralho.
 
+A Central oferece seis agrupamentos amplos, definidos em
+`administrador/agrupamentos.py`:
+
+| Id da coleção | Nome | Conteúdo atual |
+| --- | --- | --- |
+| `cinema-classico` | Cinema e TV | Cinema Clássico, Mundo dos Bruxos, Animação, Friends |
+| `mundo-da-musica` | Música | Mundo da Música, Mundo Pop, Instrumentos |
+| `esportes` | Esportes | Ainda sem baralhos |
+| `conhecimentos-gerais` | Conhecimentos Gerais | Ainda sem baralhos |
+| `lugares-e-natureza` | Lugares e Natureza | Ainda sem baralhos |
+| `especiais` | Especiais | Conteúdo personalizado, privado |
+
+Grupo é uma área ampla; franquia, artista, estilo ou assunto específico é um
+baralho. Os ids das coleções-base são preservados. A reorganização aprovada
+reassocia os baralhos às coleções existentes, sem alterar seus próprios ids,
+cards ou dicas. O editor comum continua bloqueando alteração arbitrária de id
+de coleção; reassociações exigem migração controlada, backup e validação.
+Todos os membros de uma coleção usam seu nome/ícone canônicos. Na criação,
+o painel oferece somente os seis grupos e reutiliza seus ids (não gera outro
+slug a partir do nome visível). Novos agrupamentos exigem decisão explícita.
+
+Grupos vazios existem no cadastro da Central, não como baralhos vazios no
+Firestore. O app deriva agrupamentos do índice publicado e, portanto, só os
+mostra quando houver conteúdo. Categorias técnicas permanecem compatíveis:
+`ESPECIAIS` é privada; `PERSONAGEM_FILME` e `MUNDO_DA_MUSICA` são marcadores
+internos legados e não limitam os nomes dos seis agrupamentos.
+
 | Campo | Tipo | Regra |
 | --- | --- | --- |
 | `id` | string | Identificador estável da coleção (slug); agrupa os baralhos na UI. |
@@ -89,7 +116,7 @@ os cards. **O card herda a categoria do baralho** — não existe campo
   "id": "cinema-classico-1",
   "nome": "Cinema Clássico",
   "categoria": "PERSONAGEM_FILME",
-  "colecao": { "id": "cinema-classico", "nome": "Cinema Clássico", "icone": "🎬" },
+  "colecao": { "id": "cinema-classico", "nome": "Cinema e TV", "icone": "🎬" },
   "versao": 1,
   "estado": "EM_DESENVOLVIMENTO",
   "cards": [

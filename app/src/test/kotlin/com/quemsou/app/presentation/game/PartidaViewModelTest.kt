@@ -46,6 +46,9 @@ class PartidaViewModelTest {
         var falhar = false
         var aguardar: CompletableDeferred<Unit>? = null
         var encerrada = false
+        var aguardarEncerramento: CompletableDeferred<Unit>? = null
+        var falharEncerramento = false
+        val sessoesEncerradas = mutableListOf<String>()
         override suspend fun progressoDaSessao(sessao: String) = progressos[sessao]
         override suspend fun salvarProgresso(sessao: String, progresso: ProgressoDaPartida,
             dicasReveladas: List<String>, encerrarTurno: Boolean) {
@@ -54,7 +57,12 @@ class PartidaViewModelTest {
             vistas.addAll(dicasReveladas)
             progressos[sessao] = progresso
         }
-        override suspend fun encerrarSessao(sessao: String) { encerrada = true }
+        override suspend fun encerrarSessao(sessao: String) {
+            aguardarEncerramento?.await()
+            check(!falharEncerramento)
+            sessoesEncerradas += sessao
+            encerrada = true
+        }
         override suspend fun buscarPorIds(ids: List<String>) = baralhos.filter { it.id in ids }
 
         override suspend fun buscarTodos() = baralhos
@@ -708,6 +716,61 @@ class PartidaViewModelTest {
         viewModel.reiniciarPartida()
 
         assertEquals(vez, viewModel.uiState.value)
+    }
+
+    @Test
+    fun `sair do placar aguarda encerramento e ignora saida duplicada sem alterar historico`() {
+        val repo = RepositorioFake(baralhos())
+        val handle = handleDe(configuracao(nomes = listOf("Ana", "Bia"), rodadas = 1))
+        val vm = viewModel(handle = handle, repositorio = repo)
+        vm.iniciarTurno()
+        vm.revelarDica(1)
+        vm.abrirQuemAcertou()
+        vm.proximoTurno()
+        assertTrue(vm.uiState.value is PartidaUiState.PlacarFinal)
+        val progressos = repo.progressos.toMap()
+        val vistas = repo.vistas.toSet()
+        val encerramento = CompletableDeferred<Unit>()
+        repo.aguardarEncerramento = encerramento
+        var saidas = 0
+
+        vm.confirmarAbandono { assertTrue(repo.encerrada); saidas++ }
+        vm.confirmarAbandono { saidas++ }
+
+        assertTrue(vm.uiState.value is PartidaUiState.Carregando)
+        assertFalse(repo.encerrada)
+        assertEquals(0, saidas)
+        encerramento.complete(Unit)
+        assertEquals(1, saidas)
+        assertEquals(listOf(handle.get<String>("sessao_dicas")), repo.sessoesEncerradas)
+        assertEquals(progressos, repo.progressos)
+        assertEquals(vistas, repo.vistas)
+    }
+
+    @Test
+    fun `falha ao encerrar placar impede navegacao e permite recuperar o mesmo placar`() {
+        val repo = RepositorioFake(baralhos())
+        val vm = viewModel(configuracao(nomes = listOf("Ana", "Bia"), rodadas = 1), repositorio = repo)
+        vm.iniciarTurno()
+        vm.revelarDica(1)
+        vm.abrirQuemAcertou()
+        vm.proximoTurno()
+        val placar = vm.uiState.value as PartidaUiState.PlacarFinal
+        val vistas = repo.vistas.toSet()
+        repo.falharEncerramento = true
+        var saiu = false
+
+        vm.confirmarAbandono { saiu = true }
+
+        assertFalse(saiu)
+        assertFalse(repo.encerrada)
+        assertTrue(vm.uiState.value is PartidaUiState.Indisponivel)
+        repo.falharEncerramento = false
+        vm.tentarNovamente()
+        assertEquals(placar, vm.uiState.value)
+        vm.confirmarAbandono { saiu = true }
+        assertTrue(saiu)
+        assertEquals(vistas, repo.vistas)
     }
 
     // region Modo dev de feedback

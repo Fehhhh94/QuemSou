@@ -8,6 +8,7 @@ const estado = {
   inventario: [],
   avisos: [],
   origens: [],
+  agrupamentos: [],
   chave: null,
   aberto: null,
   alterado: false,
@@ -109,12 +110,14 @@ async function carregarInventario(silencioso = false) {
   estado.inventario = dados.baralhos || [];
   estado.avisos = dados.avisos || [];
   estado.origens = dados.origens || [];
+  estado.agrupamentos = dados.agrupamentos || [];
   estado.feedbacksGlobais = dados.feedbacks || {
     quantidadeDeListas: 0,
     quantidadeDeDicas: 0,
     listas: [],
   };
   montarFiltros();
+  montarAgrupamentos();
   renderizarAvisos();
   renderizarLista();
   renderizarResumoDeFeedbacks();
@@ -690,7 +693,10 @@ function montarFiltros() {
     opcao.value = item.origem;
     origem.append(opcao);
   });
-  const grupos = [...new Set(estado.inventario.map((item) => item.grupo))].sort();
+  const grupos = [...new Set([
+    ...estado.agrupamentos.map((item) => item.nome),
+    ...estado.inventario.filter((item) => !item.tecnico).map((item) => item.grupo),
+  ])];
   grupo.replaceChildren(criar("option", "Todos"));
   grupo.firstChild.value = "";
   grupos.forEach((nome) => {
@@ -700,6 +706,32 @@ function montarFiltros() {
   });
   origem.value = origemAtual;
   grupo.value = grupoAtual;
+}
+
+function ajustarNovoAgrupamento() {
+  const escolhido = estado.agrupamentos.find((item) => item.id === document.getElementById("novo-grupo").value);
+  if (!escolhido) return;
+  document.getElementById("novo-icone").value = escolhido.icone;
+  document.getElementById("novo-categoria").value = escolhido.categoriaPadrao;
+}
+
+function montarAgrupamentos() {
+  const lista = document.getElementById("agrupamentos-disponiveis");
+  const seletor = document.getElementById("novo-grupo");
+  const anterior = seletor.value;
+  lista.replaceChildren();
+  seletor.replaceChildren();
+  estado.agrupamentos.forEach((item) => {
+    const ids = new Set(estado.inventario.filter((b) => !b.tecnico && b.grupoId === item.id).map((b) => b.id));
+    lista.append(criar("li", item.icone + " " + item.nome + " — " + (ids.size ? ids.size + " baralho(s)" : "sem baralhos")));
+    const opcao = criar("option", item.icone + " " + item.nome);
+    opcao.value = item.id;
+    opcao.defaultSelected = item.id === "especiais";
+    seletor.append(opcao);
+  });
+  if (estado.agrupamentos.some((item) => item.id === anterior)) seletor.value = anterior;
+  // Inventário/feedback não pode sobrescrever uma escolha de categoria em digitação.
+  if (!anterior) ajustarNovoAgrupamento();
 }
 
 function renderizarAvisos() {
@@ -1647,7 +1679,7 @@ elementos.formNovo.addEventListener("submit", async (evento) => {
       categoria: document.getElementById("novo-categoria").value,
     });
     elementos.formNovo.reset();
-    document.getElementById("novo-icone").value = "⭐";
+    ajustarNovoAgrupamento();
     await carregarInventario(true);
     const aberto = await pedir("/api/baralho?chave=" + encodeURIComponent(dados.chave));
     adotarBaralhoAberto(dados.chave, aberto);
@@ -1659,6 +1691,7 @@ elementos.formNovo.addEventListener("submit", async (evento) => {
   }
 });
 
+document.getElementById("novo-grupo").addEventListener("change", ajustarNovoAgrupamento);
 carregarInventario().catch((erro) => avisar(erro.message, "erro"));
 iniciarFeedbacksDaNuvem().catch((erro) => {
   estado.firebase.status = "erro";

@@ -53,6 +53,7 @@ Depois, escolha a rota abaixo.
 
 - `docs/CHANGELOG.md` é histórico extenso; não representa sozinho o estado
   vigente.
+- `docs/historico/` preserva handoffs substituídos; não orienta a unidade atual.
 - `docs/CLAUDE.md` é uma ponte legada. As fontes atuais estão neste índice.
 - `.claude/settings.local.json` contém configuração pessoal da máquina, fica
   ignorado pelo Git e nunca define política do projeto.
